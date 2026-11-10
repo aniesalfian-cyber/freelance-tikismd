@@ -84,7 +84,7 @@ class BackupService
         $pdo = DB::connection()->getPdo();
         $dbName = DB::connection()->getDatabaseName();
 
-        gzwrite($gz, "-- Monitoring Karyawan HSM Database Backup\n");
+        gzwrite($gz, "-- D&P PT. HSM Database Backup\n");
         gzwrite($gz, '-- Database: `'.$dbName.'` | Generated: '.now()->toDateTimeString()."\n");
         gzwrite($gz, "SET FOREIGN_KEY_CHECKS=0;\nSET SQL_MODE='NO_AUTO_VALUE_ON_ZERO';\n\n");
 

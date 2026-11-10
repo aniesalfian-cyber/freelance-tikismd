@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Dashboard Operasional HRD & Supervisor', 'subtitle' => 'Monitoring real-time kehadiran, distribusi tugas, dan status gerai hari ini'])
+@extends('layouts.app', ['title' => 'Delivery & Pick-Up PT. HSM', 'dashboard_name' => 'Dashboard Operasional HRD & Supervisor', 'subtitle' => 'Monitoring real-time kehadiran, distribusi tugas, dan status gerai hari ini'])
 
 @section('content')
 <!-- Top Operational KPI Cards -->

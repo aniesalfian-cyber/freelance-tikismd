@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Executive Analytics Dashboard Owner', 'subtitle' => 'Analitik komprehensif performa karyawan, sebaran gerai, dan indeks KPI korporat'])
+@extends('layouts.app', ['title' => 'Delivery & Pick-Up PT. HSM', 'dashboard_name' => 'Executive Analytics Dashboard Owner', 'subtitle' => 'Analitik komprehensif performa karyawan, sebaran gerai, dan indeks KPI korporat'])
 
 @section('content')
 @php $c = $data['cards']; @endphp

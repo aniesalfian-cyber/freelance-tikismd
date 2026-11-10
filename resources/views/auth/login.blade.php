@@ -8,7 +8,7 @@
             <x-logo size="xl" />
         </div>
         <div>
-            <h1 class="text-2xl font-extrabold text-white tracking-tight">Monitoring Karyawan HSM</h1>
+            <h1 class="text-2xl font-extrabold text-white tracking-tight">Delivery & Pick-Up PT. HSM</h1>
             <p class="text-xs text-slate-400 mt-1">Sistem Monitoring Kinerja, Presensi GPS & Analitik Eksekutif</p>
         </div>
     </div>

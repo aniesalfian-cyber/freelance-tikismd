@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Workspace Karyawan', 'subtitle' => 'Halo, '.auth()->user()->name])
+@extends('layouts.app', ['title' => 'Delivery & Pick-Up PT. HSM', 'dashboard_name' => 'Workspace Karyawan', 'subtitle' => 'Halo, '.auth()->user()->name])
 
 @section('content')
 <div class="max-w-xl mx-auto space-y-5">

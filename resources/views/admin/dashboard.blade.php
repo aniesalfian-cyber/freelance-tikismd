@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Control Center SuperAdmin', 'subtitle' => 'Manajemen pengguna, konfigurasi sistem, audit log, dan cadangan database'])
+@extends('layouts.app', ['title' => 'Delivery & Pick-Up PT. HSM', 'dashboard_name' => 'Control Center SuperAdmin', 'subtitle' => 'Manajemen pengguna, konfigurasi sistem, audit log, dan cadangan database'])
 
 @section('content')
 <!-- Top Summary Cards -->

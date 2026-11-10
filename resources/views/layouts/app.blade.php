@@ -12,7 +12,7 @@
     <link rel="manifest" href="/manifest.webmanifest">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icons/icon-192.svg">
-    <title>{{ isset($title) ? $title.' — ' : '' }}{{ config('app.name', 'Monitoring Karyawan HSM') }}</title>
+    <title>{{ isset($title) ? $title.' — ' : '' }}{{ config('app.name', 'D&P PT. HSM') }}</title>
     <script>
         window.HSM_SAMARINDA = { lat: -0.502106, lng: 117.153709, zoom: 14, label: 'Kota Samarinda, Kalimantan Timur' };
         window.__hsmReadyQueue = window.__hsmReadyQueue || [];
@@ -43,7 +43,7 @@
                     <x-logo size="sm" />
                 </a>
                 <div class="min-w-0">
-                    <h1 class="text-sm sm:text-base font-extrabold text-white truncate">{{ $title ?? 'Monitoring Karyawan HSM' }}</h1>
+                    <h1 class="text-sm sm:text-base font-extrabold text-white truncate">{{ $title ?? 'Delivery & Pick-Up PT. HSM' }}</h1>
                     <p class="text-[11px] text-slate-400 truncate">{{ $subtitle ?? now()->translatedFormat('l, d F Y') }}</p>
                 </div>
             </div>
