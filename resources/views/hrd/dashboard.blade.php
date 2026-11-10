@@ -76,9 +76,9 @@
         <div class="glass p-5 space-y-3">
             <div class="orn-line mb-1"></div>
             <h2 class="text-base font-extrabold text-white">Belum Presensi Hari Ini ({{ $today['absent']->count() }})</h2>
-            <div class="space-y-2 max-h-40 overflow-y-auto">
+            <div class="divide-y divide-white/10 max-h-44 overflow-y-auto">
                 @forelse($today['absent'] as $ab)
-                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.03] border border-white/5 text-xs">
+                    <div class="flex items-center justify-between py-2.5 text-xs">
                         <div>
                             <div class="font-bold text-white">{{ $ab->name }}</div>
                             <div class="text-slate-400">{{ $ab->phone ?: $ab->email }}</div>
@@ -94,14 +94,14 @@
         <div class="glass p-5 space-y-3">
             <div class="orn-line mb-1"></div>
             <h2 class="text-base font-extrabold text-white">Tugas Sedang Dikerjakan ({{ $activeTasks->count() }})</h2>
-            <div class="space-y-2 max-h-48 overflow-y-auto">
+            <div class="divide-y divide-white/10 max-h-48 overflow-y-auto">
                 @forelse($activeTasks as $at)
-                    <a href="{{ route('hrd.tasks.show', $at) }}" class="block p-3 rounded-xl bg-orange-500/10 border border-orange-500/30 text-xs hover:bg-orange-500/15 transition">
+                    <a href="{{ route('hrd.tasks.show', $at) }}" class="block py-2.5 text-xs hover:text-orange-300 transition">
                         <div class="flex justify-between font-bold text-white">
                             <span>{{ $at->title }}</span>
-                            <span class="text-orange-300">{{ $at->started_at?->format('H:i') }}</span>
+                            <span class="text-orange-300 font-mono">{{ $at->started_at?->format('H:i') }}</span>
                         </div>
-                        <div class="text-slate-300 mt-0.5">{{ $at->user?->name }} &bull; {{ $at->outlet?->name }}</div>
+                        <div class="text-slate-400 mt-0.5">{{ $at->user?->name }} &bull; {{ $at->outlet?->name }}</div>
                     </a>
                 @empty
                     <p class="text-xs text-slate-400 py-3 text-center">Tidak ada tugas yang sedang berjalan saat ini.</p>

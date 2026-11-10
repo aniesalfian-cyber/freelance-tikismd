@@ -51,7 +51,7 @@
 </div>
 
 <!-- Performance Logs Table -->
-<div class="glass p-5">
+<div class="table-surface">
     <div class="tbl-wrap">
         <table class="tbl">
             <thead>
@@ -70,18 +70,30 @@
             <tbody>
                 @forelse($logs as $l)
                     <tr>
-                        <td class="text-xs font-mono">{{ $l->evaluation_date->format('d/m/Y') }}</td>
-                        <td>
-                            <div class="font-bold text-white">{{ $l->user?->name }}</div>
-                            <div class="text-xs text-slate-400">{{ $l->remarks }}</div>
+                        <td data-card-header="1" data-label="Tanggal Evaluasi & Freelancer">
+                            <div class="flex items-center justify-between w-full gap-2">
+                                <div>
+                                    <div class="font-mono text-xs text-orange-300 font-bold">{{ $l->evaluation_date->format('d/m/Y') }}</div>
+                                    <div class="font-extrabold text-white text-sm md:hidden mt-0.5">{{ $l->user?->name }}</div>
+                                </div>
+                                <span class="badge {{ \App\Models\PerformanceLog::badgeFor($l->grade) }} md:hidden">
+                                    {{ number_format($l->final_kpi_score, 2) }} ({{ $l->grade }})
+                                </span>
+                            </div>
                         </td>
-                        <td class="font-bold text-white">{{ $l->completed_tasks }} / {{ $l->total_tasks }}</td>
-                        <td class="text-xs">{{ number_format($l->completion_score, 1) }}</td>
-                        <td class="text-xs">{{ number_format($l->time_score, 1) }}</td>
-                        <td class="text-xs">{{ number_format($l->location_score, 1) }}</td>
-                        <td class="text-xs">{{ number_format($l->attendance_score, 1) }}</td>
-                        <td class="font-mono font-extrabold text-orange-300">{{ number_format($l->final_kpi_score, 2) }}</td>
-                        <td><span class="badge {{ \App\Models\PerformanceLog::badgeFor($l->grade) }}">Grade {{ $l->grade }}</span></td>
+                        <td data-label="Freelancer & Catatan">
+                            <div>
+                                <div class="font-bold text-white hidden md:block">{{ $l->user?->name }}</div>
+                                <div class="text-xs text-slate-300">{{ $l->remarks ?: 'Evaluasi harian otomatis' }}</div>
+                            </div>
+                        </td>
+                        <td data-label="Penyelesaian Tugas" class="font-bold text-white">{{ $l->completed_tasks }} / {{ $l->total_tasks }} tugas</td>
+                        <td data-label="Skor Penyelesaian" class="text-xs font-mono text-white">{{ number_format($l->completion_score, 1) }}</td>
+                        <td data-label="Skor Ketepatan SLA" class="text-xs font-mono text-white">{{ number_format($l->time_score, 1) }}</td>
+                        <td data-label="Skor Lokasi GPS" class="text-xs font-mono text-white">{{ number_format($l->location_score, 1) }}</td>
+                        <td data-label="Skor Presensi" class="text-xs font-mono text-white">{{ number_format($l->attendance_score, 1) }}</td>
+                        <td data-label="Skor Akhir KPI" class="font-mono font-extrabold text-orange-300">{{ number_format($l->final_kpi_score, 2) }}</td>
+                        <td data-label="Predikat Grade"><span class="badge {{ \App\Models\PerformanceLog::badgeFor($l->grade) }}">Grade {{ $l->grade }}</span></td>
                     </tr>
                 @empty
                     <tr><td colspan="9" class="text-center text-slate-400 py-8">Belum ada log penilaian pada rentang ini.</td></tr>

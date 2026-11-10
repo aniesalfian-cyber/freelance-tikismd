@@ -44,43 +44,48 @@
     </div>
 
     <!-- Backup History Table -->
-    <div class="lg:col-span-2 glass p-6 space-y-4">
-        <div class="orn-line mb-1"></div>
-        <h2 class="text-base font-extrabold text-white">Riwayat Arsip Backup Database</h2>
+    <div class="lg:col-span-2 table-surface">
+        <div>
+            <div class="orn-line mb-1"></div>
+            <h2 class="text-base font-extrabold text-white">Riwayat Arsip Backup Database</h2>
+        </div>
         <div class="tbl-wrap">
             <table class="tbl">
                 <thead>
                     <tr>
                         <th>Nama Berkas</th>
-                        <th>Tipe</th>
-                        <th>Ukuran</th>
+                        <th>Tipe Cadangan</th>
+                        <th>Ukuran Berkas</th>
                         <th>Status</th>
-                        <th>Waktu</th>
+                        <th>Waktu Pembuatan</th>
                         <th class="text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($backups as $b)
                         <tr>
-                            <td class="font-mono text-xs font-bold text-white">{{ $b->filename }}</td>
-                            <td>
+                            <td data-card-header="1" data-label="Nama Berkas Backup">
+                                <div class="font-mono text-xs font-extrabold text-white break-all">{{ $b->filename }}</div>
+                                <div class="text-[11px] text-slate-400 mt-0.5">Oleh: {{ $b->creator?->name ?? 'Sistem Otomatis' }}</div>
+                            </td>
+                            <td data-label="Tipe Cadangan">
                                 <span class="badge {{ $b->backup_type === 'auto_scheduled' ? 'badge-info' : 'badge-orange' }}">
-                                    {{ $b->backup_type === 'auto_scheduled' ? 'Otomatis' : 'Manual' }}
+                                    {{ $b->backup_type === 'auto_scheduled' ? 'Otomatis Terjadwal' : 'Manual SuperAdmin' }}
                                 </span>
                             </td>
-                            <td class="text-xs">{{ $b->humanSize() }}</td>
-                            <td>
+                            <td data-label="Ukuran Berkas" class="text-xs font-mono text-white">{{ $b->humanSize() }}</td>
+                            <td data-label="Status">
                                 @if($b->status === 'success')
-                                    <span class="badge badge-success">Sukses</span>
+                                    <span class="badge badge-success">Sukses Terverifikasi</span>
                                 @else
                                     <span class="badge badge-danger" title="{{ $b->error_message }}">Gagal</span>
                                 @endif
                             </td>
-                            <td class="text-xs text-slate-400">{{ $b->created_at->format('d/m/Y H:i') }}</td>
-                            <td class="text-right">
+                            <td data-label="Waktu Pembuatan" class="text-xs text-slate-300">{{ $b->created_at->format('d/m/Y H:i:s') }} WITA</td>
+                            <td data-card-actions="1" data-label="Aksi Berkas" class="text-right">
                                 <div class="flex justify-end gap-1.5">
                                     @if($b->status === 'success')
-                                        <a href="{{ route('admin.backups.download', $b) }}" class="btn btn-ghost btn-sm">Unduh</a>
+                                        <a href="{{ route('admin.backups.download', $b) }}" class="btn btn-ghost btn-sm">Unduh (.sql.gz)</a>
                                     @endif
                                     <form method="POST" action="{{ route('admin.backups.destroy', $b) }}"
                                           data-confirm="Hapus arsip backup {{ $b->filename }}?">

@@ -27,7 +27,7 @@
             <x-icon name="database" class="w-6 h-6 text-orange-400" />
         </div>
         @if($lastBackup)
-            <div class="p-3.5 rounded-2xl bg-navy-950/70 border border-white/10 text-xs space-y-1.5">
+            <div class="border-t border-b border-white/10 py-3 text-xs space-y-1.5">
                 <div class="font-mono font-bold text-emerald-300 truncate">{{ $lastBackup->filename }}</div>
                 <div class="flex justify-between text-slate-400">
                     <span>Ukuran: {{ $lastBackup->humanSize() }}</span>
@@ -52,22 +52,22 @@
     <div class="glass p-6 space-y-4">
         <div class="orn-line mb-2"></div>
         <h2 class="text-base font-extrabold text-white">Kesehatan Operasional Hari Ini</h2>
-        <div class="grid grid-cols-2 gap-3 text-xs">
-            <div class="p-3 rounded-xl bg-white/[0.03] border border-white/10">
+        <div class="grid grid-cols-2 gap-y-3 gap-x-4 border-t border-b border-white/10 py-3 text-xs">
+            <div>
                 <div class="text-slate-400">Gerai Aktif</div>
-                <div class="text-xl font-extrabold text-white mt-1">{{ $stats['outlets'] }}</div>
+                <div class="text-xl font-extrabold text-white mt-0.5">{{ $stats['outlets'] }}</div>
             </div>
-            <div class="p-3 rounded-xl bg-white/[0.03] border border-white/10">
+            <div>
                 <div class="text-slate-400">Tugas Hari Ini</div>
-                <div class="text-xl font-extrabold text-white mt-1">{{ $stats['tasks_today'] }}</div>
+                <div class="text-xl font-extrabold text-white mt-0.5">{{ $stats['tasks_today'] }}</div>
             </div>
-            <div class="p-3 rounded-xl bg-white/[0.03] border border-white/10">
+            <div>
                 <div class="text-slate-400">Presensi Masuk</div>
-                <div class="text-xl font-extrabold text-emerald-400 mt-1">{{ $stats['attendance_today'] }}</div>
+                <div class="text-xl font-extrabold text-emerald-400 mt-0.5">{{ $stats['attendance_today'] }}</div>
             </div>
-            <div class="p-3 rounded-xl bg-white/[0.03] border border-white/10">
+            <div>
                 <div class="text-slate-400">Akun Nonaktif</div>
-                <div class="text-xl font-extrabold text-amber-400 mt-1">{{ $stats['inactive_users'] }}</div>
+                <div class="text-xl font-extrabold text-amber-400 mt-0.5">{{ $stats['inactive_users'] }}</div>
             </div>
         </div>
         <div class="flex flex-wrap gap-2 pt-1">
@@ -80,27 +80,29 @@
     <div class="glass p-6 space-y-3">
         <div class="orn-line mb-2"></div>
         <h2 class="text-base font-extrabold text-white">Permintaan Reset Password</h2>
-        @forelse($resetRequests as $req)
-            <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-2 text-xs">
-                <div class="min-w-0">
-                    <div class="font-bold text-white truncate">{{ $req->description }}</div>
-                    <div class="text-[11px] text-slate-400">{{ $req->created_at->diffForHumans() }}</div>
+        <div class="divide-y divide-white/10">
+            @forelse($resetRequests as $req)
+                <div class="py-2.5 flex items-center justify-between gap-2 text-xs">
+                    <div class="min-w-0">
+                        <div class="font-bold text-white truncate">{{ $req->description }}</div>
+                        <div class="text-[11px] text-slate-400">{{ $req->created_at->diffForHumans() }}</div>
+                    </div>
+                    @if($req->subject_id)
+                        <form method="POST" action="{{ route('admin.users.reset', $req->subject_id) }}">
+                            @csrf
+                            <button type="submit" class="btn btn-primary btn-sm">Reset</button>
+                        </form>
+                    @endif
                 </div>
-                @if($req->subject_id)
-                    <form method="POST" action="{{ route('admin.users.reset', $req->subject_id) }}">
-                        @csrf
-                        <button type="submit" class="btn btn-primary btn-sm">Reset</button>
-                    </form>
-                @endif
-            </div>
-        @empty
-            <p class="text-xs text-slate-400 py-6 text-center">Tidak ada permintaan reset password tertunda.</p>
-        @endforelse
+            @empty
+                <p class="text-xs text-slate-400 py-6 text-center">Tidak ada permintaan reset password tertunda.</p>
+            @endforelse
+        </div>
     </div>
 </div>
 
 <!-- Recent Audit Logs -->
-<div class="glass p-6 space-y-4 rise rise-3">
+<div class="table-surface rise rise-3">
     <div class="flex items-center justify-between">
         <div>
             <div class="orn-line mb-2"></div>
@@ -122,11 +124,13 @@
             <tbody>
                 @forelse($recentLogs as $log)
                     <tr>
-                        <td class="whitespace-nowrap text-xs text-slate-400">{{ $log->created_at->format('d/m H:i:s') }}</td>
-                        <td class="font-semibold text-white">{{ $log->user?->name ?? 'Sistem' }}</td>
-                        <td><span class="badge badge-info">{{ $log->action }}</span></td>
-                        <td class="text-xs">{{ $log->description }}</td>
-                        <td class="font-mono text-xs text-slate-400">{{ $log->ip_address ?? '-' }}</td>
+                        <td data-card-header="1" data-label="Waktu & Aksi" class="whitespace-nowrap text-xs text-orange-300 font-mono font-bold">
+                            {{ $log->created_at->format('d/m/Y H:i:s') }}
+                        </td>
+                        <td data-label="Pengguna" class="font-semibold text-white">{{ $log->user?->name ?? 'Sistem' }}</td>
+                        <td data-label="Kategori"><span class="badge badge-info">{{ $log->action }}</span></td>
+                        <td data-label="Keterangan" class="text-xs text-slate-200">{{ $log->description }}</td>
+                        <td data-label="IP Address" class="font-mono text-xs text-slate-400">{{ $log->ip_address ?? '-' }}</td>
                     </tr>
                 @empty
                     <tr><td colspan="5" class="text-center text-slate-400 py-6">Belum ada log aktivitas.</td></tr>

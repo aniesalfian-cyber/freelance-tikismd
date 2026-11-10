@@ -74,9 +74,9 @@
         </div>
     @endif
 
-    <!-- Today's Task Checklist -->
-    <div class="glass p-5 space-y-3 rise rise-4">
-        <div class="flex items-center justify-between">
+    <!-- Today's Task Checklist (Standalone Wide Cards, Zero Nested Cards) -->
+    <div class="space-y-3 rise rise-4">
+        <div class="flex items-center justify-between px-1">
             <div>
                 <div class="orn-line mb-1"></div>
                 <h3 class="text-base font-extrabold text-white">Daftar Tugas Hari Ini ({{ $tasks->count() }})</h3>
@@ -84,24 +84,26 @@
             <a href="{{ route('pwa.tasks.index') }}" class="text-xs font-bold text-orange-400 hover:underline">Lihat Semua</a>
         </div>
 
-        <div class="space-y-2.5">
+        <div class="space-y-3">
             @forelse($tasks as $t)
                 <a href="{{ route('pwa.tasks.show', $t) }}"
-                   class="block p-3.5 rounded-2xl border transition {{ $t->status === 'in_progress' ? 'bg-orange-500/15 border-orange-500/45' : ($t->status === 'completed' ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-white/[0.03] border-white/10 hover:border-orange-500/35') }}">
+                   class="block glass glass-hover p-4 space-y-2 border {{ $t->status === 'in_progress' ? 'border-orange-500/45' : ($t->status === 'completed' ? 'border-emerald-500/35' : 'border-white/10') }}">
                     <div class="flex items-start justify-between gap-2">
                         <div class="min-w-0">
                             <div class="flex items-center gap-1.5 flex-wrap">
                                 <span class="badge {{ $t->statusBadge() }}">{{ $t->statusLabel() }}</span>
-                                <span class="text-[11px] font-mono text-slate-400">{{ $t->startTimeShort() }} ({{ $t->estimated_duration_minutes }}m)</span>
+                                <span class="text-[11px] font-mono text-slate-400">{{ $t->startTimeShort() }} (SLA {{ $t->estimated_duration_minutes }}m)</span>
                             </div>
-                            <div class="font-bold text-white text-sm mt-1 truncate">{{ $t->title }}</div>
-                            <div class="text-xs text-slate-400 truncate">{{ $t->outlet?->name }} &bull; {{ $t->typeLabel() }}</div>
+                            <div class="font-extrabold text-white text-sm mt-1.5">{{ $t->title }}</div>
+                            <div class="text-xs text-slate-400 mt-0.5">📍 {{ $t->outlet?->name }} &bull; {{ $t->typeLabel() }}</div>
                         </div>
                         <span class="text-xs font-bold text-orange-300 flex-none mt-1">Buka &rarr;</span>
                     </div>
                 </a>
             @empty
-                <p class="text-xs text-slate-400 text-center py-6">Tidak ada tugas yang dijadwalkan untuk Anda hari ini.</p>
+                <div class="glass p-6 text-xs text-slate-400 text-center">
+                    Tidak ada tugas yang dijadwalkan untuk Anda hari ini.
+                </div>
             @endforelse
         </div>
     </div>

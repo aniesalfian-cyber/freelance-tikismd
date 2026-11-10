@@ -28,7 +28,7 @@
         <div id="pwa-attendance-map" class="h-64 rounded-2xl overflow-hidden border border-white/10"></div>
 
         <!-- Distance Telemetry & Simulation Controls -->
-        <div class="p-3.5 rounded-2xl bg-navy-950/75 border border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div class="border-t border-white/10 pt-3.5 flex flex-wrap items-center justify-between gap-2 text-xs">
             <div>
                 <div class="text-slate-400">Status Jarak Anda Saat Ini (Kota Samarinda):</div>
                 <div class="font-extrabold text-sm mt-0.5"
@@ -55,15 +55,15 @@
                 <span x-text="busy ? 'Memvalidasi Geofencing...' : 'Presensi Masuk Sekarang'">Presensi Masuk Sekarang</span>
             </button>
         @elseif(!$today->check_out_at)
-            <div class="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/35 text-xs flex items-center justify-between">
-                <span>Sudah Presensi Masuk pukul <b>{{ $today->check_in_at->format('H:i:s') }} WIB</b> ({{ $today->check_in_distance_meters }}m)</span>
+            <div class="border-t border-white/10 pt-3 text-xs flex items-center justify-between">
+                <span>Sudah Presensi Masuk pukul <b>{{ $today->check_in_at->format('H:i:s') }} WITA</b> ({{ $today->check_in_distance_meters }}m)</span>
                 <span class="badge {{ $today->statusBadge() }}">{{ $today->statusLabel() }}</span>
             </div>
             <button type="button" @click="submit(checkOutUrl, 'Presensi Pulang')" :disabled="busy" class="btn btn-primary btn-lg btn-block">
                 <span x-text="busy ? 'Memvalidasi Geofencing...' : 'Presensi Pulang Sekarang'">Presensi Pulang Sekarang</span>
             </button>
         @else
-            <div class="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-center space-y-1">
+            <div class="border-t border-emerald-500/30 pt-3 text-center space-y-1">
                 <div class="text-sm font-extrabold text-emerald-300">Presensi Hari Ini Selesai Lengkap</div>
                 <div class="text-xs text-slate-300">
                     Masuk: <b>{{ $today->check_in_at->format('H:i') }}</b> &bull; Pulang: <b>{{ $today->check_out_at->format('H:i') }}</b>
@@ -72,21 +72,23 @@
         @endif
     </div>
 
-    <!-- Attendance History -->
-    <div class="glass p-5 space-y-3 rise rise-2">
-        <div class="orn-line mb-1"></div>
-        <h3 class="text-base font-extrabold text-white">Riwayat Presensi Terakhir</h3>
-        <div class="space-y-2">
+    <!-- Attendance History (Standalone Wide Cards) -->
+    <div class="space-y-3 rise rise-2">
+        <div class="px-1">
+            <div class="orn-line mb-1"></div>
+            <h3 class="text-base font-extrabold text-white">Riwayat Presensi Terakhir</h3>
+        </div>
+        <div class="space-y-2.5">
             @forelse($history as $h)
-                <div class="p-3 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-between text-xs">
+                <div class="glass p-4 flex items-center justify-between text-xs">
                     <div>
-                        <div class="font-bold text-white">{{ $h->date->translatedFormat('l, d M Y') }}</div>
-                        <div class="text-slate-400">Masuk {{ $h->check_in_at->format('H:i') }} &bull; Pulang {{ $h->check_out_at?->format('H:i') ?? '-' }} ({{ $h->check_in_distance_meters }}m)</div>
+                        <div class="font-bold text-white text-sm">{{ $h->date->translatedFormat('l, d M Y') }}</div>
+                        <div class="text-slate-400 mt-0.5">Masuk {{ $h->check_in_at->format('H:i') }} &bull; Pulang {{ $h->check_out_at?->format('H:i') ?? '-' }} ({{ $h->check_in_distance_meters }}m dari Kantor Utama)</div>
                     </div>
                     <span class="badge {{ $h->statusBadge() }}">{{ $h->statusLabel() }}</span>
                 </div>
             @empty
-                <p class="text-xs text-slate-400 text-center py-4">Belum ada riwayat presensi.</p>
+                <div class="glass p-6 text-xs text-slate-400 text-center">Belum ada riwayat presensi.</div>
             @endforelse
         </div>
     </div>

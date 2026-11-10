@@ -68,7 +68,7 @@
 </div>
 
 <!-- Tasks Table -->
-<div class="glass p-5">
+<div class="table-surface">
     <div class="tbl-wrap">
         <table class="tbl">
             <thead>
@@ -86,37 +86,56 @@
             <tbody>
                 @forelse($tasks as $t)
                     <tr>
-                        <td class="text-xs">
-                            <div class="font-mono font-bold text-orange-300">{{ $t->task_number }}</div>
-                            <div class="text-slate-400">{{ $t->assigned_date->format('d/m/Y') }}</div>
-                        </td>
-                        <td>
-                            <div class="font-bold text-white">{{ $t->title }}</div>
-                            <span class="badge {{ $t->task_type === 'pasti_harian' ? 'badge-info' : 'badge-orange' }} mt-1">
-                                {{ $t->typeLabel() }}
-                            </span>
-                        </td>
-                        <td class="font-semibold text-white">{{ $t->user?->name }}</td>
-                        <td class="text-xs text-slate-300">{{ $t->outlet?->name }}</td>
-                        <td class="text-xs">
-                            <div>Mulai: <b class="text-white font-mono">{{ $t->startTimeShort() }}</b></div>
-                            <div class="text-slate-400">
-                                Durasi: {{ $t->actual_duration_minutes !== null ? $t->actual_duration_minutes.' mnt' : '-' }} / SLA {{ $t->estimated_duration_minutes }} mnt
+                        <td data-card-header="1" data-label="Nomor & Tanggal Penugasan" class="text-xs">
+                            <div class="flex items-center justify-between w-full gap-2">
+                                <div>
+                                    <div class="font-mono font-extrabold text-orange-300 text-xs">{{ $t->task_number }}</div>
+                                    <div class="text-slate-400">{{ $t->assigned_date->format('d/m/Y') }}</div>
+                                </div>
+                                <span class="badge {{ $t->statusBadge() }} md:hidden">{{ $t->statusLabel() }}</span>
                             </div>
                         </td>
-                        <td>
+                        <td data-label="Judul & Kategori Tugas">
+                            <div>
+                                <div class="font-extrabold text-white text-sm">{{ $t->title }}</div>
+                                <span class="badge {{ $t->task_type === 'pasti_harian' ? 'badge-info' : 'badge-orange' }} mt-1">
+                                    {{ $t->typeLabel() }}
+                                </span>
+                            </div>
+                        </td>
+                        <td data-label="Freelancer Pelaksana">
+                            <div>
+                                <div class="font-semibold text-white">{{ $t->user?->name }}</div>
+                                <div class="text-[11px] font-mono text-slate-400">{{ $t->user?->nik }}</div>
+                            </div>
+                        </td>
+                        <td data-label="Gerai Lokasi" class="text-xs text-slate-300">
+                            <div>
+                                <div class="font-bold text-white">{{ $t->outlet?->name }}</div>
+                                <div class="text-[11px] text-slate-400">{{ $t->outlet?->code }}</div>
+                            </div>
+                        </td>
+                        <td data-label="Jadwal & Durasi SLA" class="text-xs">
+                            <div>
+                                <div>Mulai: <b class="text-white font-mono">{{ $t->startTimeShort() }}</b></div>
+                                <div class="text-slate-400">
+                                    Durasi: {{ $t->actual_duration_minutes !== null ? $t->actual_duration_minutes.' mnt' : '-' }} / SLA {{ $t->estimated_duration_minutes }} mnt
+                                </div>
+                            </div>
+                        </td>
+                        <td data-label="Validasi Radius GPS">
                             @if($t->is_location_valid === true)
-                                <span class="badge badge-success">Valid Radius</span>
+                                <span class="badge badge-success">Valid Radius ({{ $t->start_distance_meters ?? 0 }}m)</span>
                             @elseif($t->is_location_valid === false)
-                                <span class="badge badge-danger">Di Luar Radius</span>
+                                <span class="badge badge-danger">Di Luar Radius ({{ $t->start_distance_meters ?? '-' }}m)</span>
                             @else
-                                <span class="text-xs text-slate-500">-</span>
+                                <span class="text-xs text-slate-500">Menunggu Eksekusi</span>
                             @endif
                         </td>
-                        <td><span class="badge {{ $t->statusBadge() }}">{{ $t->statusLabel() }}</span></td>
-                        <td class="text-right">
+                        <td data-label="Status Pengerjaan"><span class="badge {{ $t->statusBadge() }}">{{ $t->statusLabel() }}</span></td>
+                        <td data-card-actions="1" data-label="Aksi Penugasan" class="text-right">
                             <div class="flex justify-end gap-1.5">
-                                <a href="{{ route('hrd.tasks.show', $t) }}" class="btn btn-ghost btn-sm">Detail</a>
+                                <a href="{{ route('hrd.tasks.show', $t) }}" class="btn btn-ghost btn-sm">Detail & Peta</a>
                                 @if(auth()->user()->canManage() && $t->status === 'pending')
                                     <a href="{{ route('hrd.tasks.edit', $t) }}" class="btn btn-ghost btn-sm">Edit</a>
                                 @endif

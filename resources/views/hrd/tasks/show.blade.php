@@ -20,45 +20,43 @@
                 </div>
             </div>
 
-            <div class="divider"></div>
-
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                <div class="p-3 rounded-xl bg-white/[0.03] border border-white/10">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-b border-white/10 py-4 text-xs">
+                <div>
                     <div class="text-slate-400">Freelancer</div>
-                    <div class="font-bold text-white mt-1">{{ $task->user?->name }}</div>
+                    <div class="font-bold text-white mt-0.5">{{ $task->user?->name }}</div>
                 </div>
-                <div class="p-3 rounded-xl bg-white/[0.03] border border-white/10">
+                <div>
                     <div class="text-slate-400">Gerai Lokasi</div>
-                    <div class="font-bold text-white mt-1">{{ $task->outlet?->name }}</div>
+                    <div class="font-bold text-white mt-0.5">{{ $task->outlet?->name }}</div>
                 </div>
-                <div class="p-3 rounded-xl bg-white/[0.03] border border-white/10">
+                <div>
                     <div class="text-slate-400">Target Mulai / SLA</div>
-                    <div class="font-bold text-orange-300 mt-1">{{ $task->startTimeShort() }} ({{ $task->estimated_duration_minutes }} mnt)</div>
+                    <div class="font-bold text-orange-300 mt-0.5">{{ $task->startTimeShort() }} ({{ $task->estimated_duration_minutes }} mnt)</div>
                 </div>
-                <div class="p-3 rounded-xl bg-white/[0.03] border border-white/10">
+                <div>
                     <div class="text-slate-400">Durasi Aktual</div>
-                    <div class="font-bold text-emerald-300 mt-1">{{ $task->actual_duration_minutes !== null ? $task->actual_duration_minutes.' menit' : 'Belum selesai' }}</div>
+                    <div class="font-bold text-emerald-300 mt-0.5">{{ $task->actual_duration_minutes !== null ? $task->actual_duration_minutes.' menit' : 'Belum selesai' }}</div>
                 </div>
             </div>
 
             <!-- Timestamps & GPS Distances -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                <div class="p-4 rounded-2xl bg-navy-950/60 border border-white/10 space-y-1">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs">
+                <div class="space-y-1.5">
                     <div class="font-bold text-orange-300 uppercase">Telemetri Mulai Pengerjaan</div>
                     <div>Waktu Mulai: <b class="text-white">{{ $task->started_at?->format('d/m/Y H:i:s') ?? '-' }}</b></div>
-                    <div>Koordinat: <span class="font-mono">{{ $task->start_latitude ? $task->start_latitude.', '.$task->start_longitude : '-' }}</span></div>
+                    <div>Koordinat: <span class="font-mono text-slate-300">{{ $task->start_latitude ? $task->start_latitude.', '.$task->start_longitude : '-' }}</span></div>
                     <div>Jarak ke Gerai: <b class="text-white">{{ $task->start_distance_meters !== null ? $task->start_distance_meters.' meter' : '-' }}</b></div>
                 </div>
-                <div class="p-4 rounded-2xl bg-navy-950/60 border border-white/10 space-y-1">
+                <div class="space-y-1.5 sm:border-l sm:border-white/10 sm:pl-6">
                     <div class="font-bold text-emerald-300 uppercase">Telemetri Selesai Pengerjaan</div>
                     <div>Waktu Selesai: <b class="text-white">{{ $task->completed_at?->format('d/m/Y H:i:s') ?? '-' }}</b></div>
-                    <div>Koordinat: <span class="font-mono">{{ $task->end_latitude ? $task->end_latitude.', '.$task->end_longitude : '-' }}</span></div>
+                    <div>Koordinat: <span class="font-mono text-slate-300">{{ $task->end_latitude ? $task->end_latitude.', '.$task->end_longitude : '-' }}</span></div>
                     <div>Jarak ke Gerai: <b class="text-white">{{ $task->end_distance_meters !== null ? $task->end_distance_meters.' meter' : '-' }}</b></div>
                 </div>
             </div>
 
             @if($task->notes)
-                <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/10 text-xs space-y-1">
+                <div class="border-t border-white/10 pt-4 text-xs space-y-1">
                     <div class="font-bold text-white">Catatan Pengerjaan Freelancer:</div>
                     <p class="text-slate-300 leading-relaxed">{{ $task->notes }}</p>
                 </div>

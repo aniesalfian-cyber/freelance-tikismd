@@ -103,8 +103,8 @@
             @endforeach
         </div>
 
-        <!-- Data Table -->
-        <div class="overflow-x-auto">
+        <!-- Data Table (Desktop / Print) -->
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-xs border-collapse border border-slate-300">
                 <thead>
                     <tr class="bg-slate-900 text-white">
@@ -133,6 +133,24 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        <!-- Mobile Wide Detailed Cards for Report Rows (< 768px) -->
+        <div class="md:hidden space-y-3">
+            @forelse($report['rows'] as $rIdx => $row)
+                <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 divide-y divide-slate-200 text-xs">
+                    @foreach($report['columns'] as $cIdx => $col)
+                        <div class="py-1.5 flex items-start justify-between gap-3 {{ $cIdx === 0 ? 'pt-0 pb-2 font-extrabold text-slate-900' : '' }}">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">{{ $col['label'] }}</span>
+                            <span class="font-semibold text-slate-900 text-right">{{ $row[$col['key']] ?? '-' }}</span>
+                        </div>
+                    @endforeach
+                </div>
+            @empty
+                <div class="text-center py-6 text-xs text-slate-500">
+                    Tidak ada data pada periode yang dipilih.
+                </div>
+            @endforelse
         </div>
 
         <!-- Analytical Notes -->

@@ -18,13 +18,13 @@
     @endif
 </div>
 
-<div class="glass p-5">
+<div class="table-surface">
     <div class="tbl-wrap">
         <table class="tbl">
             <thead>
                 <tr>
-                    <th>NIK & Nama</th>
-                    <th>Kontak</th>
+                    <th>NIK & Nama Freelancer</th>
+                    <th>Kontak & Email</th>
                     <th>Bidang / Tarif</th>
                     <th>Tugas (30 Hari)</th>
                     <th>Rata-rata KPI</th>
@@ -41,37 +41,48 @@
                         $grade = \App\Services\PerformanceScoringService::gradeFor($kpi);
                     @endphp
                     <tr>
-                        <td>
-                            <div class="font-bold text-white">{{ $fl->name }}</div>
-                            <div class="font-mono text-xs text-orange-300">{{ $fl->nik ?: '-' }}</div>
+                        <td data-card-header="1" data-label="Profil Freelancer">
+                            <div class="flex items-center justify-between w-full gap-2">
+                                <div>
+                                    <div class="font-extrabold text-white text-sm">{{ $fl->name }}</div>
+                                    <div class="font-mono text-xs text-orange-300">NIK: {{ $fl->nik ?: '-' }}</div>
+                                </div>
+                                <span class="badge {{ $fl->is_active ? 'badge-success' : 'badge-danger' }} md:hidden">
+                                    {{ $fl->is_active ? 'Aktif' : 'Nonaktif' }}
+                                </span>
+                            </div>
                         </td>
-                        <td class="text-xs">
-                            <div class="text-white">{{ $fl->phone ?: '-' }}</div>
-                            <div class="text-slate-400">{{ $fl->email }}</div>
+                        <td data-label="WhatsApp & Email" class="text-xs">
+                            <div>
+                                <div class="font-semibold text-white">{{ $fl->phone ?: '-' }}</div>
+                                <div class="text-slate-400">{{ $fl->email }}</div>
+                            </div>
                         </td>
-                        <td class="text-xs">
-                            <div class="font-semibold text-white">{{ $fl->specialization ?: 'Operasional Umum' }}</div>
-                            <div class="text-slate-400">Rp {{ number_format((float) $fl->hourly_rate, 0, ',', '.') }}/jam</div>
+                        <td data-label="Bidang & Tarif" class="text-xs">
+                            <div>
+                                <div class="font-semibold text-white">{{ $fl->specialization ?: 'Operasional Umum' }}</div>
+                                <div class="text-slate-400">Rp {{ number_format((float) $fl->hourly_rate, 0, ',', '.') }}/jam</div>
+                            </div>
                         </td>
-                        <td class="font-bold text-white">{{ $fl->tasks_30d }} tugas</td>
-                        <td>
+                        <td data-label="Tugas (30 Hari)" class="font-bold text-white">{{ $fl->tasks_30d }} penugasan</td>
+                        <td data-label="Skor KPI (30H)">
                             @if($fl->kpi_30d !== null)
                                 <span class="badge {{ \App\Models\PerformanceLog::badgeFor($grade) }}">
-                                    {{ number_format($kpi, 2) }} ({{ $grade }})
+                                    {{ number_format($kpi, 2) }} (Grade {{ $grade }})
                                 </span>
                             @else
                                 <span class="text-xs text-slate-500">Belum dinilai</span>
                             @endif
                         </td>
-                        <td>
+                        <td data-label="Status">
                             <span class="badge {{ $fl->is_active ? 'badge-success' : 'badge-danger' }}">
                                 {{ $fl->is_active ? 'Aktif' : 'Nonaktif' }}
                             </span>
                         </td>
                         @if(auth()->user()->canManage())
-                            <td class="text-right">
+                            <td data-card-actions="1" data-label="Aksi Manajemen" class="text-right">
                                 <div class="flex justify-end gap-1.5 flex-wrap">
-                                    <a href="{{ route('hrd.freelancers.show', $fl) }}" class="btn btn-ghost btn-sm">Detail</a>
+                                    <a href="{{ route('hrd.freelancers.show', $fl) }}" class="btn btn-ghost btn-sm">Detail & KPI</a>
                                     <a href="{{ route('hrd.freelancers.edit', $fl) }}" class="btn btn-ghost btn-sm">Edit</a>
                                     @if(auth()->user()->isSuperadmin())
                                         <form method="POST" action="{{ route('admin.users.reset', $fl) }}"

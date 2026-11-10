@@ -17,31 +17,18 @@
     }
 @endphp
 
-<!-- SVG Gooey Liquid Water Filter -->
-<svg class="sr-only" width="0" height="0" aria-hidden="true">
-    <defs>
-        <filter id="hsm-goo">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur" />
-            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -9" result="goo" />
-            <feComposite in="SourceGraphic" in2="goo" operator="atop" />
-        </filter>
-    </defs>
-</svg>
-
 <div class="lg:hidden" x-data="{
     active: {{ $activeIndex }},
     moving: false,
-    rippling: -1,
     moreOpen: false,
     go(idx, url) {
-        this.rippling = idx;
         if (this.active !== idx) {
             this.active = idx;
             this.moving = true;
-            setTimeout(() => { this.moving = false; }, 620);
+            setTimeout(() => { this.moving = false; }, 520);
         }
         if (url) {
-            setTimeout(() => { window.location.href = url; }, 190);
+            setTimeout(() => { window.location.href = url; }, 160);
         } else {
             this.moreOpen = !this.moreOpen;
         }
@@ -86,16 +73,15 @@
         </div>
     @endif
 
-    <!-- Floating Water Bubble Bottom Dock -->
+    <!-- Flush Bottom Dock with Upward Light Beam Animation -->
     <div class="dock-wrap">
         <nav class="dock" style="--n: {{ $totalSlots }}; --i: {{ $activeIndex }};" :style="`--n: {{ $totalSlots }}; --i: ${active};`" aria-label="Navigasi Mobile">
-            <!-- Liquid Gooey Layer -->
-            <div class="dock-liquid" aria-hidden="true">
-                <div class="bubble-track is-trail">
-                    <div class="bubble-trail"></div>
-                </div>
-                <div class="bubble-track">
-                    <div class="bubble" :class="{ 'is-moving': moving }"></div>
+            <!-- Upward Light Beam Stage -->
+            <div class="dock-light-stage" aria-hidden="true">
+                <div class="light-track" :class="{ 'is-moving': moving }">
+                    <div class="light-beam"></div>
+                    <div class="light-bloom"></div>
+                    <div class="light-source"></div>
                 </div>
             </div>
 
@@ -106,8 +92,7 @@
                         <a href="{{ $dItem['url'] }}"
                            @click.prevent="go({{ $idx }}, '{{ $dItem['url'] }}')"
                            class="dock-item"
-                           :class="{ 'is-active': active === {{ $idx }}, 'is-rippling': rippling === {{ $idx }} }">
-                            <span class="ripple"></span>
+                           :class="{ 'is-active': active === {{ $idx }} }">
                             <x-icon :name="$dItem['icon']" class="w-5 h-5 dock-icon" />
                             <span class="dock-label">{{ $dItem['label'] }}</span>
                         </a>
@@ -119,8 +104,7 @@
                         <button type="button"
                                 @click="go({{ count($dockItems) }}, null)"
                                 class="dock-item"
-                                :class="{ 'is-active': active === {{ count($dockItems) }} || moreOpen, 'is-rippling': rippling === {{ count($dockItems) }} }">
-                            <span class="ripple"></span>
+                                :class="{ 'is-active': active === {{ count($dockItems) }} || moreOpen }">
                             <x-icon name="grid" class="w-5 h-5 dock-icon" />
                             <span class="dock-label">Lainnya</span>
                         </button>

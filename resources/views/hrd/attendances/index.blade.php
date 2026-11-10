@@ -14,9 +14,11 @@
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <!-- Attendance List -->
-    <div class="lg:col-span-2 glass p-5 space-y-3">
-        <div class="orn-line mb-1"></div>
-        <h2 class="text-base font-extrabold text-white">Daftar Presensi Masuk & Pulang ({{ $date->translatedFormat('d F Y') }})</h2>
+    <div class="lg:col-span-2 table-surface">
+        <div>
+            <div class="orn-line mb-1"></div>
+            <h2 class="text-base font-extrabold text-white">Daftar Presensi Masuk & Pulang ({{ $date->translatedFormat('d F Y') }})</h2>
+        </div>
         <div class="tbl-wrap">
             <table class="tbl">
                 <thead>
@@ -32,19 +34,28 @@
                 <tbody>
                     @forelse($attendances as $a)
                         <tr>
-                            <td>
-                                <div class="font-bold text-white">{{ $a->user?->name }}</div>
-                                <div class="font-mono text-xs text-slate-400">{{ $a->user?->nik }}</div>
+                            <td data-card-header="1" data-label="Freelancer">
+                                <div class="flex items-center justify-between w-full gap-2">
+                                    <div>
+                                        <div class="font-extrabold text-white text-sm">{{ $a->user?->name }}</div>
+                                        <div class="font-mono text-xs text-orange-300">NIK: {{ $a->user?->nik }}</div>
+                                    </div>
+                                    <span class="badge {{ $a->statusBadge() }} md:hidden">{{ $a->statusLabel() }}</span>
+                                </div>
                             </td>
-                            <td class="font-mono text-xs font-bold text-white">{{ $a->check_in_at->format('H:i:s') }}</td>
-                            <td class="font-mono text-xs text-slate-300">{{ $a->check_out_at?->format('H:i:s') ?? '-' }}</td>
-                            <td class="text-xs">{{ $a->check_in_distance_meters }} m</td>
-                            <td class="text-xs">{{ $a->late_minutes > 0 ? $a->late_minutes.' menit' : 'Tepat waktu' }}</td>
-                            <td>
-                                <span class="badge {{ $a->statusBadge() }}">{{ $a->statusLabel() }}</span>
-                                @if($a->notes)
-                                    <div class="text-[11px] text-slate-400 mt-0.5">{{ $a->notes }}</div>
-                                @endif
+                            <td data-label="Jam Masuk" class="font-mono text-xs font-bold text-white">{{ $a->check_in_at->format('H:i:s') }} WITA</td>
+                            <td data-label="Jam Pulang" class="font-mono text-xs text-slate-300">{{ $a->check_out_at ? $a->check_out_at->format('H:i:s').' WITA' : 'Belum Pulang' }}</td>
+                            <td data-label="Jarak ke Kantor Utama" class="text-xs font-semibold text-white">{{ $a->check_in_distance_meters }} meter</td>
+                            <td data-label="Keterlambatan" class="text-xs {{ $a->late_minutes > 0 ? 'text-amber-400 font-bold' : 'text-emerald-400' }}">
+                                {{ $a->late_minutes > 0 ? $a->late_minutes.' menit' : 'Tepat waktu' }}
+                            </td>
+                            <td data-label="Status & Catatan">
+                                <div>
+                                    <span class="badge {{ $a->statusBadge() }}">{{ $a->statusLabel() }}</span>
+                                    @if($a->notes)
+                                        <div class="text-[11px] text-slate-400 mt-1">{{ $a->notes }}</div>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @empty

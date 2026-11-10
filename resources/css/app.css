@@ -168,7 +168,22 @@
     .badge-orange { background: rgba(255, 101, 0, 0.18); color: #ff9a4d; border: 1px solid rgba(255, 101, 0, 0.45); }
     .badge-muted { background: rgba(148, 163, 184, 0.14); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.28); }
 
-    /* ------------------------------ Tables */
+    /* ------------------------------ Tables & Auto Mobile Cards */
+    .table-surface {
+        @apply space-y-4;
+    }
+    @media (min-width: 768px) {
+        .table-surface {
+            background: rgba(14, 30, 54, 0.65);
+            -webkit-backdrop-filter: blur(16px) saturate(140%);
+            backdrop-filter: blur(16px) saturate(140%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.25rem;
+            padding: 1.35rem;
+            box-shadow: 0 10px 40px -12px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        }
+    }
+
     .tbl-wrap { @apply overflow-x-auto rounded-2xl; }
     .tbl { @apply w-full min-w-full text-left text-sm; }
     .tbl thead th {
@@ -180,6 +195,115 @@
     .tbl tbody tr { transition: background 0.2s; }
     .tbl tbody tr:hover { background: rgba(255, 101, 0, 0.06); }
     .tbl tbody tr:last-child td { border-bottom: none; }
+
+    /* Automatic Wide & Detailed Card Transformation on Mobile (< 768px) */
+    @media (max-width: 767px) {
+        .tbl-wrap {
+            overflow-x: visible !important;
+            border-radius: 0 !important;
+        }
+        .tbl,
+        .tbl tbody {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 0.9rem !important;
+            width: 100% !important;
+            min-width: 100% !important;
+        }
+        .tbl thead {
+            display: none !important;
+        }
+        .tbl tbody tr {
+            display: flex !important;
+            flex-direction: column !important;
+            width: 100% !important;
+            padding: 1.1rem 1.15rem !important;
+            border-radius: 1.2rem !important;
+            background: linear-gradient(165deg, rgba(16, 34, 60, 0.88), rgba(10, 20, 36, 0.94)) !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            box-shadow: 0 14px 34px -12px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+            position: relative;
+            overflow: hidden;
+        }
+        .tbl tbody tr::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--color-brand), var(--color-brand-soft), transparent 85%);
+            opacity: 0.85;
+        }
+        .tbl tbody td {
+            display: flex !important;
+            align-items: flex-start !important;
+            justify-content: space-between !important;
+            gap: 1rem !important;
+            width: 100% !important;
+            padding: 0.55rem 0 !important;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.08) !important;
+            text-align: right !important;
+            white-space: normal !important;
+        }
+        .tbl tbody td:last-child {
+            border-bottom: none !important;
+            padding-bottom: 0.1rem !important;
+        }
+        .tbl tbody td::before {
+            content: attr(data-label);
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #94a3b8;
+            text-align: left;
+            flex-shrink: 0;
+            max-width: 44%;
+            padding-top: 0.1rem;
+        }
+        .tbl tbody td:not([data-label])::before {
+            display: none !important;
+        }
+        .tbl tbody td[data-card-header] {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            text-align: left !important;
+            padding-top: 0.1rem !important;
+            padding-bottom: 0.7rem !important;
+            margin-bottom: 0.15rem !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+        }
+        .tbl tbody td[data-card-header]::before {
+            margin-bottom: 0.2rem;
+            color: #ff9a4d;
+            max-width: 100%;
+        }
+        .tbl tbody td[data-card-actions] {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            text-align: left !important;
+            padding-top: 0.75rem !important;
+            margin-top: 0.15rem !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: none !important;
+        }
+        .tbl tbody td[data-card-actions]::before {
+            margin-bottom: 0.35rem;
+        }
+        .tbl tbody td[data-card-actions] > div {
+            justify-content: flex-start !important;
+            width: 100%;
+        }
+        .tbl tbody td[colspan] {
+            justify-content: center !important;
+            text-align: center !important;
+            padding: 1.5rem 0.5rem !important;
+        }
+        .tbl tbody td[colspan]::before {
+            display: none !important;
+        }
+    }
 
     /* ------------------------------ Stat / misc */
     .stat-ring { background: conic-gradient(var(--color-brand) calc(var(--p, 0) * 1%), rgba(255, 255, 255, 0.08) 0); }
@@ -235,71 +359,154 @@
     .sidebar.is-collapsed .nav-group { opacity: 0; height: 0.5rem; padding: 0; overflow: hidden; }
 
     /* =================================================================
-       WATER-BUBBLE BOTTOM DOCK (mobile first)
+       FLUSH BOTTOM DOCK WITH UPWARD LIGHT BEAM (mobile first)
        ================================================================= */
     .dock-wrap {
-        position: fixed; z-index: 50; left: 0; right: 0;
-        bottom: calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
-        display: flex; justify-content: center; padding-inline: 0.85rem; pointer-events: none;
+        position: fixed;
+        z-index: 50;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        padding: 0;
+        pointer-events: none;
     }
     .dock {
-        position: relative; width: 100%; max-width: 30rem; height: 4.5rem; pointer-events: auto;
-        border-radius: 2.25rem;
-        background: rgba(11, 22, 38, 0.82);
-        -webkit-backdrop-filter: blur(22px) saturate(160%);
-        backdrop-filter: blur(22px) saturate(160%);
-        border: 1px solid rgba(255, 255, 255, 0.13);
-        box-shadow: 0 22px 50px -14px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 101, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        position: relative;
+        width: 100%;
+        height: calc(4.35rem + env(safe-area-inset-bottom, 0px));
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        pointer-events: auto;
+        border-radius: 0;
+        background: linear-gradient(180deg, rgba(11, 22, 38, 0.95) 0%, rgba(6, 12, 22, 0.99) 100%);
+        -webkit-backdrop-filter: blur(24px) saturate(160%);
+        backdrop-filter: blur(24px) saturate(160%);
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 -10px 35px rgba(0, 0, 0, 0.78), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        overflow: hidden;
     }
-    .dock-liquid { position: absolute; inset: 0; z-index: 0; border-radius: inherit; filter: url(#hsm-goo); }
-    .bubble-track {
-        position: absolute; top: 0; bottom: 0; left: 0; width: calc(100% / var(--n));
-        display: flex; align-items: center; justify-content: center;
+    .dock-light-stage {
+        position: absolute;
+        inset: 0;
+        bottom: env(safe-area-inset-bottom, 0px);
+        z-index: 1;
+        pointer-events: none;
+        overflow: hidden;
+    }
+    .light-track {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: calc(100% / var(--n));
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
         transform: translateX(calc(var(--i) * 100%));
-        transition: transform 0.62s var(--ease-spring);
+        transition: transform 0.52s var(--ease-luxe);
     }
-    .bubble-track.is-trail { transition: transform 0.95s cubic-bezier(0.25, 1.25, 0.4, 1); }
-    .bubble, .bubble-trail {
-        width: 3.4rem; height: 3.4rem; border-radius: 50%; margin-top: -0.55rem;
-        background: radial-gradient(circle at 32% 26%, #ffb067, var(--color-brand-soft) 38%, var(--color-brand) 72%, var(--color-brand-deep));
-        box-shadow: 0 0 26px 2px rgba(255, 101, 0, 0.65);
+    /* Cone of light shining upward from bottom bar */
+    .light-beam {
+        position: absolute;
+        bottom: 0;
+        left: 6%;
+        right: 6%;
+        height: 100%;
+        background:
+            radial-gradient(ellipse 75% 95% at 50% 100%, rgba(255, 145, 40, 0.46) 0%, rgba(255, 101, 0, 0.22) 48%, rgba(255, 101, 0, 0.04) 82%, transparent 100%),
+            linear-gradient(0deg, rgba(255, 120, 20, 0.35) 0%, rgba(255, 101, 0, 0.10) 55%, transparent 100%);
+        clip-path: polygon(24% 100%, 76% 100%, 98% 0%, 2% 0%);
+        filter: blur(1px);
+        transform-origin: bottom center;
+        transition: opacity 0.35s, transform 0.45s var(--ease-luxe);
     }
-    .bubble-trail { width: 2.6rem; height: 2.6rem; margin-top: -0.2rem; opacity: 0.95; }
-    .bubble.is-moving { animation: bubble-squash 0.62s var(--ease-spring); }
-    @keyframes bubble-squash {
-        0% { transform: scale(1, 1); }
-        22% { transform: scale(1.32, 0.78); }
-        52% { transform: scale(0.84, 1.2); }
-        78% { transform: scale(1.08, 0.94); }
-        100% { transform: scale(1, 1); }
+    /* Soft floor bloom at the bottom of the active item */
+    .light-bloom {
+        position: absolute;
+        bottom: -8px;
+        width: 78%;
+        height: 28px;
+        border-radius: 999px;
+        background: radial-gradient(circle at 50% 100%, rgba(255, 195, 110, 0.75), rgba(255, 101, 0, 0.35) 55%, transparent 80%);
+        filter: blur(5px);
     }
-    .dock-items { position: relative; z-index: 2; display: grid; grid-template-columns: repeat(var(--n), 1fr); height: 100%; list-style: none; margin: 0; padding: 0; }
+    /* Glowing LED bar anchored at the very bottom edge */
+    .light-source {
+        position: relative;
+        z-index: 2;
+        width: 54%;
+        height: 3.5px;
+        border-radius: 6px 6px 0 0;
+        background: linear-gradient(90deg, #ff8800, #fff3e0 50%, #ff6500);
+        box-shadow:
+            0 -2px 10px 2px rgba(255, 150, 50, 0.95),
+            0 -6px 22px 5px rgba(255, 101, 0, 0.8),
+            0 0 16px 3px rgba(255, 200, 120, 0.9);
+    }
+    .light-track.is-moving .light-beam {
+        animation: light-flare 0.52s var(--ease-luxe);
+    }
+    @keyframes light-flare {
+        0% { transform: scaleX(1) scaleY(1); opacity: 1; }
+        35% { transform: scaleX(1.22) scaleY(1.08); opacity: 1; }
+        100% { transform: scaleX(1) scaleY(1); opacity: 1; }
+    }
+
+    .dock-items {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        grid-template-columns: repeat(var(--n), 1fr);
+        height: 4.35rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
     .dock-item {
-        position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.15rem;
-        height: 100%; width: 100%; color: var(--color-ink-mute); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.02em;
-        background: none; border: 0; cursor: pointer; text-decoration: none;
-        transition: color 0.35s;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.22rem;
+        height: 100%;
+        width: 100%;
+        color: var(--color-ink-mute);
+        font-size: 0.66rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        background: none;
+        border: 0;
+        cursor: pointer;
+        text-decoration: none;
+        transition: color 0.3s;
     }
-    .dock-item .dock-icon { transition: transform 0.6s var(--ease-spring), color 0.3s; }
-    .dock-item .dock-label { transition: transform 0.5s var(--ease-spring), opacity 0.3s; }
-    .dock-item.is-active { color: #fff; }
-    .dock-item.is-active .dock-icon { transform: translateY(-9px) scale(1.12); }
-    .dock-item.is-active .dock-label { transform: translateY(1px); }
-    .dock-item:active .dock-icon { transform: scale(0.82); }
-    .dock-item .ripple {
-        position: absolute; width: 3rem; height: 3rem; border-radius: 50%; border: 2px solid rgba(255, 150, 70, 0.7);
-        top: 50%; left: 50%; margin: -2.2rem 0 0 -1.5rem; opacity: 0; pointer-events: none;
+    .dock-item .dock-icon {
+        transition: transform 0.45s var(--ease-spring), color 0.3s, filter 0.35s;
     }
-    .dock-item.is-rippling .ripple { animation: ripple-out 0.9s ease-out; }
-    @keyframes ripple-out {
-        0% { transform: scale(0.6); opacity: 0.9; }
-        100% { transform: scale(2.1); opacity: 0; }
+    .dock-item .dock-label {
+        transition: transform 0.4s var(--ease-luxe), color 0.3s, text-shadow 0.35s;
+    }
+    .dock-item.is-active {
+        color: #ffffff;
+    }
+    .dock-item.is-active .dock-icon {
+        color: #ffae66;
+        transform: translateY(-3px) scale(1.1);
+        filter: drop-shadow(0 2px 10px rgba(255, 120, 20, 0.9));
+    }
+    .dock-item.is-active .dock-label {
+        color: #ffffff;
+        text-shadow: 0 0 12px rgba(255, 136, 0, 0.85);
+    }
+    .dock-item:active .dock-icon {
+        transform: scale(0.88);
     }
 
     .more-sheet {
         position: fixed; z-index: 45; left: 0; right: 0; bottom: 0;
-        border-radius: 1.75rem 1.75rem 0 0;
-        padding: 1.25rem 1rem calc(env(safe-area-inset-bottom, 0px) + 6.5rem);
+        border-radius: 1.5rem 1.5rem 0 0;
+        padding: 1.25rem 1rem calc(env(safe-area-inset-bottom, 0px) + 5.25rem);
         max-height: 78dvh; overflow-y: auto;
     }
 

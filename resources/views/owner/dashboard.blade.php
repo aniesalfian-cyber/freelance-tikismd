@@ -97,9 +97,11 @@
 
 <!-- Leaderboards: Top Performers vs Underperformers -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <div class="glass p-6 space-y-3">
-        <div class="orn-line mb-1"></div>
-        <h2 class="text-base font-extrabold text-white">Top 5 Freelancer Berprestasi (Skor Tertinggi)</h2>
+    <div class="table-surface">
+        <div>
+            <div class="orn-line mb-1"></div>
+            <h2 class="text-base font-extrabold text-white">Top 5 Freelancer Berprestasi (Skor Tertinggi)</h2>
+        </div>
         <div class="tbl-wrap">
             <table class="tbl">
                 <thead>
@@ -108,11 +110,16 @@
                 <tbody>
                     @forelse($data['top'] as $idx => $row)
                         <tr>
-                            <td class="font-extrabold text-orange-400">{{ $idx + 1 }}</td>
-                            <td class="font-bold text-white">{{ $row->user?->name }}</td>
-                            <td class="text-xs">{{ $row->done }} / {{ $row->total }} ({{ $row->days }} hari)</td>
-                            <td class="font-mono font-extrabold text-emerald-400">{{ number_format($row->avg_kpi, 2) }}</td>
-                            <td><span class="badge {{ \App\Models\PerformanceLog::badgeFor($row->grade) }}">Grade {{ $row->grade }}</span></td>
+                            <td data-card-header="1" data-label="Peringkat & Freelancer">
+                                <div class="flex items-center justify-between w-full gap-2">
+                                    <span class="font-extrabold text-orange-400">#{{ $idx + 1 }} <span class="text-white md:hidden ml-1">{{ $row->user?->name }}</span></span>
+                                    <span class="badge {{ \App\Models\PerformanceLog::badgeFor($row->grade) }} md:hidden">Grade {{ $row->grade }}</span>
+                                </div>
+                            </td>
+                            <td data-label="Nama Freelancer" class="font-bold text-white">{{ $row->user?->name }}</td>
+                            <td data-label="Tugas Selesai" class="text-xs">{{ $row->done }} / {{ $row->total }} tugas ({{ $row->days }} hari)</td>
+                            <td data-label="Rata-rata Skor KPI" class="font-mono font-extrabold text-emerald-400">{{ number_format($row->avg_kpi, 2) }}</td>
+                            <td data-label="Predikat"><span class="badge {{ \App\Models\PerformanceLog::badgeFor($row->grade) }}">Grade {{ $row->grade }}</span></td>
                         </tr>
                     @empty
                         <tr><td colspan="5" class="text-center text-slate-400 py-4">Belum ada data.</td></tr>
@@ -122,9 +129,11 @@
         </div>
     </div>
 
-    <div class="glass p-6 space-y-3">
-        <div class="orn-line mb-1"></div>
-        <h2 class="text-base font-extrabold text-white">Daftar Evaluasi & Pembinaan (Skor Terendah)</h2>
+    <div class="table-surface">
+        <div>
+            <div class="orn-line mb-1"></div>
+            <h2 class="text-base font-extrabold text-white">Daftar Evaluasi & Pembinaan (Skor Terendah)</h2>
+        </div>
         <div class="tbl-wrap">
             <table class="tbl">
                 <thead>
@@ -133,11 +142,16 @@
                 <tbody>
                     @forelse($data['bottom'] as $idx => $row)
                         <tr>
-                            <td class="font-bold text-slate-400">{{ $idx + 1 }}</td>
-                            <td class="font-bold text-white">{{ $row->user?->name }}</td>
-                            <td class="text-xs">{{ $row->done }} / {{ $row->total }} ({{ $row->days }} hari)</td>
-                            <td class="font-mono font-extrabold text-amber-400">{{ number_format($row->avg_kpi, 2) }}</td>
-                            <td><span class="badge {{ \App\Models\PerformanceLog::badgeFor($row->grade) }}">Grade {{ $row->grade }}</span></td>
+                            <td data-card-header="1" data-label="Urutan & Freelancer">
+                                <div class="flex items-center justify-between w-full gap-2">
+                                    <span class="font-bold text-slate-300">#{{ $idx + 1 }} <span class="text-white md:hidden ml-1">{{ $row->user?->name }}</span></span>
+                                    <span class="badge {{ \App\Models\PerformanceLog::badgeFor($row->grade) }} md:hidden">Grade {{ $row->grade }}</span>
+                                </div>
+                            </td>
+                            <td data-label="Nama Freelancer" class="font-bold text-white">{{ $row->user?->name }}</td>
+                            <td data-label="Tugas Selesai" class="text-xs">{{ $row->done }} / {{ $row->total }} tugas ({{ $row->days }} hari)</td>
+                            <td data-label="Rata-rata Skor KPI" class="font-mono font-extrabold text-amber-400">{{ number_format($row->avg_kpi, 2) }}</td>
+                            <td data-label="Predikat"><span class="badge {{ \App\Models\PerformanceLog::badgeFor($row->grade) }}">Grade {{ $row->grade }}</span></td>
                         </tr>
                     @empty
                         <tr><td colspan="5" class="text-center text-slate-400 py-4">Belum ada data.</td></tr>

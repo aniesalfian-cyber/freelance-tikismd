@@ -22,15 +22,15 @@
     </a>
 </div>
 
-<div class="glass p-5">
+<div class="table-surface">
     <div class="tbl-wrap">
         <table class="tbl">
             <thead>
                 <tr>
                     <th>Nama & Email</th>
-                    <th>NIK / WhatsApp</th>
-                    <th>Role</th>
-                    <th>Status</th>
+                    <th>NIK & WhatsApp</th>
+                    <th>Role & Spesialisasi</th>
+                    <th>Status Akun</th>
                     <th>Login Terakhir</th>
                     <th class="text-right">Aksi & Quick Reset</th>
                 </tr>
@@ -38,24 +38,42 @@
             <tbody>
                 @forelse($users as $u)
                     <tr>
-                        <td>
-                            <div class="font-bold text-white">{{ $u->name }}</div>
-                            <div class="text-xs text-slate-400">{{ $u->email }}</div>
+                        <td data-card-header="1" data-label="Identitas Pengguna">
+                            <div class="flex items-center justify-between w-full gap-2">
+                                <div>
+                                    <div class="font-extrabold text-white text-sm">{{ $u->name }}</div>
+                                    <div class="text-xs text-slate-400">{{ $u->email }}</div>
+                                </div>
+                                <span class="badge {{ $u->is_active ? 'badge-success' : 'badge-danger' }} md:hidden">
+                                    {{ $u->is_active ? 'Aktif' : 'Nonaktif' }}
+                                </span>
+                            </div>
                         </td>
-                        <td class="text-xs">
-                            <div class="font-mono text-white">{{ $u->nik ?: '-' }}</div>
-                            <div class="text-slate-400">{{ $u->phone ?: '-' }}</div>
+                        <td data-label="NIK & WhatsApp" class="text-xs">
+                            <div>
+                                <div class="font-mono font-semibold text-white">{{ $u->nik ?: '-' }}</div>
+                                <div class="text-slate-400">{{ $u->phone ?: '-' }}</div>
+                            </div>
                         </td>
-                        <td><span class="badge badge-orange">{{ $u->roleLabel() }}</span></td>
-                        <td>
+                        <td data-label="Role & Bidang">
+                            <div>
+                                <span class="badge badge-orange">{{ $u->roleLabel() }}</span>
+                                @if($u->specialization)
+                                    <div class="text-[11px] text-slate-400 mt-1">{{ $u->specialization }}</div>
+                                @endif
+                            </div>
+                        </td>
+                        <td data-label="Status Akun">
                             @if($u->is_active)
                                 <span class="badge badge-success">Aktif</span>
                             @else
                                 <span class="badge badge-danger">Nonaktif</span>
                             @endif
                         </td>
-                        <td class="text-xs text-slate-400">{{ $u->last_login_at?->format('d/m/Y H:i') ?? 'Belum pernah' }}</td>
-                        <td>
+                        <td data-label="Login Terakhir" class="text-xs text-slate-300">
+                            {{ $u->last_login_at?->format('d/m/Y H:i') ?? 'Belum pernah login' }}
+                        </td>
+                        <td data-card-actions="1" data-label="Tindakan Manajemen">
                             <div class="flex items-center justify-end gap-1.5 flex-wrap">
                                 <form method="POST" action="{{ route('admin.users.reset', $u) }}"
                                       data-confirm="Reset password akun {{ $u->name }} dan tampilkan template pesan WhatsApp?"

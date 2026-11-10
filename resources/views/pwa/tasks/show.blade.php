@@ -14,14 +14,14 @@
 
     <!-- 3-Stage Stepper Header -->
     <div class="glass p-5 space-y-4">
-        <div class="grid grid-cols-3 gap-2 text-center text-[11px] font-bold">
-            <div class="p-2 rounded-xl border {{ $task->status === 'pending' ? 'bg-orange-500/20 border-orange-500 text-white' : 'bg-emerald-500/15 border-emerald-500/35 text-emerald-300' }}">
+        <div class="grid grid-cols-3 gap-2 text-center text-[11px] font-bold border-b border-white/10 pb-3">
+            <div class="{{ $task->status === 'pending' ? 'text-orange-400' : 'text-emerald-400' }}">
                 1. Belum Diproses
             </div>
-            <div class="p-2 rounded-xl border {{ $task->status === 'in_progress' ? 'bg-orange-500/20 border-orange-500 text-white' : ($task->status === 'completed' ? 'bg-emerald-500/15 border-emerald-500/35 text-emerald-300' : 'bg-white/[0.03] border-white/10 text-slate-500') }}">
+            <div class="{{ $task->status === 'in_progress' ? 'text-orange-400' : ($task->status === 'completed' ? 'text-emerald-400' : 'text-slate-500') }}">
                 2. Sedang Diproses
             </div>
-            <div class="p-2 rounded-xl border {{ $task->status === 'completed' ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-white/[0.03] border-white/10 text-slate-500' }}">
+            <div class="{{ $task->status === 'completed' ? 'text-emerald-400' : 'text-slate-500' }}">
                 3. Selesai Diproses
             </div>
         </div>
@@ -35,7 +35,7 @@
             <p class="text-xs text-slate-300 mt-1 leading-relaxed">{{ $task->description ?: 'Lakukan pengerjaan sesuai SOP gerai dan catat hasilnya.' }}</p>
         </div>
 
-        <div class="p-3.5 rounded-2xl bg-navy-950/70 border border-white/10 text-xs space-y-1">
+        <div class="border-t border-white/10 pt-3.5 text-xs space-y-1">
             <div class="font-bold text-white">📍 Lokasi Gerai: {{ $task->outlet->name }} ({{ $task->outlet->code }})</div>
             <div class="text-slate-400">{{ $task->outlet->address }}</div>
             <div class="flex items-center justify-between pt-1">
@@ -88,7 +88,7 @@
         </div>
     @elseif($task->status === 'in_progress')
         <div class="glass p-5 space-y-4 border-orange-500/40">
-            <div class="flex items-center justify-between p-3.5 rounded-2xl bg-orange-500/15 border border-orange-500/35">
+            <div class="flex items-center justify-between border-b border-white/10 pb-3.5">
                 <div>
                     <div class="text-[11px] font-bold uppercase text-orange-300">Durasi Berjalan</div>
                     <div class="text-2xl font-mono font-extrabold text-white" x-text="elapsedText">00:00</div>
@@ -125,7 +125,7 @@
                 <div>Validasi Lokasi: <b class="{{ $task->is_location_valid ? 'text-emerald-400' : 'text-red-400' }}">{{ $task->is_location_valid ? 'Valid di Dalam Radius' : 'Di Luar Radius' }}</b></div>
             </div>
             @if($task->notes)
-                <div class="p-3 rounded-xl bg-navy-950/60 border border-white/10 text-xs text-slate-200">
+                <div class="border-t border-white/10 pt-3 text-xs text-slate-200">
                     <b>Catatan:</b> {{ $task->notes }}
                 </div>
             @endif

@@ -12,7 +12,7 @@
     @endif
 </div>
 
-<div class="glass p-5">
+<div class="table-surface">
     <div class="tbl-wrap">
         <table class="tbl">
             <thead>
@@ -32,24 +32,24 @@
             <tbody>
                 @forelse($templates as $tpl)
                     <tr>
-                        <td>
-                            <div class="font-bold text-white">{{ $tpl->title }}</div>
-                            <div class="text-xs text-slate-400">{{ $tpl->description }}</div>
+                        <td data-card-header="1" data-label="Template Tugas Pasti">
+                            <div class="font-extrabold text-white text-sm">{{ $tpl->title }}</div>
+                            <div class="text-xs text-slate-400 mt-0.5">{{ $tpl->description }}</div>
                         </td>
-                        <td class="text-xs font-semibold text-white">{{ $tpl->outlet?->name ?? '-' }}</td>
-                        <td class="text-xs">{{ $tpl->user?->name ?? 'Semua Freelancer Aktif' }}</td>
-                        <td class="font-mono text-xs text-orange-300">{{ $tpl->startTimeShort() }}</td>
-                        <td><span class="badge badge-info">{{ $tpl->estimated_duration_minutes }} menit</span></td>
-                        <td class="text-xs">{{ $tpl->activeDaysLabel() }}</td>
-                        <td>
+                        <td data-label="Gerai Lokasi" class="text-xs font-semibold text-white">{{ $tpl->outlet?->name ?? '-' }}</td>
+                        <td data-label="Penerima Default" class="text-xs">{{ $tpl->user?->name ?? 'Semua Freelancer Aktif' }}</td>
+                        <td data-label="Jam Target Mulai" class="font-mono text-xs text-orange-300 font-bold">{{ $tpl->startTimeShort() }}</td>
+                        <td data-label="Target Durasi SLA"><span class="badge badge-info">{{ $tpl->estimated_duration_minutes }} menit</span></td>
+                        <td data-label="Jadwal Hari Aktif" class="text-xs">{{ $tpl->activeDaysLabel() }}</td>
+                        <td data-label="Status Template">
                             <span class="badge {{ $tpl->is_active ? 'badge-success' : 'badge-muted' }}">
                                 {{ $tpl->is_active ? 'Aktif' : 'Nonaktif' }}
                             </span>
                         </td>
                         @if(auth()->user()->canManage())
-                            <td class="text-right">
+                            <td data-card-actions="1" data-label="Aksi Template" class="text-right">
                                 <div class="flex justify-end gap-1.5">
-                                    <a href="{{ route('hrd.templates.edit', $tpl) }}" class="btn btn-ghost btn-sm">Edit</a>
+                                    <a href="{{ route('hrd.templates.edit', $tpl) }}" class="btn btn-ghost btn-sm">Edit Template</a>
                                     <form method="POST" action="{{ route('hrd.templates.destroy', $tpl) }}"
                                           data-confirm="Hapus template {{ $tpl->title }}?">
                                         @csrf

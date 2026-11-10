@@ -18,9 +18,11 @@
     @endif
 </div>
 
-<div class="glass p-5 space-y-4">
+<div class="glass p-4">
     <div id="outlets-overview-map" class="h-64 rounded-2xl overflow-hidden border border-white/10"></div>
+</div>
 
+<div class="table-surface">
     <div class="tbl-wrap">
         <table class="tbl">
             <thead>
@@ -28,8 +30,8 @@
                     <th>Kode</th>
                     <th>Nama Gerai & Alamat</th>
                     <th>Koordinat GPS</th>
-                    <th>Radius</th>
-                    <th>Tipe</th>
+                    <th>Radius Geofence</th>
+                    <th>Tipe & Beban Tugas</th>
                     <th>Status</th>
                     @if(auth()->user()->canManage())
                         <th class="text-right">Aksi</th>
@@ -39,29 +41,43 @@
             <tbody>
                 @forelse($outlets as $o)
                     <tr>
-                        <td class="font-mono font-bold text-orange-300">{{ $o->code }}</td>
-                        <td>
-                            <div class="font-bold text-white">{{ $o->name }}</div>
-                            <div class="text-xs text-slate-400">{{ $o->address }}</div>
+                        <td data-card-header="1" data-label="Identitas Lokasi Gerai">
+                            <div class="flex items-center justify-between w-full gap-2">
+                                <div>
+                                    <span class="font-mono font-extrabold text-orange-300 text-xs">{{ $o->code }}</span>
+                                    <div class="font-extrabold text-white text-sm md:hidden mt-0.5">{{ $o->name }}</div>
+                                </div>
+                                <span class="badge {{ $o->is_active ? 'badge-success' : 'badge-danger' }} md:hidden">
+                                    {{ $o->is_active ? 'Aktif' : 'Nonaktif' }}
+                                </span>
+                            </div>
                         </td>
-                        <td class="font-mono text-xs text-slate-300">{{ number_format($o->latitude, 6) }}, {{ number_format($o->longitude, 6) }}</td>
-                        <td><span class="badge badge-info">{{ $o->radius_meters }} m</span></td>
-                        <td>
+                        <td data-label="Nama & Alamat Lengkap">
+                            <div>
+                                <div class="font-bold text-white hidden md:block">{{ $o->name }}</div>
+                                <div class="text-xs text-slate-300">{{ $o->address }}</div>
+                            </div>
+                        </td>
+                        <td data-label="Koordinat GPS (Samarinda)" class="font-mono text-xs text-slate-300">
+                            {{ number_format($o->latitude, 6) }}, {{ number_format($o->longitude, 6) }}
+                        </td>
+                        <td data-label="Radius Geofence"><span class="badge badge-info">{{ $o->radius_meters }} meter</span></td>
+                        <td data-label="Fungsi & Tugas">
                             @if($o->is_main_office)
                                 <span class="badge badge-orange">Kantor Utama Presensi</span>
                             @else
                                 <span class="badge badge-muted">Gerai Operasional ({{ $o->tasks_count }} tugas)</span>
                             @endif
                         </td>
-                        <td>
+                        <td data-label="Status">
                             <span class="badge {{ $o->is_active ? 'badge-success' : 'badge-danger' }}">
                                 {{ $o->is_active ? 'Aktif' : 'Nonaktif' }}
                             </span>
                         </td>
                         @if(auth()->user()->canManage())
-                            <td class="text-right">
+                            <td data-card-actions="1" data-label="Aksi Gerai" class="text-right">
                                 <div class="flex justify-end gap-1.5">
-                                    <a href="{{ route('hrd.outlets.edit', $o) }}" class="btn btn-ghost btn-sm">Edit</a>
+                                    <a href="{{ route('hrd.outlets.edit', $o) }}" class="btn btn-ghost btn-sm">Edit Lokasi</a>
                                     @if(!$o->is_main_office)
                                         <form method="POST" action="{{ route('hrd.outlets.destroy', $o) }}"
                                               data-confirm="Hapus gerai {{ $o->name }}?">

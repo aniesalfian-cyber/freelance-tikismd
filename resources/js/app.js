@@ -199,6 +199,27 @@ window.hsmPinIcon = function (color = '#ff6500', glow = 'rgba(255,101,0,0.4)') {
     });
 };
 
+// Auto-enhance all .tbl tables so every cell has data-label from thead on mobile card view
+window.hsmEnhanceTables = function () {
+    document.querySelectorAll('table.tbl').forEach((table) => {
+        const headers = Array.from(table.querySelectorAll('thead th')).map((th) => th.textContent.trim());
+        table.querySelectorAll('tbody tr').forEach((tr) => {
+            const cells = Array.from(tr.querySelectorAll('td'));
+            if (cells.length === 1 && cells[0].hasAttribute('colspan')) return;
+            cells.forEach((td, idx) => {
+                if (!td.hasAttribute('data-label') && headers[idx]) {
+                    td.setAttribute('data-label', headers[idx]);
+                }
+                if (idx === 0 && !td.hasAttribute('data-card-header')) {
+                    td.setAttribute('data-card-header', '1');
+                }
+            });
+        });
+    });
+};
+document.addEventListener('DOMContentLoaded', () => window.hsmEnhanceTables());
+window.hsmEnhanceTables();
+
 // Jalankan antrean callback script halaman yang menunggu hsmCreateMap / Chart siap
 window.__hsmReadyQueue = window.__hsmReadyQueue || [];
 window.hsmReady = function (fn) {

@@ -45,8 +45,11 @@
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <!-- Recent Tasks -->
-    <div class="glass p-5 space-y-3">
-        <h3 class="text-sm font-extrabold text-white">10 Penugasan Terakhir</h3>
+    <div class="table-surface">
+        <div>
+            <div class="orn-line mb-1"></div>
+            <h3 class="text-sm font-extrabold text-white">10 Penugasan Terakhir</h3>
+        </div>
         <div class="tbl-wrap">
             <table class="tbl">
                 <thead>
@@ -55,13 +58,17 @@
                 <tbody>
                     @forelse($tasks as $t)
                         <tr>
-                            <td class="text-xs">{{ $t->assigned_date->format('d/m/Y') }}</td>
-                            <td>
-                                <a href="{{ route('hrd.tasks.show', $t) }}" class="font-bold text-white hover:text-orange-300">{{ $t->title }}</a>
-                                <div class="text-xs text-slate-400">{{ $t->outlet?->name }}</div>
+                            <td data-card-header="1" data-label="Tanggal & Nomor Tugas" class="text-xs">
+                                <span class="font-mono font-bold text-orange-300">{{ $t->task_number }}</span> &bull; {{ $t->assigned_date->format('d/m/Y') }}
                             </td>
-                            <td class="text-xs">{{ $t->actual_duration_minutes ?? '-' }} / {{ $t->estimated_duration_minutes }} mnt</td>
-                            <td><span class="badge {{ $t->statusBadge() }}">{{ $t->statusLabel() }}</span></td>
+                            <td data-label="Tugas & Lokasi Gerai">
+                                <div>
+                                    <a href="{{ route('hrd.tasks.show', $t) }}" class="font-bold text-white hover:text-orange-300">{{ $t->title }}</a>
+                                    <div class="text-xs text-slate-400">{{ $t->outlet?->name }}</div>
+                                </div>
+                            </td>
+                            <td data-label="Durasi Pengerjaan" class="text-xs">{{ $t->actual_duration_minutes ?? '-' }} / {{ $t->estimated_duration_minutes }} mnt</td>
+                            <td data-label="Status"><span class="badge {{ $t->statusBadge() }}">{{ $t->statusLabel() }}</span></td>
                         </tr>
                     @empty
                         <tr><td colspan="4" class="text-center text-slate-400 py-4">Belum ada tugas.</td></tr>
@@ -72,8 +79,11 @@
     </div>
 
     <!-- Recent Attendance -->
-    <div class="glass p-5 space-y-3">
-        <h3 class="text-sm font-extrabold text-white">10 Presensi Terakhir</h3>
+    <div class="table-surface">
+        <div>
+            <div class="orn-line mb-1"></div>
+            <h3 class="text-sm font-extrabold text-white">10 Presensi Terakhir</h3>
+        </div>
         <div class="tbl-wrap">
             <table class="tbl">
                 <thead>
@@ -82,11 +92,11 @@
                 <tbody>
                     @forelse($attendances as $a)
                         <tr>
-                            <td class="text-xs">{{ $a->date->format('d/m/Y') }}</td>
-                            <td class="font-mono text-xs text-white">{{ $a->check_in_at->format('H:i') }}</td>
-                            <td class="font-mono text-xs text-slate-300">{{ $a->check_out_at?->format('H:i') ?? '-' }}</td>
-                            <td class="text-xs">{{ $a->check_in_distance_meters }} m</td>
-                            <td><span class="badge {{ $a->statusBadge() }}">{{ $a->statusLabel() }}</span></td>
+                            <td data-card-header="1" data-label="Tanggal Presensi" class="text-xs font-bold text-white">{{ $a->date->format('d/m/Y') }}</td>
+                            <td data-label="Jam Masuk" class="font-mono text-xs text-white">{{ $a->check_in_at->format('H:i') }} WITA</td>
+                            <td data-label="Jam Pulang" class="font-mono text-xs text-slate-300">{{ $a->check_out_at?->format('H:i') ?? '-' }}</td>
+                            <td data-label="Jarak ke Kantor Utama" class="text-xs">{{ $a->check_in_distance_meters }} m</td>
+                            <td data-label="Status Kehadiran"><span class="badge {{ $a->statusBadge() }}">{{ $a->statusLabel() }}</span></td>
                         </tr>
                     @empty
                         <tr><td colspan="5" class="text-center text-slate-400 py-4">Belum ada presensi.</td></tr>
