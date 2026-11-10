@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background Gradient (Deep Luxury Navy) -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0E1E36"/>
+      <stop offset="50%" stop-color="#0B1626"/>
+      <stop offset="100%" stop-color="#060D18"/>
+    </linearGradient>
+
+    <!-- Orange Radiant Gradient (Bold & Energetic) -->
+    <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF9E44"/>
+      <stop offset="45%" stop-color="#FF6500"/>
+      <stop offset="100%" stop-color="#E04800"/>
+    </linearGradient>
+
+    <!-- Cyan Pulse Accent (Tech & Geofencing) -->
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38E1FF"/>
+      <stop offset="100%" stop-color="#00A3FF"/>
+    </linearGradient>
+
+    <!-- Subtle Glass Edge Glow -->
+    <linearGradient id="borderGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.25"/>
+      <stop offset="50%" stop-color="#FF6500" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.05"/>
+    </linearGradient>
+
+    <!-- Drop Shadow Filter -->
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <filter id="badgeShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#FF6500" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <!-- Base App Icon Container (Squircle Glass) -->
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#bgGrad)"/>
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="none" stroke="url(#borderGlow)" stroke-width="3"/>
+
+  <!-- Subtle Geometric Radar / Geofencing Orbit Rings -->
+  <circle cx="256" cy="256" r="185" fill="none" stroke="#2C538A" stroke-width="1.5" stroke-dasharray="8 8" opacity="0.3"/>
+  <circle cx="256" cy="256" r="130" fill="none" stroke="#2C538A" stroke-width="2" opacity="0.2"/>
+
+  <!-- Core Logo Emblem: Stylized Monogram 'H' + 'S' Fluid + Checkmark -->
+  <!-- Left Pillar of 'H' (Clean, Solid, Corporate) -->
+  <rect x="130" y="145" width="46" height="222" rx="23" fill="#FFFFFF"/>
+
+  <!-- Center Crossbar that Morphs into an Agile Dynamic Chevron / Flow -->
+  <path d="M153 233 L325 233 C338 233 348 243 348 256 C348 269 338 279 325 279 L153 279 Z" fill="#FFFFFF"/>
+
+  <!-- Right Pillar of 'H' transitioning into GPS Geofencing Marker -->
+  <rect x="306" y="145" width="46" height="150" rx="23" fill="#FFFFFF"/>
+
+  <!-- Bold Vibrant Orange Dynamic Checkmark & Location Beacon (The HSM Performance Signature) -->
+  <g filter="url(#badgeShadow)">
+    <!-- Pulse Target Circle -->
+    <circle cx="370" cy="140" r="14" fill="url(#cyanGrad)"/>
+    <circle cx="370" cy="140" r="28" fill="none" stroke="#38E1FF" stroke-width="3" opacity="0.4"/>
+
+    <!-- Sharp Modern Checkmark Arrow (Performance & Completion) -->
+    <path d="M210 268 L266 324 L378 198" 
+          fill="none" 
+          stroke="url(#orangeGrad)" 
+          stroke-width="44" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+  </g>
+
+  <!-- Speed Dot / Active Live Indicator -->
+  <circle cx="153" cy="145" r="7" fill="url(#cyanGrad)"/>
+</svg>
