@@ -38,10 +38,10 @@ class FreelancerController extends Controller
         $data = $this->validated($request);
         $plain = PasswordGenerator::generate();
         $freelancer = User::create($data + ['role' => User::ROLE_FREELANCER, 'password' => $plain]);
-        ActivityLogger::log('freelancer.created', "Mendaftarkan freelancer {$freelancer->name}", $freelancer);
+        ActivityLogger::log('freelancer.created', "Mendaftarkan karyawan {$freelancer->name}", $freelancer);
 
         return redirect()->route('hrd.freelancers.index')
-            ->with('success', "Freelancer {$freelancer->name} berhasil didaftarkan.")
+            ->with('success', "Karyawan {$freelancer->name} berhasil didaftarkan.")
             ->with('credential', PasswordGenerator::credentialPayload($freelancer, $plain, 'Akun freelancer Anda telah dibuat'));
     }
 
@@ -75,9 +75,9 @@ class FreelancerController extends Controller
     {
         $this->ensureFreelancer($freelancer);
         $freelancer->update($this->validated($request, $freelancer));
-        ActivityLogger::log('freelancer.updated', "Memperbarui freelancer {$freelancer->name}", $freelancer);
+        ActivityLogger::log('freelancer.updated', "Memperbarui karyawan {$freelancer->name}", $freelancer);
 
-        return redirect()->route('hrd.freelancers.index')->with('success', 'Data freelancer berhasil diperbarui.');
+        return redirect()->route('hrd.freelancers.index')->with('success', 'Data karyawan berhasil diperbarui.');
     }
 
     public function toggle(User $freelancer): RedirectResponse
@@ -87,22 +87,22 @@ class FreelancerController extends Controller
         if (! $freelancer->is_active) {
             DB::table('sessions')->where('user_id', $freelancer->id)->delete();
         }
-        ActivityLogger::log($freelancer->is_active ? 'freelancer.activated' : 'freelancer.deactivated', ($freelancer->is_active ? 'Mengaktifkan' : 'Menonaktifkan')." freelancer {$freelancer->name}", $freelancer);
+        ActivityLogger::log($freelancer->is_active ? 'freelancer.activated' : 'freelancer.deactivated', ($freelancer->is_active ? 'Mengaktifkan' : 'Menonaktifkan')." karyawan {$freelancer->name}", $freelancer);
 
-        return back()->with('success', 'Status freelancer '.($freelancer->is_active ? 'diaktifkan.' : 'dinonaktifkan.'));
+        return back()->with('success', 'Status karyawan '.($freelancer->is_active ? 'diaktifkan.' : 'dinonaktifkan.'));
     }
 
     public function destroy(User $freelancer): RedirectResponse
     {
         $this->ensureFreelancer($freelancer);
         if ($freelancer->tasks()->exists() || $freelancer->attendances()->exists() || $freelancer->performanceLogs()->exists()) {
-            return back()->with('error', 'Freelancer memiliki riwayat tugas/presensi. Nonaktifkan akun alih-alih menghapus.');
+            return back()->with('error', 'Karyawan memiliki riwayat tugas/presensi. Nonaktifkan akun alih-alih menghapus.');
         }
         $name = $freelancer->name;
         $freelancer->delete();
-        ActivityLogger::log('freelancer.deleted', "Menghapus freelancer {$name}");
+        ActivityLogger::log('freelancer.deleted', "Menghapus karyawan {$name}");
 
-        return redirect()->route('hrd.freelancers.index')->with('success', 'Freelancer dihapus.');
+        return redirect()->route('hrd.freelancers.index')->with('success', 'Karyawan dihapus.');
     }
 
     /** HRD tidak mereset langsung; permintaan dicatat dan muncul di dashboard SuperAdmin. */

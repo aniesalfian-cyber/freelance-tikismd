@@ -7,7 +7,7 @@
         <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Kehadiran Hari Ini</div>
         <div class="mt-2 flex items-baseline gap-2">
             <span class="text-3xl font-extrabold text-emerald-400">{{ $today['present'] }}</span>
-            <span class="text-xs text-slate-400">/ {{ $today['freelancers_total'] }} freelancer</span>
+            <span class="text-xs text-slate-400">/ {{ $today['freelancers_total'] }} karyawan</span>
         </div>
         <div class="mt-1 text-xs text-amber-400">{{ $today['late_attendance'] }} hadir terlambat</div>
     </div>
@@ -46,7 +46,7 @@
                 <x-icon name="repeat" class="w-4 h-4" /> Generate Tugas Pasti Hari Ini
             </button>
         </form>
-        <a href="{{ route('hrd.freelancers.create') }}" class="btn btn-ghost btn-sm">+ Tambah Freelancer</a>
+        <a href="{{ route('hrd.freelancers.create') }}" class="btn btn-ghost btn-sm">+ Tambah Karyawan</a>
         <a href="{{ route('hrd.outlets.create') }}" class="btn btn-ghost btn-sm">+ Tambah Gerai</a>
     </div>
     <a href="{{ route('reports.index', ['type' => 'performa']) }}" class="btn btn-ghost btn-sm">
@@ -86,7 +86,7 @@
                         <a href="{{ route('hrd.attendances.index') }}" class="badge badge-warning">Input Manual</a>
                     </div>
                 @empty
-                    <p class="text-xs text-emerald-400 py-3 text-center">Semua freelancer aktif sudah presensi!</p>
+                    <p class="text-xs text-emerald-400 py-3 text-center">Semua karyawan aktif sudah presensi!</p>
                 @endforelse
             </div>
         </div>

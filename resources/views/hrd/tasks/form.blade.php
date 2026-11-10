@@ -3,7 +3,7 @@
 @section('content')
 <div class="glass p-6 max-w-2xl mx-auto">
     <div class="orn-line mb-2"></div>
-    <h2 class="text-lg font-extrabold text-white mb-4">{{ $task->exists ? 'Perbarui Tugas '.$task->task_number : 'Formulir Penugasan Karyawan Freelancer' }}</h2>
+    <h2 class="text-lg font-extrabold text-white mb-4">{{ $task->exists ? 'Perbarui Tugas '.$task->task_number : 'Formulir Penugasan Karyawan' }}</h2>
 
     <form method="POST" action="{{ $task->exists ? route('hrd.tasks.update', $task) : route('hrd.tasks.store') }}" class="space-y-4">
         @csrf
@@ -56,7 +56,7 @@
 
         @if($task->exists)
             <div>
-                <label class="label">Freelancer Penerima Tugas</label>
+                <label class="label">Karyawan Penerima Tugas</label>
                 <select name="user_id" required class="input">
                     @foreach($freelancers as $fl)
                         <option value="{{ $fl->id }}" @selected(old('user_id', $task->user_id) == $fl->id)>{{ $fl->name }} ({{ $fl->nik }})</option>
@@ -65,7 +65,7 @@
             </div>
         @else
             <div>
-                <label class="label">Pilih Freelancer Penerima Tugas (Dapat pilih lebih dari satu)</label>
+                <label class="label">Pilih Karyawan Penerima Tugas (Dapat pilih lebih dari satu)</label>
                 @php $oldUsers = (array) old('user_ids', []); @endphp
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3 rounded-2xl bg-navy-950/60 border border-white/10 max-h-56 overflow-y-auto">
                     @foreach($freelancers as $fl)

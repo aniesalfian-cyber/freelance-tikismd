@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Executive Analytics Dashboard Owner', 'subtitle' => 'Analitik komprehensif performa freelancer, sebaran gerai, dan indeks KPI korporat'])
+@extends('layouts.app', ['title' => 'Executive Analytics Dashboard Owner', 'subtitle' => 'Analitik komprehensif performa karyawan, sebaran gerai, dan indeks KPI korporat'])
 
 @section('content')
 @php $c = $data['cards']; @endphp
@@ -25,7 +25,7 @@
 <!-- 6 Executive KPI Summary Cards -->
 <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 rise rise-2">
     <div class="glass glass-hover p-4">
-        <div class="text-[11px] font-bold uppercase text-slate-400">Freelancer Aktif</div>
+        <div class="text-[11px] font-bold uppercase text-slate-400">Karyawan Aktif</div>
         <div class="text-2xl font-extrabold text-white mt-1">{{ $c['freelancers_active'] }}</div>
         <div class="text-[11px] text-emerald-400 mt-1">{{ $c['present_today'] }} hadir hari ini</div>
     </div>
@@ -100,23 +100,23 @@
     <div class="table-surface">
         <div>
             <div class="orn-line mb-1"></div>
-            <h2 class="text-base font-extrabold text-white">Top 5 Freelancer Berprestasi (Skor Tertinggi)</h2>
+            <h2 class="text-base font-extrabold text-white">Top 5 Karyawan Berprestasi (Skor Tertinggi)</h2>
         </div>
         <div class="tbl-wrap">
             <table class="tbl">
                 <thead>
-                    <tr><th>#</th><th>Freelancer</th><th>Tugas Selesai</th><th>Rata-rata KPI</th><th>Grade</th></tr>
+                    <tr><th>#</th><th>Karyawan</th><th>Tugas Selesai</th><th>Rata-rata KPI</th><th>Grade</th></tr>
                 </thead>
                 <tbody>
                     @forelse($data['top'] as $idx => $row)
                         <tr>
-                            <td data-card-header="1" data-label="Peringkat & Freelancer">
+                            <td data-card-header="1" data-label="Peringkat & Karyawan">
                                 <div class="flex items-center justify-between w-full gap-2">
                                     <span class="font-extrabold text-orange-400">#{{ $idx + 1 }} <span class="text-white md:hidden ml-1">{{ $row->user?->name }}</span></span>
                                     <span class="badge {{ \App\Models\PerformanceLog::badgeFor($row->grade) }} md:hidden">Grade {{ $row->grade }}</span>
                                 </div>
                             </td>
-                            <td data-label="Nama Freelancer" class="font-bold text-white">{{ $row->user?->name }}</td>
+                            <td data-label="Nama Karyawan" class="font-bold text-white">{{ $row->user?->name }}</td>
                             <td data-label="Tugas Selesai" class="text-xs">{{ $row->done }} / {{ $row->total }} tugas ({{ $row->days }} hari)</td>
                             <td data-label="Rata-rata Skor KPI" class="font-mono font-extrabold text-emerald-400">{{ number_format($row->avg_kpi, 2) }}</td>
                             <td data-label="Predikat"><span class="badge {{ \App\Models\PerformanceLog::badgeFor($row->grade) }}">Grade {{ $row->grade }}</span></td>
@@ -137,18 +137,18 @@
         <div class="tbl-wrap">
             <table class="tbl">
                 <thead>
-                    <tr><th>#</th><th>Freelancer</th><th>Tugas Selesai</th><th>Rata-rata KPI</th><th>Grade</th></tr>
+                    <tr><th>#</th><th>Karyawan</th><th>Tugas Selesai</th><th>Rata-rata KPI</th><th>Grade</th></tr>
                 </thead>
                 <tbody>
                     @forelse($data['bottom'] as $idx => $row)
                         <tr>
-                            <td data-card-header="1" data-label="Urutan & Freelancer">
+                            <td data-card-header="1" data-label="Urutan & Karyawan">
                                 <div class="flex items-center justify-between w-full gap-2">
                                     <span class="font-bold text-slate-300">#{{ $idx + 1 }} <span class="text-white md:hidden ml-1">{{ $row->user?->name }}</span></span>
                                     <span class="badge {{ \App\Models\PerformanceLog::badgeFor($row->grade) }} md:hidden">Grade {{ $row->grade }}</span>
                                 </div>
                             </td>
-                            <td data-label="Nama Freelancer" class="font-bold text-white">{{ $row->user?->name }}</td>
+                            <td data-label="Nama Karyawan" class="font-bold text-white">{{ $row->user?->name }}</td>
                             <td data-label="Tugas Selesai" class="text-xs">{{ $row->done }} / {{ $row->total }} tugas ({{ $row->days }} hari)</td>
                             <td data-label="Rata-rata Skor KPI" class="font-mono font-extrabold text-amber-400">{{ number_format($row->avg_kpi, 2) }}</td>
                             <td data-label="Predikat"><span class="badge {{ \App\Models\PerformanceLog::badgeFor($row->grade) }}">Grade {{ $row->grade }}</span></td>

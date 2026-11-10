@@ -35,7 +35,7 @@
         <input type="date" name="from" value="{{ $from->toDateString() }}" class="input sm:w-40">
         <input type="date" name="to" value="{{ $to->toDateString() }}" class="input sm:w-40">
         <select name="user_id" class="input sm:w-48">
-            <option value="">Semua Freelancer</option>
+            <option value="">Semua Karyawan</option>
             @foreach($freelancers as $fl)
                 <option value="{{ $fl->id }}" @selected(request('user_id') == $fl->id)>{{ $fl->name }}</option>
             @endforeach
@@ -57,7 +57,7 @@
             <thead>
                 <tr>
                     <th>Tanggal</th>
-                    <th>Freelancer</th>
+                    <th>Karyawan</th>
                     <th>Tugas (Selesai/Total)</th>
                     <th>Penyelesaian</th>
                     <th>Waktu SLA</th>
@@ -70,7 +70,7 @@
             <tbody>
                 @forelse($logs as $l)
                     <tr>
-                        <td data-card-header="1" data-label="Tanggal Evaluasi & Freelancer">
+                        <td data-card-header="1" data-label="Tanggal Evaluasi & Karyawan">
                             <div class="flex items-center justify-between w-full gap-2">
                                 <div>
                                     <div class="font-mono text-xs text-orange-300 font-bold">{{ $l->evaluation_date->format('d/m/Y') }}</div>
@@ -81,7 +81,7 @@
                                 </span>
                             </div>
                         </td>
-                        <td data-label="Freelancer & Catatan">
+                        <td data-label="Karyawan & Catatan">
                             <div>
                                 <div class="font-bold text-white hidden md:block">{{ $l->user?->name }}</div>
                                 <div class="text-xs text-slate-300">{{ $l->remarks ?: 'Evaluasi harian otomatis' }}</div>

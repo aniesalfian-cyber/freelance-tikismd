@@ -17,7 +17,7 @@
         <div class="leading-tight">
             <div class="flex items-center gap-1.5">
                 <span class="font-extrabold text-white text-base tracking-tight">HSM</span>
-                <span class="text-[10px] font-bold text-orange-400 uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-orange-500/10 border border-orange-500/20">Freelance</span>
+                <span class="text-[10px] font-bold text-orange-400 uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-orange-500/10 border border-orange-500/20">Karyawan</span>
             </div>
             <div class="text-[10px] text-slate-400 font-medium tracking-wide">Monitoring System</div>
         </div>

@@ -30,7 +30,7 @@
                 <input type="checkbox" name="range" value="all" @checked($range) class="check"> Semua Tanggal
             </label>
             <select name="user_id" class="input sm:w-44">
-                <option value="">Semua Freelancer</option>
+                <option value="">Semua Karyawan</option>
                 @foreach($freelancers as $fl)
                     <option value="{{ $fl->id }}" @selected(request('user_id') == $fl->id)>{{ $fl->name }}</option>
                 @endforeach
@@ -75,7 +75,7 @@
                 <tr>
                     <th>No. Tugas & Tanggal</th>
                     <th>Judul Tugas & Tipe</th>
-                    <th>Freelancer</th>
+                    <th>Karyawan</th>
                     <th>Gerai Lokasi</th>
                     <th>Jadwal & Durasi</th>
                     <th>Lokasi GPS</th>
@@ -103,7 +103,7 @@
                                 </span>
                             </div>
                         </td>
-                        <td data-label="Freelancer Pelaksana">
+                        <td data-label="Karyawan Pelaksana">
                             <div>
                                 <div class="font-semibold text-white">{{ $t->user?->name }}</div>
                                 <div class="text-[11px] font-mono text-slate-400">{{ $t->user?->nik }}</div>

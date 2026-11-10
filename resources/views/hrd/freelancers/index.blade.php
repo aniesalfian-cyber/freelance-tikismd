@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Data Master Karyawan Freelancer', 'subtitle' => 'Manajemen personel operasional, bidang keahlian, dan ringkasan KPI 30 hari'])
+@extends('layouts.app', ['title' => 'Data Master Karyawan', 'subtitle' => 'Manajemen personel operasional, bidang keahlian, dan ringkasan KPI 30 hari'])
 
 @section('content')
 <div class="glass p-5 flex flex-wrap items-center justify-between gap-3">
@@ -13,7 +13,7 @@
     </form>
     @if(auth()->user()->canManage())
         <a href="{{ route('hrd.freelancers.create') }}" class="btn btn-primary">
-            <x-icon name="plus" class="w-4 h-4" /> Daftarkan Freelancer
+            <x-icon name="plus" class="w-4 h-4" /> Daftarkan Karyawan
         </a>
     @endif
 </div>
@@ -23,7 +23,7 @@
         <table class="tbl">
             <thead>
                 <tr>
-                    <th>NIK & Nama Freelancer</th>
+                    <th>NIK & Nama Karyawan</th>
                     <th>Kontak & Email</th>
                     <th>Bidang / Tarif</th>
                     <th>Tugas (30 Hari)</th>
@@ -41,7 +41,7 @@
                         $grade = \App\Services\PerformanceScoringService::gradeFor($kpi);
                     @endphp
                     <tr>
-                        <td data-card-header="1" data-label="Profil Freelancer">
+                        <td data-card-header="1" data-label="Profil Karyawan">
                             <div class="flex items-center justify-between w-full gap-2">
                                 <div>
                                     <div class="font-extrabold text-white text-sm">{{ $fl->name }}</div>
@@ -101,7 +101,7 @@
                         @endif
                     </tr>
                 @empty
-                    <tr><td colspan="7" class="text-center text-slate-400 py-8">Belum ada data freelancer.</td></tr>
+                    <tr><td colspan="7" class="text-center text-slate-400 py-8">Belum ada data karyawan.</td></tr>
                 @endforelse
             </tbody>
         </table>

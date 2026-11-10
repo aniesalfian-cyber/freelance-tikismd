@@ -32,7 +32,7 @@
             <div>
                 <label class="label">Ditugaskan Kepada</label>
                 <select name="default_user_id" class="input">
-                    <option value="">Semua Freelancer Aktif</option>
+                    <option value="">Semua Karyawan Aktif</option>
                     @foreach($freelancers as $fl)
                         <option value="{{ $fl->id }}" @selected(old('default_user_id', $template->default_user_id) == $fl->id)>{{ $fl->name }}</option>
                     @endforeach

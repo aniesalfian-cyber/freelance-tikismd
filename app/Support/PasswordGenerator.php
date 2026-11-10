@@ -32,7 +32,7 @@ class PasswordGenerator
     /** Data untuk modal kredensial + template pesan WhatsApp siap kirim. */
     public static function credentialPayload(\App\Models\User $user, string $password, string $heading = 'Kredensial akun Anda'): array
     {
-        $message = "Halo {$user->name},\n\n{$heading} pada aplikasi *Monitoring Freelancer HSM*:\n\n"
+        $message = "Halo {$user->name},\n\n{$heading} pada aplikasi *Monitoring Karyawan HSM*:\n\n"
             ."Email: {$user->email}\nPassword: {$password}\nLink: ".url('/login')
             ."\n\nDemi keamanan, segera ganti password Anda setelah login pertama (menu Profil).\nTerima kasih.";
 

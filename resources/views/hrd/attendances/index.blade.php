@@ -23,7 +23,7 @@
             <table class="tbl">
                 <thead>
                     <tr>
-                        <th>Freelancer</th>
+                        <th>Karyawan</th>
                         <th>Jam Masuk</th>
                         <th>Jam Pulang</th>
                         <th>Jarak GPS</th>
@@ -34,7 +34,7 @@
                 <tbody>
                     @forelse($attendances as $a)
                         <tr>
-                            <td data-card-header="1" data-label="Freelancer">
+                            <td data-card-header="1" data-label="Karyawan">
                                 <div class="flex items-center justify-between w-full gap-2">
                                     <div>
                                         <div class="font-extrabold text-white text-sm">{{ $a->user?->name }}</div>
@@ -76,9 +76,9 @@
                     @csrf
                     <input type="hidden" name="date" value="{{ $date->toDateString() }}">
                     <div>
-                        <label class="label">Pilih Freelancer (Belum Presensi)</label>
+                        <label class="label">Pilih Karyawan (Belum Presensi)</label>
                         <select name="user_id" required class="input">
-                            <option value="">-- Pilih Freelancer --</option>
+                            <option value="">-- Pilih Karyawan --</option>
                             @foreach($absent as $ab)
                                 <option value="{{ $ab->id }}">{{ $ab->name }} ({{ $ab->nik }})</option>
                             @endforeach

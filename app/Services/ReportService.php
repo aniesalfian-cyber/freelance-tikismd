@@ -14,9 +14,9 @@ use Illuminate\Support\Collection;
 class ReportService
 {
     public const TYPES = [
-        'performa' => 'Laporan Evaluasi Performa Freelancer',
+        'performa' => 'Laporan Evaluasi Performa Karyawan',
         'tugas' => 'Laporan Rincian Penugasan & Pengerjaan Tugas',
-        'presensi' => 'Laporan Rekapitulasi Presensi Freelancer',
+        'presensi' => 'Laporan Rekapitulasi Presensi Karyawan',
     ];
 
     /**
@@ -142,8 +142,8 @@ class ReportService
             $notes[] = "Performa tertinggi diraih {$best['name']} dengan skor KPI {$best['kpi']} (Grade {$best['grade']}).";
             $low = $rows->where('grade', 'D');
             $notes[] = $low->isEmpty()
-                ? 'Tidak terdapat freelancer pada kategori Grade D (perlu evaluasi) pada periode ini.'
-                : $low->count().' freelancer berada pada Grade D dan direkomendasikan untuk pembinaan: '.$low->pluck('name')->implode(', ').'.';
+                ? 'Tidak terdapat karyawan pada kategori Grade D (perlu evaluasi) pada periode ini.'
+                : $low->count().' karyawan berada pada Grade D dan direkomendasikan untuk pembinaan: '.$low->pluck('name')->implode(', ').'.';
             $notes[] = $locBad > 0
                 ? "Terdeteksi {$locBad} penyelesaian tugas di luar radius gerai; mohon dilakukan verifikasi lapangan."
                 : 'Seluruh tugas selesai terverifikasi berada dalam radius gerai yang ditetapkan.';
@@ -157,7 +157,7 @@ class ReportService
         return [
             'columns' => [
                 ['key' => 'no', 'label' => 'No', 'align' => 'center', 'width' => '4%'],
-                ['key' => 'name', 'label' => 'Nama Freelancer', 'align' => 'left'],
+                ['key' => 'name', 'label' => 'Nama Karyawan', 'align' => 'left'],
                 ['key' => 'nik', 'label' => 'NIK', 'align' => 'left'],
                 ['key' => 'days', 'label' => 'Hari Dinilai', 'align' => 'center'],
                 ['key' => 'tasks', 'label' => 'Tugas (Selesai/Total)', 'align' => 'center'],
@@ -170,7 +170,7 @@ class ReportService
             ],
             'rows' => $rows->map(fn ($r) => collect($r)->except('_raw')->all())->all(),
             'summary' => [
-                ['label' => 'Freelancer Dievaluasi', 'value' => $rows->count().' orang'],
+                ['label' => 'Karyawan Dievaluasi', 'value' => $rows->count().' orang'],
                 ['label' => 'Total Tugas', 'value' => (string) $totalTasks],
                 ['label' => 'Tugas Selesai', 'value' => (string) $doneTasks],
                 ['label' => 'Tingkat Tepat SLA', 'value' => $doneTasks ? round($onTime / $doneTasks * 100, 1).'%' : '-'],
@@ -223,7 +223,7 @@ class ReportService
                 ['key' => 'no', 'label' => 'No', 'align' => 'center', 'width' => '3%'],
                 ['key' => 'number', 'label' => 'No. Tugas', 'align' => 'left'],
                 ['key' => 'date', 'label' => 'Tanggal', 'align' => 'center'],
-                ['key' => 'user', 'label' => 'Freelancer', 'align' => 'left'],
+                ['key' => 'user', 'label' => 'Karyawan', 'align' => 'left'],
                 ['key' => 'outlet', 'label' => 'Gerai', 'align' => 'left'],
                 ['key' => 'title', 'label' => 'Tugas', 'align' => 'left'],
                 ['key' => 'type', 'label' => 'Tipe', 'align' => 'center'],
@@ -274,7 +274,7 @@ class ReportService
             'columns' => [
                 ['key' => 'no', 'label' => 'No', 'align' => 'center', 'width' => '4%'],
                 ['key' => 'date', 'label' => 'Tanggal', 'align' => 'center'],
-                ['key' => 'user', 'label' => 'Freelancer', 'align' => 'left'],
+                ['key' => 'user', 'label' => 'Karyawan', 'align' => 'left'],
                 ['key' => 'nik', 'label' => 'NIK', 'align' => 'left'],
                 ['key' => 'in', 'label' => 'Masuk', 'align' => 'center'],
                 ['key' => 'out', 'label' => 'Pulang', 'align' => 'center'],
@@ -289,7 +289,7 @@ class ReportService
                 ['label' => 'Hadir Tepat Waktu', 'value' => (string) $items->where('status', Attendance::STATUS_ON_TIME)->count()],
                 ['label' => 'Terlambat', 'value' => (string) $late->count()],
                 ['label' => 'Rata-rata Keterlambatan', 'value' => $late->count() ? round($late->avg('late_minutes')).' mnt' : '-'],
-                ['label' => 'Freelancer Hadir', 'value' => $items->pluck('user_id')->unique()->count().' orang'],
+                ['label' => 'Karyawan Hadir', 'value' => $items->pluck('user_id')->unique()->count().' orang'],
                 ['label' => 'Belum Presensi Pulang', 'value' => (string) $items->whereNull('check_out_at')->count()],
             ],
             'notes' => [
@@ -307,12 +307,12 @@ class ReportService
             $parts[] = 'Gerai: '.(\App\Models\Outlet::find($f['outlet_id'])?->name ?? '-');
         }
         if ($f['user_id']) {
-            $parts[] = 'Freelancer: '.(User::find($f['user_id'])?->name ?? '-');
+            $parts[] = 'Karyawan: '.(User::find($f['user_id'])?->name ?? '-');
         }
         if ($f['grade']) {
             $parts[] = 'Grade: '.$f['grade'];
         }
 
-        return $parts ? implode(' | ', $parts) : 'Semua Gerai & Semua Freelancer';
+        return $parts ? implode(' | ', $parts) : 'Semua Gerai & Semua Karyawan';
     }
 }

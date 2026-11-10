@@ -111,7 +111,7 @@ class AttendanceService
     public function manualEntry(User $freelancer, Carbon $date, string $checkInTime, ?string $checkOutTime, string $notes, User $actor): Attendance
     {
         if (Attendance::where('user_id', $freelancer->id)->whereDate('date', $date)->exists()) {
-            throw new BusinessRuleException('Freelancer ini sudah memiliki presensi pada tanggal tersebut.');
+            throw new BusinessRuleException('Karyawan ini sudah memiliki presensi pada tanggal tersebut.');
         }
 
         $office = Outlet::mainOffice();

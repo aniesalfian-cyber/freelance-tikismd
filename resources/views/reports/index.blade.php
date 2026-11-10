@@ -33,9 +33,9 @@
             </select>
         </div>
         <div>
-            <label class="label">Freelancer</label>
+            <label class="label">Karyawan</label>
             <select name="user_id" class="input">
-                <option value="">Semua Freelancer</option>
+                <option value="">Semua Karyawan</option>
                 @foreach($freelancers as $fl)
                     <option value="{{ $fl->id }}" @selected(($query['user_id'] ?? '') == $fl->id)>{{ $fl->name }}</option>
                 @endforeach

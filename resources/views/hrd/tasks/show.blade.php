@@ -22,7 +22,7 @@
 
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-b border-white/10 py-4 text-xs">
                 <div>
-                    <div class="text-slate-400">Freelancer</div>
+                    <div class="text-slate-400">Karyawan</div>
                     <div class="font-bold text-white mt-0.5">{{ $task->user?->name }}</div>
                 </div>
                 <div>
@@ -57,7 +57,7 @@
 
             @if($task->notes)
                 <div class="border-t border-white/10 pt-4 text-xs space-y-1">
-                    <div class="font-bold text-white">Catatan Pengerjaan Freelancer:</div>
+                    <div class="font-bold text-white">Catatan Pengerjaan Karyawan:</div>
                     <p class="text-slate-300 leading-relaxed">{{ $task->notes }}</p>
                 </div>
             @endif

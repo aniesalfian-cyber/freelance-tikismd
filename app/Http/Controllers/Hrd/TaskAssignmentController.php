@@ -65,12 +65,12 @@ class TaskAssignmentController extends Controller
             'assigned_date' => ['required', 'date', 'after_or_equal:today'],
             'scheduled_start_time' => ['required', 'date_format:H:i'],
             'estimated_duration_minutes' => ['required', 'integer', 'min:5', 'max:720'],
-        ], ['user_ids.required' => 'Pilih minimal satu freelancer.', 'assigned_date.after_or_equal' => 'Tanggal penugasan tidak boleh di masa lalu.']);
+        ], ['user_ids.required' => 'Pilih minimal satu karyawan.', 'assigned_date.after_or_equal' => 'Tanggal penugasan tidak boleh di masa lalu.']);
 
         $date = Carbon::parse($data['assigned_date']);
         $users = User::freelancers()->active()->whereIn('id', $data['user_ids'])->get();
         if ($users->isEmpty()) {
-            return back()->withInput()->with('error', 'Freelancer yang dipilih tidak aktif / tidak valid.');
+            return back()->withInput()->with('error', 'Karyawan yang dipilih tidak aktif / tidak valid.');
         }
 
         $created = DB::transaction(function () use ($data, $users, $request, $date) {
@@ -89,7 +89,7 @@ class TaskAssignmentController extends Controller
             ]));
         });
 
-        ActivityLogger::log('task.created', "Menugaskan '{$data['title']}' kepada {$created->count()} freelancer", $created->first());
+        ActivityLogger::log('task.created', "Menugaskan '{$data['title']}' kepada {$created->count()} karyawan", $created->first());
 
         return redirect()->route('hrd.tasks.index', ['date' => $date->toDateString()])
             ->with('success', "{$created->count()} penugasan berhasil dibuat.");

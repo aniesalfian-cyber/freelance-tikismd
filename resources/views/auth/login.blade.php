@@ -8,7 +8,7 @@
             <x-logo size="xl" />
         </div>
         <div>
-            <h1 class="text-2xl font-extrabold text-white tracking-tight">Monitoring Freelancer HSM</h1>
+            <h1 class="text-2xl font-extrabold text-white tracking-tight">Monitoring Karyawan HSM</h1>
             <p class="text-xs text-slate-400 mt-1">Sistem Monitoring Kinerja, Presensi GPS & Analitik Eksekutif</p>
         </div>
     </div>
@@ -72,7 +72,7 @@
                 </button>
                 <button type="button" @click="email='freelancer@hsm.id'; password='Password123!'"
                         class="btn btn-ghost btn-sm justify-start">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Freelancer
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Karyawan
                 </button>
                 <button type="button" @click="email='owner@hsm.id'; password='Password123!'"
                         class="btn btn-ghost btn-sm justify-start">

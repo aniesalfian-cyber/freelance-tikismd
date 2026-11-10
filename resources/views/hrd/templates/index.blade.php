@@ -37,7 +37,7 @@
                             <div class="text-xs text-slate-400 mt-0.5">{{ $tpl->description }}</div>
                         </td>
                         <td data-label="Gerai Lokasi" class="text-xs font-semibold text-white">{{ $tpl->outlet?->name ?? '-' }}</td>
-                        <td data-label="Penerima Default" class="text-xs">{{ $tpl->user?->name ?? 'Semua Freelancer Aktif' }}</td>
+                        <td data-label="Penerima Default" class="text-xs">{{ $tpl->user?->name ?? 'Semua Karyawan Aktif' }}</td>
                         <td data-label="Jam Target Mulai" class="font-mono text-xs text-orange-300 font-bold">{{ $tpl->startTimeShort() }}</td>
                         <td data-label="Target Durasi SLA"><span class="badge badge-info">{{ $tpl->estimated_duration_minutes }} menit</span></td>
                         <td data-label="Jadwal Hari Aktif" class="text-xs">{{ $tpl->activeDaysLabel() }}</td>

@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Manajemen Pengguna & Reset Password', 'subtitle' => 'Kelola akun SuperAdmin, HRD, Freelancer, dan Owner'])
+@extends('layouts.app', ['title' => 'Manajemen Pengguna & Reset Password', 'subtitle' => 'Kelola akun SuperAdmin, HRD, Karyawan, dan Owner'])
 
 @section('content')
 <div class="glass p-5 flex flex-wrap items-center justify-between gap-3">

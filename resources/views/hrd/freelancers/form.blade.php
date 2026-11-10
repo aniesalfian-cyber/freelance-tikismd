@@ -1,9 +1,9 @@
-@extends('layouts.app', ['title' => $freelancer->exists ? 'Edit Data Freelancer' : 'Daftarkan Freelancer Baru'])
+@extends('layouts.app', ['title' => $freelancer->exists ? 'Edit Data Karyawan' : 'Daftarkan Karyawan Baru'])
 
 @section('content')
 <div class="glass p-6 max-w-2xl mx-auto">
     <div class="orn-line mb-2"></div>
-    <h2 class="text-lg font-extrabold text-white mb-4">{{ $freelancer->exists ? 'Perbarui Profil '.$freelancer->name : 'Registrasi Karyawan Freelancer' }}</h2>
+    <h2 class="text-lg font-extrabold text-white mb-4">{{ $freelancer->exists ? 'Perbarui Profil '.$freelancer->name : 'Registrasi Karyawan' }}</h2>
 
     <form method="POST" action="{{ $freelancer->exists ? route('hrd.freelancers.update', $freelancer) : route('hrd.freelancers.store') }}" class="space-y-4">
         @csrf
@@ -11,7 +11,7 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-                <label class="label">NIK Freelancer</label>
+                <label class="label">NIK Karyawan</label>
                 <input type="text" name="nik" value="{{ old('nik', $freelancer->nik) }}" placeholder="FL-0006" required class="input font-mono">
             </div>
             <div class="sm:col-span-2">
@@ -55,7 +55,7 @@
 
         <div class="flex items-center justify-end gap-2 pt-3">
             <a href="{{ route('hrd.freelancers.index') }}" class="btn btn-ghost">Batal</a>
-            <button type="submit" class="btn btn-primary">Simpan Freelancer</button>
+            <button type="submit" class="btn btn-primary">Simpan Karyawan</button>
         </div>
     </form>
 </div>

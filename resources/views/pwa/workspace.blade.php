@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Workspace Freelancer', 'subtitle' => 'Halo, '.auth()->user()->name])
+@extends('layouts.app', ['title' => 'Workspace Karyawan', 'subtitle' => 'Halo, '.auth()->user()->name])
 
 @section('content')
 <div class="max-w-xl mx-auto space-y-5">

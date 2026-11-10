@@ -1,6 +1,6 @@
 {
-    "name": "Monitoring Freelancer HSM",
-    "short_name": "HSM Freelance",
+    "name": "Monitoring Karyawan HSM",
+    "short_name": "HSM Karyawan",
     "description": "Aplikasi PWA Monitoring Performa Kinerja Karyawan Freelancer PT HSM",
     "start_url": "/",
     "scope": "/",
