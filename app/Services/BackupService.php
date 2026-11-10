@@ -6,16 +6,19 @@ use App\Exceptions\BusinessRuleException;
 use App\Models\SystemBackup;
 use App\Models\User;
 use App\Support\ActivityLogger;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\Process\ExecutableFinder;
-use Symfony\Component\Process\Process;
+use PDO;
 use Throwable;
 
 class BackupService
 {
     public const DIRECTORY = 'backups';
 
-    /** Buat backup `.sql.gz` seluruh database. Password dikirim via env MYSQL_PWD (tidak muncul di argumen proses). */
+    /**
+     * Buat backup `.sql.gz` seluruh tabel database menggunakan koneksi PDO aktif.
+     * Bekerja 100% di Dedicated/VPS maupun Shared Hosting (Hostinger) yang menonaktifkan proc_open/exec.
+     */
     public function create(string $type = 'manual_superadmin', ?User $by = null): SystemBackup
     {
         Storage::disk('local')->makeDirectory(self::DIRECTORY);
@@ -25,41 +28,32 @@ class BackupService
         $absolute = Storage::disk('local')->path($relative);
 
         $error = '';
-        $gz = gzopen($absolute, 'wb9');
+        $gz = @gzopen($absolute, 'wb9');
         if ($gz === false) {
             throw new BusinessRuleException('Tidak dapat menulis berkas backup. Periksa izin folder storage/app/backups.');
         }
 
         try {
-            $process = new Process(
-                array_merge([$this->binary('mysqldump')], $this->dumpOptions(), [$this->dbConfig('database')]),
-                null,
-                $this->processEnv(),
-                null,
-                900
-            );
-            $process->run(function ($kind, $buffer) use ($gz, &$error) {
-                if ($kind === Process::OUT) {
-                    gzwrite($gz, $buffer);
-                } else {
-                    $error .= $buffer;
-                }
-            });
-            $ok = $process->isSuccessful();
+            $this->dumpViaPdo($gz);
+            $ok = true;
         } catch (Throwable $e) {
             $ok = false;
-            $error .= $e->getMessage();
+            $error = $e->getMessage();
         } finally {
             gzclose($gz);
         }
 
         $size = is_file($absolute) ? filesize($absolute) : 0;
 
-        if (! $ok || $size < 200) {
+        if (! $ok || $size < 100) {
             @unlink($absolute);
             $record = SystemBackup::create([
-                'filename' => $filename, 'file_path' => $relative, 'file_size_bytes' => 0,
-                'backup_type' => $type, 'status' => 'failed', 'error_message' => mb_substr(trim($error) ?: 'Dump kosong.', 0, 1000),
+                'filename' => $filename,
+                'file_path' => $relative,
+                'file_size_bytes' => 0,
+                'backup_type' => $type,
+                'status' => 'failed',
+                'error_message' => mb_substr(trim($error) ?: 'Dump kosong.', 0, 1000),
                 'created_by' => $by?->id,
             ]);
             ActivityLogger::log('backup.failed', 'Backup database gagal: '.mb_substr($error, 0, 300), $record, $by?->id);
@@ -67,8 +61,12 @@ class BackupService
         }
 
         $record = SystemBackup::create([
-            'filename' => $filename, 'file_path' => $relative, 'file_size_bytes' => $size,
-            'backup_type' => $type, 'status' => 'success', 'created_by' => $by?->id,
+            'filename' => $filename,
+            'file_path' => $relative,
+            'file_size_bytes' => $size,
+            'backup_type' => $type,
+            'status' => 'success',
+            'created_by' => $by?->id,
         ]);
         ActivityLogger::log('backup.created', "Backup database dibuat ({$type}): {$filename}", $record, $by?->id);
 
@@ -78,8 +76,63 @@ class BackupService
     }
 
     /**
-     * Pulihkan database dari berkas .sql / .sql.gz yang diunggah.
-     * Memvalidasi skema, membuat backup pengaman, lalu mengeksekusi restore.
+     * Ekspor seluruh skema & data tabel MySQL/MariaDB via PDO ke resource gzip.
+     */
+    protected function dumpViaPdo($gz): void
+    {
+        /** @var PDO $pdo */
+        $pdo = DB::connection()->getPdo();
+        $dbName = DB::connection()->getDatabaseName();
+
+        gzwrite($gz, "-- Monitoring Freelancer HSM Database Backup\n");
+        gzwrite($gz, '-- Database: `'.$dbName.'` | Generated: '.now()->toDateTimeString()."\n");
+        gzwrite($gz, "SET FOREIGN_KEY_CHECKS=0;\nSET SQL_MODE='NO_AUTO_VALUE_ON_ZERO';\n\n");
+
+        $tables = $pdo->query('SHOW FULL TABLES WHERE Table_type = "BASE TABLE"')->fetchAll(PDO::FETCH_NUM);
+
+        foreach ($tables as $tRow) {
+            $table = $tRow[0];
+            $createRow = $pdo->query("SHOW CREATE TABLE `{$table}`")->fetch(PDO::FETCH_NUM);
+            $createSql = $createRow[1] ?? '';
+
+            gzwrite($gz, "-- --------------------------------------------------------\n");
+            gzwrite($gz, "-- Table structure for `{$table}`\n");
+            gzwrite($gz, "-- --------------------------------------------------------\n");
+            gzwrite($gz, "DROP TABLE IF EXISTS `{$table}`;\n");
+            gzwrite($gz, $createSql.";\n\n");
+
+            $stmt = $pdo->query("SELECT * FROM `{$table}`");
+            $batch = [];
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $vals = [];
+                foreach ($row as $val) {
+                    if ($val === null) {
+                        $vals[] = 'NULL';
+                    } elseif (is_int($val) || is_float($val)) {
+                        $vals[] = (string) $val;
+                    } else {
+                        $vals[] = $pdo->quote((string) $val);
+                    }
+                }
+                $batch[] = '('.implode(',', $vals).')';
+
+                if (count($batch) >= 150) {
+                    gzwrite($gz, "INSERT INTO `{$table}` VALUES\n".implode(",\n", $batch).";\n");
+                    $batch = [];
+                }
+            }
+
+            if (! empty($batch)) {
+                gzwrite($gz, "INSERT INTO `{$table}` VALUES\n".implode(",\n", $batch).";\n");
+            }
+            gzwrite($gz, "\n");
+        }
+
+        gzwrite($gz, "SET FOREIGN_KEY_CHECKS=1;\n");
+    }
+
+    /**
+     * Pulihkan database dari berkas .sql / .sql.gz yang diunggah menggunakan PDO.
      */
     public function restore(string $uploadedPath, string $originalName, User $by): void
     {
@@ -93,27 +146,45 @@ class BackupService
             // Backup pengaman sebelum menimpa data.
             $safety = $this->create('manual_superadmin', $by);
 
-            $in = fopen($tmpSql, 'rb');
-            $process = new Process(
-                array_merge([$this->binary('mysql')], $this->clientOptions(), [$this->dbConfig('database')]),
-                null,
-                $this->processEnv(),
-                $in,
-                1800
-            );
-            $process->run();
-            fclose($in);
-
-            if (! $process->isSuccessful()) {
-                ActivityLogger::log('backup.restore_failed', 'Restore gagal: '.mb_substr($process->getErrorOutput(), 0, 300), null, $by->id);
-                throw new BusinessRuleException('Restore gagal: '.mb_substr(trim($process->getErrorOutput()), 0, 300).' Backup pengaman tersimpan: '.$safety->filename);
-            }
+            $this->restoreViaPdo($tmpSql);
 
             $this->syncFromDisk();
             ActivityLogger::log('backup.restored', "Database dipulihkan dari berkas {$originalName} (backup pengaman: {$safety->filename})", null, $by->id);
+        } catch (BusinessRuleException $e) {
+            throw $e;
+        } catch (Throwable $e) {
+            ActivityLogger::log('backup.restore_failed', 'Restore gagal: '.mb_substr($e->getMessage(), 0, 300), null, $by->id);
+            throw new BusinessRuleException('Restore gagal: '.mb_substr($e->getMessage(), 0, 300));
         } finally {
             @unlink($tmpSql);
         }
+    }
+
+    /**
+     * Jalankan statement SQL dari file dump secara berurutan via PDO.
+     */
+    protected function restoreViaPdo(string $sqlPath): void
+    {
+        /** @var PDO $pdo */
+        $pdo = DB::connection()->getPdo();
+        $pdo->exec('SET FOREIGN_KEY_CHECKS=0;');
+
+        $handle = fopen($sqlPath, 'rb');
+        $statement = '';
+        while (($line = fgets($handle)) !== false) {
+            $trimmed = trim($line);
+            if ($trimmed === '' || str_starts_with($trimmed, '--') || str_starts_with($trimmed, '/*')) {
+                continue;
+            }
+            $statement .= $line;
+            if (str_ends_with(rtrim($line), ';')) {
+                $pdo->exec($statement);
+                $statement = '';
+            }
+        }
+        fclose($handle);
+
+        $pdo->exec('SET FOREIGN_KEY_CHECKS=1;');
     }
 
     /** Daftarkan kembali berkas backup di disk yang hilang dari tabel (mis. setelah restore). */
@@ -198,52 +269,5 @@ class BackupService
         if (count($found) !== count($required)) {
             throw new BusinessRuleException('Berkas bukan backup database HSM yang valid (struktur tabel inti tidak ditemukan).');
         }
-    }
-
-    protected function dumpOptions(): array
-    {
-        return array_merge($this->clientOptions(), ['--single-transaction', '--routines', '--default-character-set=utf8mb4']);
-    }
-
-    protected function clientOptions(): array
-    {
-        $opts = ['--no-defaults', '--user='.$this->dbConfig('username')];
-        $socket = $this->dbConfig('unix_socket');
-        if ($socket) {
-            $opts[] = '--socket='.$socket;
-        } else {
-            $opts[] = '--host='.$this->dbConfig('host');
-            $opts[] = '--port='.$this->dbConfig('port');
-        }
-
-        return $opts;
-    }
-
-    protected function processEnv(): array
-    {
-        return ['MYSQL_PWD' => (string) $this->dbConfig('password')];
-    }
-
-    protected function dbConfig(string $key): mixed
-    {
-        return config('database.connections.'.config('database.default').'.'.$key);
-    }
-
-    protected function binary(string $which): string
-    {
-        $configured = config("hsm.{$which}_path");
-        if ($configured && is_executable($configured)) {
-            return $configured;
-        }
-
-        $finder = new ExecutableFinder();
-        $candidates = $which === 'mysqldump' ? ['mysqldump', 'mariadb-dump'] : ['mysql', 'mariadb'];
-        foreach ($candidates as $name) {
-            if ($path = $finder->find($name)) {
-                return $path;
-            }
-        }
-
-        throw new BusinessRuleException("Utilitas {$which} tidak ditemukan di server. Set HSM_".strtoupper($which).'_PATH pada .env.');
     }
 }
