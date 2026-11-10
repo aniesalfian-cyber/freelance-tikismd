@@ -150,7 +150,7 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+window.hsmReady(() => {
     const trend = @json($data['trend']);
     const radar = @json($data['radar']);
     const outletLoad = @json($data['outlet_load']);
@@ -235,18 +235,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const mapEl = document.getElementById('owner-live-map');
     if (mapEl && window.hsmCreateMap) {
-        const first = mapPoints[0] || { lat: -0.5022, lng: 117.1536 };
+        const first = mapPoints[0] || { lat: -0.502106, lng: 117.153709 };
         const map = window.hsmCreateMap(mapEl, first.lat, first.lng, 13);
         const bounds = [];
         mapPoints.forEach((p) => {
             const color = p.status === 'danger' ? '#ef4444' : (p.status === 'orange' ? '#ff6500' : '#10b981');
-            L.circle([p.lat, p.lng], { radius: p.radius, color, fillColor: color, fillOpacity: 0.16 }).addTo(map);
+            L.circle([p.lat, p.lng], { radius: p.radius, color, fillColor: color, fillOpacity: 0.18, weight: 2 }).addTo(map);
             L.marker([p.lat, p.lng], { icon: window.hsmPinIcon(color) })
                 .addTo(map)
                 .bindPopup(`<b>${p.name}</b> (${p.code})<br>Selesai: ${p.done}/${p.tasks} tugas`);
             bounds.push([p.lat, p.lng]);
         });
-        if (bounds.length > 1) map.fitBounds(bounds, { padding: [28, 28] });
+        if (bounds.length > 1) map.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
     }
 });
 </script>

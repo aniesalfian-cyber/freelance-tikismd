@@ -61,40 +61,50 @@
 
     <!-- Interactive Map Picker -->
     <div class="glass p-6 space-y-3">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-wrap items-center justify-between gap-2">
             <div>
                 <div class="orn-line mb-1"></div>
-                <h3 class="text-base font-extrabold text-white">Pemilih Titik Lokasi Interaktif</h3>
-                <p class="text-xs text-slate-400">Klik pada peta atau seret pin untuk mengambil koordinat presisi.</p>
+                <h3 class="text-base font-extrabold text-white">Pemilih Titik Lokasi Interaktif (Kota Samarinda)</h3>
+                <p class="text-xs text-slate-400">Klik pada peta atau seret pin untuk mengambil koordinat presisi di Kota Samarinda.</p>
             </div>
             <button type="button" id="btn-my-loc" class="btn btn-ghost btn-sm">Gunakan GPS Saya</button>
         </div>
+
+        <div class="flex flex-wrap gap-1.5 text-[11px]">
+            <button type="button" data-lat="-0.502106" data-lng="117.153709" class="samarinda-preset btn btn-ghost btn-sm text-[11px]">Pusat Kota (Gajah Mada)</button>
+            <button type="button" data-lat="-0.478920" data-lng="117.141550" class="samarinda-preset btn btn-ghost btn-sm text-[11px]">Samarinda Ulu (Juanda)</button>
+            <button type="button" data-lat="-0.507850" data-lng="117.163400" class="samarinda-preset btn btn-ghost btn-sm text-[11px]">Samarinda Ilir</button>
+            <button type="button" data-lat="-0.517640" data-lng="117.139820" class="samarinda-preset btn btn-ghost btn-sm text-[11px]">Samarinda Seberang</button>
+            <button type="button" data-lat="-0.472850" data-lng="117.169420" class="samarinda-preset btn btn-ghost btn-sm text-[11px]">Sungai Pinang</button>
+        </div>
+
         <div id="outlet-picker-map" class="h-96 rounded-2xl overflow-hidden border border-white/10"></div>
     </div>
 </div>
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+window.hsmReady(() => {
     const latInput = document.getElementById('inp-lat');
     const lngInput = document.getElementById('inp-lng');
     const radInput = document.getElementById('inp-rad');
     const mapEl = document.getElementById('outlet-picker-map');
     if (!mapEl || !window.hsmCreateMap) return;
 
-    const initLat = parseFloat(latInput.value) || -0.5022;
-    const initLng = parseFloat(lngInput.value) || 117.1536;
+    const initLat = parseFloat(latInput.value) || -0.502106;
+    const initLng = parseFloat(lngInput.value) || 117.153709;
     const initRad = parseInt(radInput.value, 10) || 50;
 
     const map = window.hsmCreateMap(mapEl, initLat, initLng, 16);
     const marker = L.marker([initLat, initLng], { draggable: true, icon: window.hsmPinIcon('#ff6500') }).addTo(map);
     const circle = L.circle([initLat, initLng], { radius: initRad, color: '#00d2ff', fillColor: '#00d2ff', fillOpacity: 0.18 }).addTo(map);
 
-    function sync(lat, lng) {
+    function sync(lat, lng, pan = false) {
         latInput.value = Number(lat).toFixed(8);
         lngInput.value = Number(lng).toFixed(8);
         marker.setLatLng([lat, lng]);
         circle.setLatLng([lat, lng]);
+        if (pan) map.setView([lat, lng], 16);
     }
 
     marker.on('dragend', () => {
@@ -103,16 +113,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     map.on('click', (e) => sync(e.latlng.lat, e.latlng.lng));
     [latInput, lngInput].forEach((inp) => inp.addEventListener('change', () => {
-        sync(parseFloat(latInput.value) || initLat, parseFloat(lngInput.value) || initLng);
-        map.panTo([ parseFloat(latInput.value) || initLat, parseFloat(lngInput.value) || initLng ]);
+        sync(parseFloat(latInput.value) || initLat, parseFloat(lngInput.value) || initLng, true);
     }));
     radInput.addEventListener('input', () => circle.setRadius(parseInt(radInput.value, 10) || 50));
+
+    document.querySelectorAll('.samarinda-preset').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            sync(parseFloat(btn.dataset.lat), parseFloat(btn.dataset.lng), true);
+        });
+    });
 
     document.getElementById('btn-my-loc')?.addEventListener('click', () => {
         if (!navigator.geolocation) return;
         navigator.geolocation.getCurrentPosition((pos) => {
-            sync(pos.coords.latitude, pos.coords.longitude);
-            map.setView([pos.coords.latitude, pos.coords.longitude], 17);
+            sync(pos.coords.latitude, pos.coords.longitude, true);
         });
     });
 });

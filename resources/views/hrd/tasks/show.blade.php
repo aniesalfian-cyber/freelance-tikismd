@@ -99,14 +99,14 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+window.hsmReady(() => {
     const el = document.getElementById('task-detail-map');
     if (!el || !window.hsmCreateMap) return;
-    const oLat = {{ $task->outlet->latitude }};
-    const oLng = {{ $task->outlet->longitude }};
-    const oRad = {{ $task->outlet->radius_meters }};
+    const oLat = {{ $task->outlet->latitude ?? -0.502106 }};
+    const oLng = {{ $task->outlet->longitude ?? 117.153709 }};
+    const oRad = {{ $task->outlet->radius_meters ?? 50 }};
     const map = window.hsmCreateMap(el, oLat, oLng, 16);
-    L.circle([oLat, oLng], { radius: oRad, color: '#ff6500', fillColor: '#ff6500', fillOpacity: 0.16 }).addTo(map);
+    L.circle([oLat, oLng], { radius: oRad, color: '#ff6500', fillColor: '#ff6500', fillOpacity: 0.18 }).addTo(map);
     L.marker([oLat, oLng], { icon: window.hsmPinIcon('#ff6500') }).addTo(map).bindPopup('Titik Gerai: {{ $task->outlet->name }}');
 
     @if($task->start_latitude && $task->start_longitude)

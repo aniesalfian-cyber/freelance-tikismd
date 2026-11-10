@@ -13,6 +13,11 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icons/icon-192.svg">
     <title>{{ isset($title) ? $title.' — ' : '' }}{{ config('app.name', 'Monitoring Freelancer HSM') }}</title>
+    <script>
+        window.HSM_SAMARINDA = { lat: -0.502106, lng: 117.153709, zoom: 14, label: 'Kota Samarinda, Kalimantan Timur' };
+        window.__hsmReadyQueue = window.__hsmReadyQueue || [];
+        window.hsmReady = window.hsmReady || function (fn) { window.__hsmReadyQueue.push(fn); };
+    </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body x-data="{
@@ -98,7 +103,7 @@
 
     @if(session('success') || session('error'))
         <script>
-            document.addEventListener('DOMContentLoaded', () => {
+            window.hsmReady(() => {
                 if (window.HsmSwal) {
                     @if(session('success'))
                         window.HsmSwal.toast(@json(session('success')), 'success');

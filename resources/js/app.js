@@ -8,6 +8,14 @@ window.Chart = Chart;
 window.Swal = Swal;
 window.L = L;
 
+// Koordinat Default: Pusat Kota Samarinda, Kalimantan Timur
+window.HSM_SAMARINDA = {
+    lat: -0.502106,
+    lng: 117.153709,
+    zoom: 14,
+    label: 'Kota Samarinda, Kalimantan Timur',
+};
+
 // Chart.js default dark corporate theme
 Chart.defaults.color = '#94a3b8';
 Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.07)';
@@ -116,26 +124,92 @@ window.hsmCompressImage = function (file, maxWidth = 1280, quality = 0.8) {
     });
 };
 
-// Leaflet dark tile helper
-window.hsmCreateMap = function (el, lat = -0.5022, lng = 117.1536, zoom = 15) {
-    const map = L.map(el, { zoomControl: true }).setView([lat, lng], zoom);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+/**
+ * Penampil Peta Gratis & Tanpa API Key (OpenStreetMap + Esri Satelit + Carto Voyager).
+ * Koordinat default selalu mengarah ke Kota Samarinda (-0.502106, 117.153709).
+ */
+window.hsmCreateMap = function (elOrId, lat, lng, zoom = 14) {
+    const el = typeof elOrId === 'string' ? document.getElementById(elOrId) : elOrId;
+    if (!el) return null;
+
+    const validLat = Number.isFinite(Number(lat)) && Number(lat) !== 0 ? Number(lat) : window.HSM_SAMARINDA.lat;
+    const validLng = Number.isFinite(Number(lng)) && Number(lng) !== 0 ? Number(lng) : window.HSM_SAMARINDA.lng;
+
+    // Cegah error "Map container is already initialized"
+    if (el._hsmMap) {
+        el._hsmMap.setView([validLat, validLng], zoom);
+        setTimeout(() => el._hsmMap.invalidateSize(), 100);
+        return el._hsmMap;
+    }
+    if (el._leaflet_id) {
+        el._leaflet_id = null;
+        el.innerHTML = '';
+    }
+
+    const osmStreet = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors',
+    });
+
+    const cartoVoyager = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
         maxZoom: 20,
         subdomains: 'abcd',
         attribution: '&copy; OpenStreetMap &copy; CARTO',
-    }).addTo(map);
-    setTimeout(() => map.invalidateSize(), 200);
+    });
+
+    const esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19,
+        attribution: '&copy; Esri World Imagery',
+    });
+
+    const map = L.map(el, {
+        zoomControl: true,
+        scrollWheelZoom: true,
+        layers: [osmStreet],
+    }).setView([validLat, validLng], zoom);
+
+    L.control.layers(
+        {
+            'Peta Jalan (OSM)': osmStreet,
+            'Peta Bersih (Voyager)': cartoVoyager,
+            'Citra Satelit (Esri)': esriSatellite,
+        },
+        {},
+        { position: 'topright', collapsed: true }
+    ).addTo(map);
+
+    el._hsmMap = map;
+
+    // Pastikan ukuran peta selalu terhitung ulang setelah animasi halaman (.rise) & perubahan ukuran layar
+    [60, 250, 600, 1000].forEach((ms) => setTimeout(() => map.invalidateSize(), ms));
+    if (typeof ResizeObserver !== 'undefined') {
+        const ro = new ResizeObserver(() => map.invalidateSize());
+        ro.observe(el);
+    }
+
     return map;
 };
 
-window.hsmPinIcon = function (color = '#ff6500', glow = 'rgba(255,101,0,0.35)') {
+window.hsmPinIcon = function (color = '#ff6500', glow = 'rgba(255,101,0,0.4)') {
     return L.divIcon({
         className: '',
         html: `<div class="hsm-pin" style="--pin-solid:${color};--pin:${glow}"></div>`,
-        iconSize: [18, 18],
-        iconAnchor: [9, 9],
+        iconSize: [20, 20],
+        iconAnchor: [10, 10],
     });
 };
+
+// Jalankan antrean callback script halaman yang menunggu hsmCreateMap / Chart siap
+window.__hsmReadyQueue = window.__hsmReadyQueue || [];
+window.hsmReady = function (fn) {
+    if (typeof fn === 'function') {
+        fn();
+    }
+};
+while (window.__hsmReadyQueue.length > 0) {
+    const fn = window.__hsmReadyQueue.shift();
+    try { fn(); } catch (e) { console.error(e); }
+}
 
 Alpine.start();
 

@@ -85,22 +85,22 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+window.hsmReady(() => {
     const items = @json($mapOutlets);
     const el = document.getElementById('outlets-overview-map');
     if (!el || !window.hsmCreateMap) return;
-    const first = items[0] || { latitude: -0.5022, longitude: 117.1536 };
+    const first = items[0] || { latitude: -0.502106, longitude: 117.153709 };
     const map = window.hsmCreateMap(el, first.latitude, first.longitude, 13);
     const bounds = [];
     items.forEach((o) => {
         const color = o.is_main_office ? '#ff6500' : '#00d2ff';
-        L.circle([o.latitude, o.longitude], { radius: o.radius_meters, color, fillColor: color, fillOpacity: 0.16 }).addTo(map);
+        L.circle([o.latitude, o.longitude], { radius: o.radius_meters, color, fillColor: color, fillOpacity: 0.18, weight: 2 }).addTo(map);
         L.marker([o.latitude, o.longitude], { icon: window.hsmPinIcon(color) })
             .addTo(map)
             .bindPopup(`<b>${o.name}</b> (${o.code})<br>${o.address}<br>Radius: ${o.radius_meters} m`);
         bounds.push([o.latitude, o.longitude]);
     });
-    if (bounds.length > 1) map.fitBounds(bounds, { padding: [25, 25] });
+    if (bounds.length > 1) map.fitBounds(bounds, { padding: [28, 28], maxZoom: 15 });
 });
 </script>
 @endpush

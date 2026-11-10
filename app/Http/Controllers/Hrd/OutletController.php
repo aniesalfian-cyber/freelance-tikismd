@@ -28,7 +28,9 @@ class OutletController extends Controller
         return view('hrd.outlets.form', [
             'outlet' => new Outlet([
                 'radius_meters' => (int) Setting::get('default_radius', 50),
-                'latitude' => -0.5022, 'longitude' => 117.1536, 'is_active' => true,
+                'latitude' => -0.50210600,
+                'longitude' => 117.15370900,
+                'is_active' => true,
             ]),
         ]);
     }

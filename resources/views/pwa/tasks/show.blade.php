@@ -3,15 +3,14 @@
 @section('content')
 <div class="max-w-xl mx-auto space-y-5"
      x-data="taskRunner({
-         outletLat: {{ $task->outlet->latitude }},
-         outletLng: {{ $task->outlet->longitude }},
-         outletRadius: {{ $task->outlet->radius_meters }},
+         outletLat: {{ $task->outlet->latitude ?? -0.502106 }},
+         outletLng: {{ $task->outlet->longitude ?? 117.153709 }},
+         outletRadius: {{ $task->outlet->radius_meters ?? 50 }},
          startedAtMs: {{ $task->started_at ? $task->started_at->getTimestamp() * 1000 : 'null' }},
          startUrl: '{{ route('pwa.tasks.start', $task) }}',
          completeUrl: '{{ route('pwa.tasks.complete', $task) }}',
          csrf: '{{ csrf_token() }}'
-     })"
-     x-init="init()">
+     })">
 
     <!-- 3-Stage Stepper Header -->
     <div class="glass p-5 space-y-4">
@@ -59,18 +58,18 @@
     @if(!$task->isFinal())
         <!-- Live Map & Simulation Helper -->
         <div class="glass p-4 space-y-3">
-            <div class="flex items-center justify-between gap-2">
-                <span class="text-xs font-bold text-white">Peta Geofencing Lokasi Tugas</span>
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <span class="text-xs font-bold text-white">Peta Geofencing Lokasi Tugas (Samarinda)</span>
                 <div class="flex gap-1.5">
-                    <button type="button" @click="simulateAtOutlet()" class="btn btn-ghost btn-sm text-[11px]" title="Simulasi berada di titik gerai untuk pengujian">
+                    <button type="button" @click="simulateAtOutlet(true)" class="btn btn-ghost btn-sm text-[11px]" title="Simulasi berada di titik gerai Samarinda">
                         Simulasi di Gerai
                     </button>
                     <button type="button" @click="locate()" class="btn btn-ghost btn-sm text-[11px]">
-                        Perbarui GPS
+                        GPS Perangkat
                     </button>
                 </div>
             </div>
-            <div id="pwa-task-map" class="h-52 rounded-2xl overflow-hidden border border-white/10"></div>
+            <div id="pwa-task-map" class="h-60 rounded-2xl overflow-hidden border border-white/10"></div>
         </div>
     @endif
 
@@ -158,9 +157,10 @@ function taskRunner(cfg) {
             if (mapEl && window.hsmCreateMap) {
                 this.map = window.hsmCreateMap(mapEl, cfg.outletLat, cfg.outletLng, 16);
                 L.circle([cfg.outletLat, cfg.outletLng], { radius: cfg.outletRadius, color: '#ff6500', fillColor: '#ff6500', fillOpacity: 0.18 }).addTo(this.map);
-                L.marker([cfg.outletLat, cfg.outletLng], { icon: window.hsmPinIcon('#ff6500') }).addTo(this.map).bindPopup('Titik Gerai');
+                L.marker([cfg.outletLat, cfg.outletLng], { icon: window.hsmPinIcon('#ff6500') }).addTo(this.map).bindPopup('Titik Gerai Samarinda');
             }
-            this.locate();
+            // Default ke titik gerai di Kota Samarinda
+            this.simulateAtOutlet(false);
             if (cfg.startedAtMs) {
                 this.tick();
                 setInterval(() => this.tick(), 1000);
@@ -183,22 +183,28 @@ function taskRunner(cfg) {
                 } else {
                     this.meMarker.setLatLng([lat, lng]);
                 }
+                this.map.panTo([lat, lng]);
             }
         },
         locate() {
             if (!navigator.geolocation) {
-                this.simulateAtOutlet();
+                this.simulateAtOutlet(true);
                 return;
             }
             navigator.geolocation.getCurrentPosition(
-                (pos) => this.setCoords(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy || 12),
-                () => this.simulateAtOutlet(),
+                (pos) => {
+                    this.setCoords(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy || 12);
+                    window.HsmSwal?.toast('Koordinat GPS perangkat diperbarui', 'success');
+                },
+                () => this.simulateAtOutlet(true),
                 { enableHighAccuracy: true, timeout: 6000 }
             );
         },
-        simulateAtOutlet() {
+        simulateAtOutlet(showToast = false) {
             this.setCoords(cfg.outletLat + 0.00008, cfg.outletLng + 0.00008, 8);
-            window.HsmSwal?.toast('Koordinat disimulasikan di dekat gerai (±12m)', 'info');
+            if (showToast) {
+                window.HsmSwal?.toast('Koordinat disimulasikan di dekat gerai Samarinda (±12m)', 'info');
+            }
         },
         async handleFile(e) {
             const f = e.target.files?.[0];

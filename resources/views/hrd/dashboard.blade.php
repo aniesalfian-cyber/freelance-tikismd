@@ -113,22 +113,22 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+window.hsmReady(() => {
     const points = @json($map);
     const el = document.getElementById('hrd-live-map');
     if (!el || !window.hsmCreateMap) return;
-    const center = points[0] || { lat: -0.5022, lng: 117.1536 };
+    const center = points[0] || { lat: -0.502106, lng: 117.153709 };
     const map = window.hsmCreateMap(el, center.lat, center.lng, 13);
     const bounds = [];
     points.forEach((p) => {
         const color = p.status === 'danger' ? '#ef4444' : (p.status === 'orange' ? '#ff6500' : '#10b981');
-        L.circle([p.lat, p.lng], { radius: p.radius, color, fillColor: color, fillOpacity: 0.15, weight: 1.5 }).addTo(map);
+        L.circle([p.lat, p.lng], { radius: p.radius, color, fillColor: color, fillOpacity: 0.18, weight: 2 }).addTo(map);
         L.marker([p.lat, p.lng], { icon: window.hsmPinIcon(color) })
             .addTo(map)
             .bindPopup(`<b>${p.name}</b> (${p.code})<br>Tugas Selesai: ${p.done}/${p.tasks}<br>Radius: ${p.radius} m`);
         bounds.push([p.lat, p.lng]);
     });
-    if (bounds.length > 1) map.fitBounds(bounds, { padding: [30, 30] });
+    if (bounds.length > 1) map.fitBounds(bounds, { padding: [32, 32], maxZoom: 15 });
 });
 </script>
 @endpush

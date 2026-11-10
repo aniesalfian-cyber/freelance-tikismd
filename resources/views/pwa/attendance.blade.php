@@ -3,22 +3,21 @@
 @section('content')
 <div class="max-w-xl mx-auto space-y-5"
      x-data="attendanceApp({
-         officeLat: {{ $office?->latitude ?? -0.5022 }},
-         officeLng: {{ $office?->longitude ?? 117.1536 }},
+         officeLat: {{ $office?->latitude ?? -0.502106 }},
+         officeLng: {{ $office?->longitude ?? 117.153709 }},
          officeRadius: {{ $office?->radius_meters ?? 50 }},
          checkInUrl: '{{ route('pwa.attendance.checkin') }}',
          checkOutUrl: '{{ route('pwa.attendance.checkout') }}',
          csrf: '{{ csrf_token() }}'
-     })"
-     x-init="init()">
+     })">
 
     <!-- Main Office Geofence Card -->
     <div class="glass p-5 space-y-4 rise">
         <div class="flex items-start justify-between gap-3">
             <div>
-                <span class="badge badge-orange">Titik Presensi Wajib</span>
-                <h2 class="text-lg font-extrabold text-white mt-1">{{ $office?->name ?? 'Kantor Utama HSM' }}</h2>
-                <p class="text-xs text-slate-400">{{ $office?->address }}</p>
+                <span class="badge badge-orange">Titik Presensi Wajib • Kota Samarinda</span>
+                <h2 class="text-lg font-extrabold text-white mt-1">{{ $office?->name ?? 'Kantor Utama HSM Samarinda' }}</h2>
+                <p class="text-xs text-slate-400">{{ $office?->address ?? 'Jl. Gajah Mada No. 1, Kota Samarinda, Kalimantan Timur' }}</p>
             </div>
             <div class="text-right text-xs">
                 <div class="text-slate-400">Radius Maks</div>
@@ -26,22 +25,25 @@
             </div>
         </div>
 
-        <div id="pwa-attendance-map" class="h-60 rounded-2xl overflow-hidden border border-white/10"></div>
+        <div id="pwa-attendance-map" class="h-64 rounded-2xl overflow-hidden border border-white/10"></div>
 
         <!-- Distance Telemetry & Simulation Controls -->
         <div class="p-3.5 rounded-2xl bg-navy-950/75 border border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs">
             <div>
-                <div class="text-slate-400">Status Jarak Anda Saat Ini:</div>
+                <div class="text-slate-400">Status Jarak Anda Saat Ini (Kota Samarinda):</div>
                 <div class="font-extrabold text-sm mt-0.5"
                      :class="distance !== null && distance <= officeRadius ? 'text-emerald-400' : 'text-amber-400'"
                      x-text="distance !== null ? `${distance} meter dari Kantor Utama (Akurasi ±${Math.round(accuracy||10)}m)` : 'Memindai sinyal GPS...'"></div>
             </div>
-            <div class="flex gap-1.5">
-                <button type="button" @click="simulateInside()" class="btn btn-ghost btn-sm text-[11px]" title="Simulasi berada di dalam kantor utama">
+            <div class="flex flex-wrap gap-1.5">
+                <button type="button" @click="simulateInside(true)" class="btn btn-ghost btn-sm text-[11px]" title="Simulasi berada di dalam kantor utama Samarinda">
                     Simulasi Di Kantor
                 </button>
                 <button type="button" @click="simulateOutside()" class="btn btn-ghost btn-sm text-[11px]" title="Simulasi berada di luar radius (180m)">
                     Simulasi Luar (180m)
+                </button>
+                <button type="button" @click="locate()" class="btn btn-ghost btn-sm text-[11px]" title="Ambil posisi dari sensor GPS perangkat">
+                    GPS Perangkat
                 </button>
             </div>
         </div>
@@ -110,9 +112,12 @@ function attendanceApp(cfg) {
             if (el && window.hsmCreateMap) {
                 this.map = window.hsmCreateMap(el, cfg.officeLat, cfg.officeLng, 17);
                 L.circle([cfg.officeLat, cfg.officeLng], { radius: cfg.officeRadius, color: '#ff6500', fillColor: '#ff6500', fillOpacity: 0.18 }).addTo(this.map);
-                L.marker([cfg.officeLat, cfg.officeLng], { icon: window.hsmPinIcon('#ff6500') }).addTo(this.map).bindPopup('Kantor Utama HSM');
+                L.marker([cfg.officeLat, cfg.officeLng], { icon: window.hsmPinIcon('#ff6500') })
+                    .addTo(this.map)
+                    .bindPopup('<b>Kantor Utama HSM</b><br>Kota Samarinda');
             }
-            this.locate();
+            // Default ke koordinat Kantor Utama di Kota Samarinda agar peta langsung tampil akurat
+            this.simulateInside(false);
         },
         setCoords(lat, lng, acc = 10) {
             this.lat = lat;
@@ -130,20 +135,25 @@ function attendanceApp(cfg) {
         },
         locate() {
             if (!navigator.geolocation) {
-                this.simulateInside();
+                this.simulateInside(true);
                 return;
             }
             navigator.geolocation.getCurrentPosition(
-                (pos) => this.setCoords(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy || 10),
-                () => this.simulateInside(),
+                (pos) => {
+                    this.setCoords(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy || 10);
+                    window.HsmSwal?.toast('Koordinat GPS perangkat berhasil diperbarui', 'success');
+                },
+                () => this.simulateInside(true),
                 { enableHighAccuracy: true, timeout: 6000 }
             );
         },
-        simulateInside() {
+        simulateInside(showToast = false) {
             this.setCoords(cfg.officeLat + 0.00010, cfg.officeLng + 0.00010, 8);
+            if (showToast) window.HsmSwal?.toast('Koordinat disetel di Kantor Utama Samarinda (±15m)', 'info');
         },
         simulateOutside() {
             this.setCoords(cfg.officeLat + 0.00160, cfg.officeLng + 0.00020, 10);
+            window.HsmSwal?.toast('Koordinat disimulasikan 180m dari Kantor Utama Samarinda', 'warning');
         },
         async submit(url, title) {
             if (this.lat === null) this.simulateInside();
