@@ -151,8 +151,11 @@
         </form>
     </div>
 
-    <p class="text-center text-[10px] text-slate-400">
-        &copy; {{ date('Y') }} PT HSM &mdash; Delivery & Pick-Up System
-    </p>
+    <div class="flex items-center justify-between text-[10px] text-slate-500 px-1">
+        <span>&copy; {{ date('Y') }} PT HSM &mdash; Delivery &amp; Pick-Up</span>
+        <a href="/Buku_Panduan_Aplikasi_DP_PT_HSM.pdf" download class="font-extrabold text-orange-600 hover:underline inline-flex items-center gap-1">
+            <x-icon name="document" class="w-3 h-3" /> Unduh Buku Panduan (PDF)
+        </a>
+    </div>
 </div>
 @endsection

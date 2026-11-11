@@ -160,6 +160,14 @@
             </div>
 
             <div class="flex items-center gap-2">
+                <!-- Tombol Unduh Buku Panduan PDF -->
+                <a href="/Buku_Panduan_Aplikasi_DP_PT_HSM.pdf" download
+                   class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold shadow-xs transition"
+                   title="Unduh Buku Panduan Penggunaan Aplikasi (PDF)">
+                    <x-icon name="document" class="w-3.5 h-3.5 text-orange-600" />
+                    <span class="hidden md:inline">Panduan PDF</span>
+                </a>
+
                 <!-- Tombol Install PWA jika belum terinstall -->
                 <template x-if="!isStandalone">
                     <button type="button" @click="installPwa()"
