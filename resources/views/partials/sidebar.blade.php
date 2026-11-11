@@ -2,16 +2,15 @@
     $grouped = collect($menuItems)->groupBy('group');
 @endphp
 <aside class="sidebar hidden lg:flex flex-col fixed inset-y-0 left-0 z-40 select-none" :class="{ 'is-collapsed': sidebarCollapsed }">
-    <!-- Brand Header -->
-    <div class="flex items-center justify-between px-4 h-20 border-b border-white/10">
+    <!-- Brand Header (3D Skeuomorphic Paper Plate) -->
+    <div class="flex items-center justify-between px-4 h-20 border-b border-white/10" style="background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 100%);">
         <a href="{{ auth()->user()->dashboardRoute() }}" class="flex items-center gap-3 overflow-hidden">
             <x-logo size="md" />
             <div class="side-hide leading-tight">
-                <div class="font-extrabold text-white text-sm tracking-tight flex items-center gap-1.5">
-                    <span>HSM</span>
-                    <span class="text-[9px] font-bold text-orange-400 px-1 py-0.2 rounded bg-orange-500/10 border border-orange-500/20">OPS</span>
+                <div class="font-black text-white text-sm tracking-tight flex items-center gap-1.5" style="text-shadow: 0 1px 2px rgba(0,0,0,0.6);">
+                    <span>D&P PT. HSM</span>
                 </div>
-                <div class="text-[11px] text-slate-400 font-semibold truncate">{{ auth()->user()->roleLabel() }}</div>
+                <div class="text-[11px] text-orange-400 font-bold truncate">{{ auth()->user()->roleLabel() }}</div>
             </div>
         </a>
         <button type="button" @click="toggleSidebar()" class="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition" title="Lipat / Buka Sidebar">
@@ -35,18 +34,19 @@
     </nav>
 
     <!-- Footer PWA Status & Profile -->
-    <div class="p-3 border-t border-white/10 space-y-2">
-        <div class="flex items-center gap-2.5 px-2.5 py-2 rounded-xl bg-white/[0.03] border border-white/5">
+    <div class="p-3 border-t border-white/10 space-y-2" style="background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.3) 100%);">
+        <div class="flex items-center gap-2.5 px-2.5 py-2 rounded-xl bg-white/[0.04] border border-white/10 shadow-inner">
             <span class="w-2.5 h-2.5 rounded-full flex-none pulse-dot"
                   :class="online ? 'bg-emerald-400 text-emerald-400' : 'bg-amber-400 text-amber-400'"></span>
             <div class="side-hide text-xs">
-                <div class="font-semibold text-white" x-text="online ? 'PWA Terhubung' : 'Mode Offline'">PWA Terhubung</div>
-                <div class="text-[10px] text-slate-400">v1.0 Corporate Edition</div>
+                <div class="font-bold text-white" x-text="online ? 'Sistem D&P Online' : 'Mode Offline'">Sistem D&P Online</div>
+                <div class="text-[10px] text-slate-400">Paper 3D Edition</div>
             </div>
         </div>
         <div class="flex items-center justify-between gap-2 px-2 py-1.5">
             <a href="{{ route('profile.edit') }}" class="flex items-center gap-2.5 min-w-0">
-                <div class="w-8 h-8 rounded-full bg-orange-500/20 border border-orange-400/40 flex items-center justify-center text-xs font-bold text-orange-300 flex-none">
+                <div class="w-8 h-8 rounded-full border border-orange-400/40 flex items-center justify-center text-xs font-black text-white flex-none"
+                     style="background: linear-gradient(180deg, #ff8800 0%, #ff6500 100%); box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.4);">
                     {{ auth()->user()->initials() }}
                 </div>
                 <div class="side-hide truncate">

@@ -13,15 +13,15 @@
 
 @if($type === 'horizontal')
     <div {{ $attributes->merge(['class' => 'flex items-center gap-3 select-none ' . $class]) }}>
-        <img src="/icons/icon-192.svg" alt="HSM Logo" class="{{ $dim }} flex-none rounded-2xl shadow-lg shadow-orange-500/20" />
+        <img src="/icons/icon-192.svg" alt="D&P PT. HSM Logo" class="{{ $dim }} flex-none rounded-2xl shadow-md border border-white/20" style="box-shadow: 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.3);" />
         <div class="leading-tight">
             <div class="flex items-center gap-1.5">
-                <span class="font-extrabold text-white text-base tracking-tight">HSM</span>
-                <span class="text-[10px] font-bold text-orange-400 uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-orange-500/10 border border-orange-500/20">D&P</span>
+                <span class="font-black text-white text-base tracking-tight" style="text-shadow: 0 1px 3px rgba(0,0,0,0.6);">D&P</span>
+                <span class="text-[10px] font-extrabold text-white uppercase tracking-wider px-1.5 py-0.5 rounded shadow-sm" style="background: linear-gradient(180deg, #ff8c26 0%, #ff6500 100%); border: 1px solid #ff7a1a; border-top: 1px solid #ffba7a;">PT. HSM</span>
             </div>
-            <div class="text-[10px] text-slate-400 font-medium tracking-wide">Delivery & Pick-Up PT. HSM</div>
+            <div class="text-[10px] text-slate-300 font-bold tracking-wide">Delivery & Pick-Up System</div>
         </div>
     </div>
 @else
-    <img src="/icons/icon-192.svg" alt="HSM Icon" {{ $attributes->merge(['class' => $dim . ' rounded-2xl shadow-lg shadow-orange-500/25 transition-transform duration-300 hover:scale-105 select-none ' . $class]) }} />
+    <img src="/icons/icon-192.svg" alt="D&P PT. HSM Icon" {{ $attributes->merge(['class' => $dim . ' rounded-2xl border border-white/20 transition-transform duration-200 hover:scale-105 select-none ' . $class]) }} style="box-shadow: 0 4px 14px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.3);" />
 @endif
