@@ -7,39 +7,32 @@
 @source '../views';
 
 /* =====================================================================
-   DESIGN TOKENS — Paper 3D Skeuomorphism & Tactile Logistics Aesthetic
+   DESIGN TOKENS — Paper 3D White Skeuomorphism (Putih Kertas Premium)
    D&P PT. HSM (Delivery & Pick-Up)
    ===================================================================== */
 @theme {
     --font-sans: 'Plus Jakarta Sans Variable', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
-    /* Base Paper & Depth Palette */
-    --color-paper-50: #f8fafc;
-    --color-paper-100: #f1f5f9;
-    --color-paper-200: #e2e8f0;
-    --color-paper-300: #cbd5e1;
+    /* Base Paper White Palette */
+    --color-paper-50: #ffffff;
+    --color-paper-100: #fafafa;
+    --color-paper-200: #f4f5f8;
+    --color-paper-300: #e2e8f0;
+    --color-paper-400: #cbd5e1;
+    --color-paper-500: #94a3b8;
+    --color-paper-700: #475569;
     --color-paper-800: #1e293b;
     --color-paper-900: #0f172a;
-    --color-paper-950: #080d1a;
 
-    /* Corporate Deep Navy Layering */
-    --color-navy-950: #060c18;
-    --color-navy-900: #091322;
-    --color-navy-800: #0e1e36;
-    --color-navy-700: #152b4d;
-    --color-navy-600: #1c3b68;
-    --color-navy-500: #254d87;
-    --color-navy-400: #3366ad;
+    /* Brand Accent — Vibrant Warm Logistics Orange */
+    --color-brand: #ea580c;
+    --color-brand-soft: #f97316;
+    --color-brand-deep: #c2410c;
+    --color-glow: #fb923c;
 
-    /* Logistics Brand Orange & Amber Flare */
-    --color-brand: #ff6500;
-    --color-brand-soft: #ff8800;
-    --color-brand-deep: #d94e00;
-    --color-glow: #38bdf8;
-
-    --color-ink: #ffffff;
-    --color-ink-soft: #e2e8f0;
-    --color-ink-mute: #94a3b8;
+    --color-ink: #0f172a;
+    --color-ink-soft: #334155;
+    --color-ink-mute: #64748b;
 
     --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
     --ease-tactile: cubic-bezier(0.2, 0.9, 0.3, 1);
@@ -47,264 +40,298 @@
 
 @layer base {
     html {
-        color-scheme: dark;
+        color-scheme: light;
         -webkit-tap-highlight-color: transparent;
         text-rendering: optimizeLegibility;
     }
 
     body {
-        @apply min-h-dvh font-sans text-ink-soft antialiased;
-        background-color: #080f1d;
-        /* Skeuomorphic tactile fiber & layered physical lighting */
+        @apply min-h-dvh font-sans antialiased;
+        background-color: #f3f4f7;
+        color: #1e293b;
+        /* Skeuomorphic Warm Paper Texture & Overhead Diffuse Light */
         background-image:
-            radial-gradient(1100px 700px at 15% -10%, rgba(255, 101, 0, 0.18), transparent 60%),
-            radial-gradient(900px 650px at 85% 15%, rgba(37, 99, 235, 0.16), transparent 60%),
-            radial-gradient(800px 600px at 50% 115%, rgba(255, 136, 0, 0.12), transparent 55%),
-            radial-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+            radial-gradient(1000px 600px at 15% -5%, rgba(234, 88, 12, 0.05), transparent 60%),
+            radial-gradient(900px 500px at 85% 10%, rgba(37, 99, 235, 0.04), transparent 55%),
+            radial-gradient(800px 600px at 50% 110%, rgba(249, 115, 22, 0.04), transparent 50%),
+            radial-gradient(rgba(15, 23, 42, 0.035) 1px, transparent 1px);
         background-size: auto, auto, auto, 24px 24px;
         background-attachment: fixed;
         overscroll-behavior-y: none;
     }
 
     h1, h2, h3, h4 {
-        @apply text-ink tracking-tight font-extrabold;
+        @apply text-slate-900 tracking-tight font-extrabold;
     }
 
     ::selection {
-        background: #ff6500;
+        background: #ea580c;
         color: #ffffff;
     }
 
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-thumb {
-        background: linear-gradient(180deg, #2b456b, #152740);
+        background: #cbd5e1;
         border-radius: 99px;
-        border: 2px solid #080f1d;
+        border: 2px solid #f3f4f7;
     }
-    ::-webkit-scrollbar-thumb:hover { background: #ff6500; }
+    ::-webkit-scrollbar-thumb:hover { background: #ea580c; }
 
     [x-cloak] { display: none !important; }
+}
+
+/* =====================================================================
+   COMPATIBILITY ADAPTER — MAPPING DARK UTILITIES TO HIGH-CONTRAST PAPER WHITE
+   ===================================================================== */
+/* Map text-white to rich dark ink EXCEPT inside solid colored buttons & badges */
+.text-white:not(.btn-primary):not(.btn-primary *):not(.btn-danger):not(.btn-danger *):not(.btn-success):not(.btn-success *):not(.badge):not(.badge *):not([style*="background: linear-gradient"]):not([style*="background: linear-gradient"] *) {
+    color: #0f172a !important;
+}
+
+/* Elevate slate-400 to crisp legible charcoal-slate */
+.text-slate-400 {
+    color: #475569 !important;
+}
+.text-slate-300 {
+    color: #334155 !important;
+}
+
+/* Adapt translucent borders & card backgrounds to physical white paper */
+.border-white\/10,
+.border-white\/15,
+.border-white\/20,
+.border-white\/5 {
+    border-color: #e2e8f0 !important;
+}
+
+.bg-white\/\[0\.04\],
+.bg-white\/\[0\.03\],
+.bg-white\/\[0\.08\] {
+    background-color: #ffffff !important;
+}
+
+.bg-navy-950,
+.bg-navy-950\/80,
+.bg-navy-900,
+.bg-navy-800 {
+    background-color: #f8fafc !important;
 }
 
 /* =====================================================================
    SKEUOMORPHIC 3D PAPER SURFACES & TACTILE COMPONENTS
    ===================================================================== */
 @layer components {
-    /* 3D Embossed Physical Card (Card Bertumpuk Efek Kertas Tebal) */
+    /* 3D Embossed Physical White Paper Sheet */
     .glass,
     .paper-card {
         position: relative;
-        background: linear-gradient(168deg, #13243d 0%, #0d1a2d 55%, #081220 100%);
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        border-top: 1px solid rgba(255, 255, 255, 0.28); /* Highlight tepi atas kena cahaya */
-        border-bottom: 2px solid rgba(0, 0, 0, 0.65);     /* Bevel bayangan bawah */
+        background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+        border: 1px solid #e2e8f0;
+        border-top: 1.5px solid #ffffff; /* Specular highlight atas */
+        border-bottom: 2px solid #cbd5e1; /* Bevel bayangan fisik bawah */
         border-radius: 1.25rem;
         /* Multi-layer physical 3D drop shadow (Ambient + Direct + Contact) */
         box-shadow:
-            0 1px 0 0 rgba(255, 255, 255, 0.2) inset,
-            0 2px 4px 0 rgba(0, 0, 0, 0.4),
-            0 12px 28px -6px rgba(0, 0, 0, 0.65),
-            0 24px 48px -12px rgba(4, 8, 16, 0.75);
-        transition: transform 0.28s var(--ease-tactile), box-shadow 0.28s var(--ease-tactile);
-    }
-
-    /* Efek stempel/perforasi halus pada kartu kertas */
-    .paper-card::after,
-    .glass::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        border-radius: inherit;
-        pointer-events: none;
-        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+            0 1px 0 0 #ffffff inset,
+            0 1px 3px 0 rgba(15, 23, 42, 0.05),
+            0 6px 16px -2px rgba(15, 23, 42, 0.06),
+            0 14px 28px -6px rgba(15, 23, 42, 0.04);
+        transition: transform 0.24s var(--ease-tactile), box-shadow 0.24s var(--ease-tactile);
     }
 
     .glass-strong {
-        background: linear-gradient(175deg, #162a47 0%, #0e1b2f 60%, #091220 100%);
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        border-top: 1.5px solid rgba(255, 255, 255, 0.35);
-        border-bottom: 2px solid rgba(0, 0, 0, 0.7);
+        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        border: 1px solid #e2e8f0;
+        border-top: 1.5px solid #ffffff;
+        border-bottom: 2.5px solid #cbd5e1;
         border-radius: 1.5rem;
         box-shadow:
-            0 1px 0 0 rgba(255, 255, 255, 0.22) inset,
-            0 16px 36px -8px rgba(0, 0, 0, 0.75),
-            0 30px 60px -15px rgba(2, 5, 12, 0.85);
+            0 1px 0 0 #ffffff inset,
+            0 10px 25px -4px rgba(15, 23, 42, 0.08),
+            0 20px 40px -8px rgba(15, 23, 42, 0.06);
     }
 
     .glass-hover,
     .paper-hover {
-        transition: transform 0.24s var(--ease-tactile), box-shadow 0.24s var(--ease-tactile), border-color 0.24s;
+        transition: transform 0.22s var(--ease-tactile), box-shadow 0.22s var(--ease-tactile), border-color 0.22s;
     }
     .glass-hover:hover,
     .paper-hover:hover {
-        transform: translateY(-3px);
-        border-top-color: rgba(255, 136, 0, 0.55);
+        transform: translateY(-2.5px);
+        border-top-color: #ea580c;
         box-shadow:
-            0 1px 0 0 rgba(255, 255, 255, 0.3) inset,
-            0 8px 20px -4px rgba(255, 101, 0, 0.25),
-            0 20px 42px -10px rgba(0, 0, 0, 0.75);
+            0 1px 0 0 #ffffff inset,
+            0 8px 20px -3px rgba(15, 23, 42, 0.1),
+            0 4px 12px rgba(234, 88, 12, 0.12);
     }
 
     /* ------------------------------ 3D Skeuomorphic Tactile Buttons */
     .btn {
         @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold
-               select-none transition-all duration-200 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50;
+               select-none transition-all duration-150 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50;
         position: relative;
         transform-origin: center;
     }
     /* Efek tombol ditekan masuk ke dalam secara fisik */
     .btn:active:not(:disabled) {
         transform: translateY(2px) scale(0.98);
-        box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.6) !important;
+        box-shadow: inset 0 2px 4px rgba(15, 23, 42, 0.25) !important;
     }
 
     .btn-primary {
-        @apply text-white;
-        background: linear-gradient(180deg, #ff8c26 0%, #ff6500 52%, #d84b00 100%);
-        border: 1px solid #ff7a1a;
-        border-top: 1.5px solid #ffba7a;
-        border-bottom: 2px solid #993300;
+        color: #ffffff !important;
+        background: linear-gradient(180deg, #ff7a1a 0%, #ea580c 55%, #c2410c 100%);
+        border: 1px solid #ea580c;
+        border-top: 1.5px solid #fdba74;
+        border-bottom: 2px solid #9a3412;
         box-shadow:
             0 1px 0 0 rgba(255, 255, 255, 0.4) inset,
-            0 4px 14px -2px rgba(255, 101, 0, 0.75),
-            0 8px 20px -4px rgba(0, 0, 0, 0.5);
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+            0 3px 8px -1px rgba(234, 88, 12, 0.4),
+            0 6px 14px -3px rgba(15, 23, 42, 0.12);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
     }
     .btn-primary:hover:not(:disabled) {
-        background: linear-gradient(180deg, #ffa047 0%, #ff7314 52%, #e55200 100%);
+        background: linear-gradient(180deg, #ff8826 0%, #f97316 55%, #d94e00 100%);
         box-shadow:
             0 1px 0 0 rgba(255, 255, 255, 0.5) inset,
-            0 6px 20px -2px rgba(255, 101, 0, 0.9),
-            0 12px 26px -6px rgba(0, 0, 0, 0.6);
-        filter: brightness(1.04);
+            0 4px 12px -1px rgba(234, 88, 12, 0.55),
+            0 8px 18px -4px rgba(15, 23, 42, 0.16);
     }
 
     .btn-ghost {
-        @apply text-ink-soft;
-        background: linear-gradient(180deg, #1b3050 0%, #112038 100%);
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        border-top: 1px solid rgba(255, 255, 255, 0.28);
-        border-bottom: 2px solid rgba(0, 0, 0, 0.6);
+        color: #1e293b !important;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        border: 1px solid #cbd5e1;
+        border-top: 1.5px solid #ffffff;
+        border-bottom: 2px solid #94a3b8;
         box-shadow:
-            0 1px 0 0 rgba(255, 255, 255, 0.15) inset,
-            0 3px 8px -2px rgba(0, 0, 0, 0.45);
+            0 1px 0 0 #ffffff inset,
+            0 2px 4px -1px rgba(15, 23, 42, 0.08);
     }
     .btn-ghost:hover:not(:disabled) {
-        background: linear-gradient(180deg, #243f68 0%, #172a48 100%);
-        color: #ffffff;
-        border-color: rgba(255, 255, 255, 0.25);
+        background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
+        color: #0f172a !important;
+        border-color: #94a3b8;
+        box-shadow:
+            0 1px 0 0 #ffffff inset,
+            0 3px 8px -2px rgba(15, 23, 42, 0.12);
     }
 
     .btn-danger {
-        @apply text-white;
-        background: linear-gradient(180deg, #ef4444 0%, #dc2626 55%, #b91c1c 100%);
-        border: 1px solid #f87171;
+        color: #ffffff !important;
+        background: linear-gradient(180deg, #f87171 0%, #ef4444 55%, #dc2626 100%);
+        border: 1px solid #dc2626;
         border-top: 1.5px solid #fca5a5;
-        border-bottom: 2px solid #7f1d1d;
+        border-bottom: 2px solid #991b1b;
         box-shadow:
             0 1px 0 0 rgba(255, 255, 255, 0.35) inset,
-            0 4px 14px -2px rgba(220, 38, 38, 0.65);
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+            0 3px 8px -1px rgba(220, 38, 38, 0.35);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
     }
     .btn-success {
-        @apply text-white;
-        background: linear-gradient(180deg, #10b981 0%, #059669 55%, #047857 100%);
-        border: 1px solid #34d399;
+        color: #ffffff !important;
+        background: linear-gradient(180deg, #34d399 0%, #10b981 55%, #059669 100%);
+        border: 1px solid #059669;
         border-top: 1.5px solid #6ee7b7;
         border-bottom: 2px solid #064e3b;
         box-shadow:
             0 1px 0 0 rgba(255, 255, 255, 0.35) inset,
-            0 4px 14px -2px rgba(5, 150, 105, 0.65);
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+            0 3px 8px -1px rgba(5, 150, 105, 0.35);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
     }
 
     .btn-sm { @apply rounded-lg px-3 py-1.5 text-xs; }
     .btn-lg { @apply rounded-2xl px-6 py-3.5 text-base; }
     .btn-block { @apply w-full; }
 
-    /* ------------------------------ 3D Inset Input Fields */
+    /* ------------------------------ 3D Inset Engraved Input Fields */
     .label {
-        @apply mb-1.5 block text-[11px] font-extrabold uppercase tracking-wider text-slate-400;
+        @apply mb-1.5 block text-[11px] font-extrabold uppercase tracking-wider text-slate-600;
         letter-spacing: 0.08em;
     }
 
     .input {
-        @apply w-full rounded-xl px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 outline-none transition;
-        background: #08111e;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-top: 2px solid rgba(0, 0, 0, 0.7); /* Efek lubang input masuk ke dalam */
+        @apply w-full rounded-xl px-3.5 py-2.5 text-sm outline-none transition;
+        background: #ffffff;
+        color: #0f172a;
+        border: 1px solid #cbd5e1;
+        border-top: 2px solid #94a3b8; /* Efek lekukan lubang input masuk ke dalam kertas */
         box-shadow:
-            inset 0 3px 6px rgba(0, 0, 0, 0.6),
-            inset 0 1px 2px rgba(0, 0, 0, 0.8),
-            0 1px 0 rgba(255, 255, 255, 0.08);
+            inset 0 2px 4px rgba(15, 23, 42, 0.06),
+            0 1px 0 #ffffff;
+    }
+    .input::placeholder {
+        color: #94a3b8;
     }
     .input:focus {
-        border-color: #ff6500;
+        border-color: #ea580c;
+        border-top-color: #ea580c;
         box-shadow:
-            inset 0 2px 4px rgba(0, 0, 0, 0.6),
-            0 0 0 3px rgba(255, 101, 0, 0.28),
-            0 1px 0 rgba(255, 255, 255, 0.12);
+            inset 0 1px 2px rgba(15, 23, 42, 0.04),
+            0 0 0 3px rgba(234, 88, 12, 0.18),
+            0 1px 0 #ffffff;
     }
-    .input[disabled] { opacity: 0.55; }
+    .input[disabled] { opacity: 0.6; background-color: #f1f5f9; }
     select.input {
         @apply pr-9;
         appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23ff9a4d'%3E%3Cpath d='M5.5 7.5 10 12l4.5-4.5'/%3E%3C/svg%3E");
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23ea580c'%3E%3Cpath d='M5.5 7.5 10 12l4.5-4.5'/%3E%3C/svg%3E");
         background-repeat: no-repeat;
         background-position: right 0.75rem center;
         background-size: 1.25rem;
     }
-    select.input option { background: #0c182a; color: #fff; }
+    select.input option { background: #ffffff; color: #0f172a; }
     textarea.input { @apply min-h-24 resize-y; }
     input[type='checkbox'].check, input[type='radio'].check {
-        @apply h-4 w-4 rounded border-white/20 align-middle;
-        background-color: #0c182a;
+        @apply h-4 w-4 rounded border-slate-300 align-middle;
+        background-color: #ffffff;
         accent-color: var(--color-brand);
     }
-    input[type='date'], input[type='time'] { color-scheme: dark; }
+    input[type='date'], input[type='time'] { color-scheme: light; }
 
-    /* ------------------------------ 3D Skeuomorphic Physical Badges */
+    /* ------------------------------ 3D Physical Badges & Stamps */
     .badge {
         @apply inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-1 text-[11px] font-extrabold tracking-wide;
         border-radius: 6px;
-        box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.25) inset, 0 2px 5px rgba(0, 0, 0, 0.35);
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.35) inset, 0 1px 3px rgba(15, 23, 42, 0.12);
+        text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
     }
     .badge-success {
-        background: linear-gradient(180deg, #10b981 0%, #047857 100%);
-        color: #ffffff;
-        border: 1px solid #059669;
+        background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+        color: #ffffff !important;
+        border: 1px solid #047857;
         border-top-color: #6ee7b7;
     }
     .badge-warning {
-        background: linear-gradient(180deg, #f59e0b 0%, #b45309 100%);
-        color: #ffffff;
-        border: 1px solid #d97706;
+        background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+        color: #ffffff !important;
+        border: 1px solid #b45309;
         border-top-color: #fcd34d;
     }
     .badge-danger {
-        background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
-        color: #ffffff;
-        border: 1px solid #dc2626;
+        background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+        color: #ffffff !important;
+        border: 1px solid #b91c1c;
         border-top-color: #fca5a5;
     }
     .badge-info {
         background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
-        color: #ffffff;
-        border: 1px solid #0284c7;
+        color: #ffffff !important;
+        border: 1px solid #075985;
         border-top-color: #7dd3fc;
     }
     .badge-orange {
-        background: linear-gradient(180deg, #ff7a1a 0%, #d84b00 100%);
-        color: #ffffff;
-        border: 1px solid #ff6500;
-        border-top-color: #ffba7a;
+        background: linear-gradient(180deg, #f97316 0%, #ea580c 100%);
+        color: #ffffff !important;
+        border: 1px solid #c2410c;
+        border-top-color: #fdba74;
     }
     .badge-muted {
-        background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
-        color: #cbd5e1;
-        border: 1px solid #475569;
-        border-top-color: #64748b;
+        background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+        color: #334155 !important;
+        border: 1px solid #cbd5e1;
+        border-top-color: #ffffff;
+        text-shadow: none;
     }
 
     /* ------------------------------ Paper Tables & 3D Mobile Cards */
@@ -313,32 +340,32 @@
     }
     @media (min-width: 768px) {
         .table-surface {
-            background: linear-gradient(168deg, #13243d 0%, #0d1a2d 55%, #081220 100%);
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            border-top: 1.5px solid rgba(255, 255, 255, 0.28);
-            border-bottom: 2px solid rgba(0, 0, 0, 0.65);
+            background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+            border: 1px solid #e2e8f0;
+            border-top: 1.5px solid #ffffff;
+            border-bottom: 2px solid #cbd5e1;
             border-radius: 1.25rem;
             padding: 1.35rem;
             box-shadow:
-                0 1px 0 0 rgba(255, 255, 255, 0.2) inset,
-                0 12px 28px -6px rgba(0, 0, 0, 0.65);
+                0 1px 0 0 #ffffff inset,
+                0 4px 16px -2px rgba(15, 23, 42, 0.06);
         }
     }
 
-    .tbl-wrap { @apply overflow-x-auto rounded-xl; }
+    .tbl-wrap { @apply overflow-x-auto rounded-xl border border-slate-200; }
     .tbl { @apply w-full min-w-full text-left text-sm; }
     .tbl thead th {
-        @apply whitespace-nowrap px-4 py-3 text-[11px] font-extrabold uppercase tracking-wider text-slate-300;
-        background: linear-gradient(180deg, #1a2f4d 0%, #122137 100%);
-        border-bottom: 2px solid rgba(0, 0, 0, 0.5);
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        @apply whitespace-nowrap px-4 py-3 text-[11px] font-extrabold uppercase tracking-wider text-slate-700;
+        background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+        border-bottom: 2px solid #cbd5e1;
+        box-shadow: inset 0 1px 0 #ffffff;
     }
     .tbl tbody td {
-        @apply px-4 py-3 align-middle text-ink-soft;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        @apply px-4 py-3 align-middle text-slate-800;
+        border-bottom: 1px solid #e2e8f0;
     }
-    .tbl tbody tr { transition: background 0.2s; }
-    .tbl tbody tr:hover { background: rgba(255, 101, 0, 0.08); }
+    .tbl tbody tr { transition: background 0.15s; }
+    .tbl tbody tr:hover { background: #fff7ed; }
     .tbl tbody tr:last-child td { border-bottom: none; }
 
     /* Automatic 3D Paper Sheet on Mobile Screens (< 768px) */
@@ -346,6 +373,7 @@
         .tbl-wrap {
             overflow-x: visible !important;
             border-radius: 0 !important;
+            border: none !important;
         }
         .tbl,
         .tbl tbody {
@@ -364,15 +392,15 @@
             width: 100% !important;
             padding: 1.15rem 1.25rem !important;
             border-radius: 1.25rem !important;
-            /* 3D Paper Card with top specular line and bottom paper drop */
-            background: linear-gradient(172deg, #152742 0%, #0e1b2f 52%, #08111e 100%) !important;
-            border: 1px solid rgba(255, 255, 255, 0.16) !important;
-            border-top: 1.5px solid rgba(255, 255, 255, 0.32) !important;
-            border-bottom: 3px solid rgba(0, 0, 0, 0.75) !important;
+            /* 3D Paper White Card with top highlight and bottom rim */
+            background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%) !important;
+            border: 1px solid #e2e8f0 !important;
+            border-top: 1.5px solid #ffffff !important;
+            border-bottom: 2.5px solid #cbd5e1 !important;
             box-shadow:
-                0 1px 0 0 rgba(255, 255, 255, 0.2) inset,
-                0 8px 24px -4px rgba(0, 0, 0, 0.7),
-                0 16px 36px -8px rgba(0, 0, 0, 0.8) !important;
+                0 1px 0 0 #ffffff inset,
+                0 4px 14px -2px rgba(15, 23, 42, 0.07),
+                0 10px 24px -4px rgba(15, 23, 42, 0.05) !important;
             position: relative;
             overflow: hidden;
         }
@@ -383,7 +411,7 @@
             left: 0;
             right: 0;
             height: 3px;
-            background: linear-gradient(90deg, #ff8800, #ff6500 50%, transparent 90%);
+            background: linear-gradient(90deg, #f97316, #ea580c 50%, #c2410c 100%);
         }
         .tbl tbody td {
             display: flex !important;
@@ -392,9 +420,10 @@
             gap: 1rem !important;
             width: 100% !important;
             padding: 0.6rem 0 !important;
-            border-bottom: 1px dashed rgba(255, 255, 255, 0.1) !important;
+            border-bottom: 1px dashed #e2e8f0 !important;
             text-align: right !important;
             white-space: normal !important;
+            color: #0f172a !important;
         }
         .tbl tbody td:last-child {
             border-bottom: none !important;
@@ -406,7 +435,7 @@
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.06em;
-            color: #94a3b8;
+            color: #64748b;
             text-align: left;
             flex-shrink: 0;
             max-width: 44%;
@@ -422,11 +451,11 @@
             padding-top: 0.1rem !important;
             padding-bottom: 0.75rem !important;
             margin-bottom: 0.2rem !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+            border-bottom: 1px solid #e2e8f0 !important;
         }
         .tbl tbody td[data-card-header]::before {
             margin-bottom: 0.25rem;
-            color: #ff9a4d;
+            color: #ea580c;
             max-width: 100%;
         }
         .tbl tbody td[data-card-actions] {
@@ -435,7 +464,7 @@
             text-align: left !important;
             padding-top: 0.85rem !important;
             margin-top: 0.2rem !important;
-            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            border-top: 1px solid #e2e8f0;
             border-bottom: none !important;
         }
         .tbl tbody td[data-card-actions]::before {
@@ -456,18 +485,17 @@
     }
 
     /* ------------------------------ Visual Ornaments & Rulers */
-    .stat-ring { background: conic-gradient(var(--color-brand) calc(var(--p, 0) * 1%), rgba(255, 255, 255, 0.08) 0); }
+    .stat-ring { background: conic-gradient(var(--color-brand) calc(var(--p, 0) * 1%), #e2e8f0 0); }
     .divider {
-        height: 2px;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.18), transparent);
-        border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+        height: 1px;
+        background: #e2e8f0;
     }
     .orn-line {
         height: 4px;
         width: 48px;
         border-radius: 99px;
-        background: linear-gradient(90deg, #ff8800, #ff6500);
-        box-shadow: 0 2px 8px rgba(255, 101, 0, 0.65), 0 1px 0 rgba(255, 255, 255, 0.3) inset;
+        background: linear-gradient(90deg, #f97316, #ea580c);
+        box-shadow: 0 2px 6px rgba(234, 88, 12, 0.3);
     }
 
     /* =================================================================
@@ -475,46 +503,44 @@
        ================================================================= */
     .sidebar {
         width: 17rem;
-        transition: width 0.4s var(--ease-tactile);
-        background: linear-gradient(180deg, #112036 0%, #0a1424 60%, #060d18 100%);
-        border-right: 1px solid rgba(255, 255, 255, 0.12);
-        box-shadow: 12px 0 40px -15px rgba(0, 0, 0, 0.85);
+        transition: width 0.35s var(--ease-tactile);
+        background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+        border-right: 1px solid #e2e8f0;
+        box-shadow: 4px 0 20px rgba(15, 23, 42, 0.05);
     }
     .sidebar.is-collapsed { width: 5.25rem; }
 
     .nav-item {
         position: relative; display: flex; align-items: center; gap: 0.85rem; overflow: hidden;
         border-radius: 0.9rem; padding: 0.72rem 0.95rem; font-size: 0.875rem; font-weight: 700;
-        color: var(--color-ink-mute); white-space: nowrap;
-        transition: color 0.25s, background 0.3s, transform 0.25s var(--ease-tactile);
+        color: #475569; white-space: nowrap;
+        transition: color 0.2s, background 0.2s, transform 0.2s var(--ease-tactile);
     }
     .nav-item:hover {
-        color: #ffffff;
-        background: linear-gradient(90deg, rgba(255, 101, 0, 0.16), rgba(255, 255, 255, 0.03));
-        border: 1px solid rgba(255, 101, 0, 0.25);
-        transform: translateX(3px);
+        color: #ea580c;
+        background: #fff7ed;
+        border: 1px solid #ffedd5;
+        transform: translateX(2px);
     }
     .nav-item.is-active {
-        color: #ffffff;
-        background: linear-gradient(90deg, rgba(255, 101, 0, 0.28) 0%, rgba(37, 99, 235, 0.12) 100%);
-        border: 1px solid rgba(255, 101, 0, 0.45);
-        border-top: 1px solid rgba(255, 136, 0, 0.6);
-        box-shadow:
-            0 1px 0 rgba(255, 255, 255, 0.2) inset,
-            0 4px 12px rgba(255, 101, 0, 0.35);
+        color: #c2410c;
+        background: linear-gradient(90deg, #ffedd5 0%, #fef3c7 100%);
+        border: 1px solid #fdba74;
+        border-top: 1px solid #ffffff;
+        box-shadow: 0 2px 6px rgba(234, 88, 12, 0.15);
     }
     .nav-item.is-active .nav-icon {
-        color: #ff9a4d;
+        color: #ea580c;
         transform: scale(1.1);
-        filter: drop-shadow(0 2px 6px rgba(255, 101, 0, 0.8));
+        filter: drop-shadow(0 1px 3px rgba(234, 88, 12, 0.4));
     }
     .sidebar.is-collapsed .nav-label, .sidebar.is-collapsed .side-hide { opacity: 0; width: 0; overflow: hidden; pointer-events: none; }
     .sidebar.is-collapsed .nav-item { justify-content: center; padding-inline: 0; }
-    .nav-group { @apply px-3 pb-1.5 pt-4 text-[10px] font-black uppercase tracking-[0.18em] text-slate-400; }
+    .nav-group { @apply px-3 pb-1.5 pt-4 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500; }
     .sidebar.is-collapsed .nav-group { opacity: 0; height: 0.5rem; padding: 0; overflow: hidden; }
 
     /* =================================================================
-       SKEUOMORPHIC 3D CONSOLE BOTTOM DOCK (Mobile First)
+       SKEUOMORPHIC 3D CONSOLE BOTTOM DOCK (Mobile First - White Paper)
        ================================================================= */
     .dock-wrap {
         position: fixed;
@@ -533,12 +559,12 @@
         padding-bottom: env(safe-area-inset-bottom, 0px);
         pointer-events: auto;
         border-radius: 0;
-        /* Beveled 3D Console Dock */
-        background: linear-gradient(180deg, #162944 0%, #0c182a 45%, #060e1a 100%);
-        border-top: 1.5px solid rgba(255, 255, 255, 0.25);
+        /* Beveled 3D White Console Dock */
+        background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+        border-top: 1.5px solid #e2e8f0;
         box-shadow:
-            0 -1px 0 rgba(255, 255, 255, 0.2) inset,
-            0 -8px 28px rgba(0, 0, 0, 0.85);
+            0 -1px 0 #ffffff inset,
+            0 -4px 20px rgba(15, 23, 42, 0.08);
         overflow: hidden;
     }
     .dock-light-stage {
@@ -559,44 +585,44 @@
         align-items: flex-end;
         justify-content: center;
         transform: translateX(calc(var(--i) * 100%));
-        transition: transform 0.42s var(--ease-tactile);
+        transition: transform 0.38s var(--ease-tactile);
     }
-    /* Upward Skeuomorphic Light Cone */
+    /* Upward Light Beam on Paper White */
     .light-beam {
         position: absolute;
         bottom: 0;
-        left: 4%;
-        right: 4%;
+        left: 6%;
+        right: 6%;
         height: 100%;
         background:
-            radial-gradient(ellipse 75% 95% at 50% 100%, rgba(255, 145, 40, 0.45) 0%, rgba(255, 101, 0, 0.18) 50%, transparent 80%),
-            linear-gradient(0deg, rgba(255, 120, 20, 0.3) 0%, transparent 85%);
+            radial-gradient(ellipse 75% 95% at 50% 100%, rgba(234, 88, 12, 0.22) 0%, rgba(249, 115, 22, 0.08) 50%, transparent 80%),
+            linear-gradient(0deg, rgba(234, 88, 12, 0.12) 0%, transparent 85%);
         clip-path: polygon(20% 100%, 80% 100%, 98% 0%, 2% 0%);
         filter: blur(1px);
         transform-origin: bottom center;
     }
     .light-bloom {
         position: absolute;
-        bottom: -6px;
+        bottom: -4px;
         width: 80%;
-        height: 24px;
+        height: 20px;
         border-radius: 999px;
-        background: radial-gradient(circle at 50% 100%, rgba(255, 200, 120, 0.85), rgba(255, 101, 0, 0.4) 60%, transparent 85%);
-        filter: blur(4px);
+        background: radial-gradient(circle at 50% 100%, rgba(251, 146, 60, 0.6), rgba(234, 88, 12, 0.25) 60%, transparent 85%);
+        filter: blur(3px);
     }
     .light-source {
         position: relative;
         z-index: 2;
-        width: 60%;
-        height: 3.5px;
-        border-radius: 4px 4px 0 0;
-        background: linear-gradient(90deg, #ff8800, #fff7ed 50%, #ff6500);
+        width: 55%;
+        height: 3px;
+        border-radius: 3px 3px 0 0;
+        background: linear-gradient(90deg, #f97316, #ea580c);
         box-shadow:
-            0 -2px 10px 2px rgba(255, 150, 50, 0.95),
-            0 -6px 20px 4px rgba(255, 101, 0, 0.75);
+            0 -1px 8px 1px rgba(234, 88, 12, 0.6),
+            0 -3px 12px 2px rgba(249, 115, 22, 0.4);
     }
     .light-track.is-moving .light-beam {
-        animation: light-flare 0.42s var(--ease-tactile);
+        animation: light-flare 0.38s var(--ease-tactile);
     }
     @keyframes light-flare {
         0% { transform: scaleX(1); opacity: 1; }
@@ -623,7 +649,7 @@
         gap: 0.2rem;
         height: 100%;
         width: 100%;
-        color: var(--color-ink-mute);
+        color: #64748b;
         font-size: 0.65rem;
         font-weight: 800;
         letter-spacing: 0.02em;
@@ -631,20 +657,20 @@
         border: 0;
         cursor: pointer;
         text-decoration: none;
-        transition: color 0.25s;
+        transition: color 0.2s;
     }
     .dock-item .dock-icon {
-        transition: transform 0.35s var(--ease-spring), color 0.25s;
+        transition: transform 0.3s var(--ease-spring), color 0.2s;
     }
-    .dock-item.is-active { color: #ffffff; }
+    .dock-item.is-active { color: #ea580c; }
     .dock-item.is-active .dock-icon {
-        color: #ff9a4d;
+        color: #ea580c;
         transform: translateY(-2px) scale(1.12);
-        filter: drop-shadow(0 2px 8px rgba(255, 101, 0, 0.85));
+        filter: drop-shadow(0 2px 6px rgba(234, 88, 12, 0.4));
     }
     .dock-item.is-active .dock-label {
-        color: #ffffff;
-        text-shadow: 0 0 10px rgba(255, 136, 0, 0.8);
+        color: #ea580c;
+        font-weight: 800;
     }
     .dock-item:active .dock-icon { transform: scale(0.9); }
 
@@ -655,19 +681,19 @@
         max-height: 78dvh; overflow-y: auto;
     }
 
-    /* Topbar Skeuomorphic Bar */
+    /* Topbar */
     .topbar {
-        background: linear-gradient(180deg, #13243d 0%, #0d1a2d 100%);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        background: #ffffff;
+        border-bottom: 1px solid #e2e8f0;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
     }
 
     /* Page Entrance Animation */
-    .rise { animation: rise-in 0.55s var(--ease-tactile) both; }
-    .rise-2 { animation-delay: 0.06s; }
-    .rise-3 { animation-delay: 0.12s; }
-    .rise-4 { animation-delay: 0.18s; }
-    @keyframes rise-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+    .rise { animation: rise-in 0.45s var(--ease-tactile) both; }
+    .rise-2 { animation-delay: 0.05s; }
+    .rise-3 { animation-delay: 0.1s; }
+    .rise-4 { animation-delay: 0.15s; }
+    @keyframes rise-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 
     .pulse-dot { position: relative; }
     .pulse-dot::after {
@@ -682,122 +708,75 @@
         color: #0f172a;
         border-radius: 0.75rem;
         box-shadow:
-            0 1px 3px rgba(0, 0, 0, 0.1),
-            0 12px 28px -4px rgba(0, 0, 0, 0.4),
-            0 32px 64px -12px rgba(0, 0, 0, 0.6);
+            0 1px 3px rgba(15, 23, 42, 0.08),
+            0 8px 24px -4px rgba(15, 23, 42, 0.06);
         border: 1px solid #e2e8f0;
     }
 }
 
 /* =====================================================================
-   SWEETALERT2 — Skeuomorphic 3D Dialog Theme
+   SWEETALERT2 — Skeuomorphic 3D Paper Dialog Theme
    ===================================================================== */
-.swal2-container { backdrop-filter: blur(6px); }
+.swal2-container { backdrop-filter: blur(4px); }
 .swal2-popup.hsm-swal {
-    background: linear-gradient(175deg, #152744 0%, #0d1a2d 60%, #08111e 100%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    border-top: 2px solid rgba(255, 255, 255, 0.35) !important;
-    border-bottom: 3px solid rgba(0, 0, 0, 0.8) !important;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-top: 2px solid #ffffff !important;
+    border-bottom: 3px solid #cbd5e1 !important;
     border-radius: 1.5rem !important;
-    color: #e2e8f0 !important;
+    color: #0f172a !important;
     box-shadow:
-        0 1px 0 rgba(255, 255, 255, 0.2) inset,
-        0 24px 60px -12px rgba(0, 0, 0, 0.9),
-        0 0 50px -10px rgba(255, 101, 0, 0.35) !important;
+        0 1px 0 #ffffff inset,
+        0 16px 40px -8px rgba(15, 23, 42, 0.15) !important;
     font-family: var(--font-sans) !important;
 }
-.hsm-swal .swal2-title { color: #ffffff !important; font-weight: 800; font-size: 1.3rem; }
-.hsm-swal .swal2-html-container { color: #cbd5e1 !important; }
+.hsm-swal .swal2-title { color: #0f172a !important; font-weight: 800; font-size: 1.3rem; }
+.hsm-swal .swal2-html-container { color: #475569 !important; }
 .hsm-swal .swal2-confirm {
-    background: linear-gradient(180deg, #ff8c26 0%, #ff6500 52%, #d84b00 100%) !important;
-    border: 1px solid #ff7a1a !important;
-    border-top: 1.5px solid #ffba7a !important;
+    background: linear-gradient(180deg, #ff7a1a 0%, #ea580c 55%, #c2410c 100%) !important;
+    border: 1px solid #ea580c !important;
+    border-top: 1.5px solid #fdba74 !important;
     border-radius: 0.85rem !important;
     font-weight: 800 !important;
-    box-shadow: 0 4px 16px rgba(255, 101, 0, 0.7) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35) !important;
 }
 .hsm-swal .swal2-cancel {
-    background: linear-gradient(180deg, #243f68 0%, #172a48 100%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%) !important;
+    border: 1px solid #cbd5e1 !important;
     border-radius: 0.85rem !important;
-    color: #cbd5e1 !important;
+    color: #334155 !important;
     font-weight: 700 !important;
 }
 .hsm-swal .swal2-input, .hsm-swal .swal2-textarea {
-    background: #08111e !important;
-    color: #ffffff !important;
-    border: 1px solid rgba(255, 255, 255, 0.14) !important;
-    border-top: 2px solid rgba(0, 0, 0, 0.7) !important;
-    box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.6) !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+    border-top: 2px solid #94a3b8 !important;
+    box-shadow: inset 0 2px 4px rgba(15, 23, 42, 0.06) !important;
     border-radius: 0.75rem !important;
 }
 .swal2-popup.hsm-toast {
-    background: linear-gradient(175deg, #152744 0%, #0d1a2d 100%) !important;
-    color: #ffffff !important;
-    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #e2e8f0 !important;
     border-radius: 1rem !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7) !important;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12) !important;
 }
-.hsm-toast .swal2-title { color: #ffffff !important; font-size: 0.9rem !important; font-weight: 700; }
+.hsm-toast .swal2-title { color: #0f172a !important; font-size: 0.9rem !important; font-weight: 700; }
 .swal2-timer-progress-bar { background: var(--color-brand) !important; }
 
 /* =====================================================================
-   LEAFLET MAP CONTAINER — Skeuomorphic Beveled Screen
+   LEAFLET MAP CONTAINER — Paper White Beveled Frame
    ===================================================================== */
 .leaflet-container {
     position: relative !important;
     width: 100% !important;
     min-height: 240px;
-    background: #dbeafe !important;
-    font-family: var(--font-sans) !important;
-    border-radius: inherit;
+    border-radius: 1rem;
+    overflow: hidden;
     z-index: 10;
-    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
-}
-.leaflet-container img.leaflet-tile {
-    mix-blend-mode: normal !important;
-    filter: none !important;
-    max-width: none !important;
-    max-height: none !important;
-}
-.leaflet-popup-content-wrapper, .leaflet-popup-tip {
-    background: linear-gradient(180deg, #162944 0%, #0d1a2d 100%) !important;
-    color: #f8fafc !important;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-top: 1.5px solid rgba(255, 255, 255, 0.35);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6) !important;
-}
-.leaflet-popup-content { margin: 0.7rem 0.9rem; font-size: 0.8rem; line-height: 1.45; }
-.leaflet-control-attribution {
-    background: rgba(8, 16, 28, 0.88) !important;
-    color: #cbd5e1 !important;
-    font-size: 10px !important;
-    padding: 2px 6px !important;
-    border-radius: 6px 0 0 0;
-}
-.leaflet-control-attribution a { color: #ff9a4d !important; }
-.leaflet-bar a {
-    background: #102138 !important;
-    color: #ffffff !important;
-    border-bottom-color: rgba(255, 255, 255, 0.14) !important;
-}
-.leaflet-bar a:hover { background: var(--color-brand) !important; color: #ffffff !important; }
-.leaflet-control-layers {
-    background: #102138 !important;
-    color: #f1f5f9 !important;
-    border: 1px solid rgba(255, 255, 255, 0.18) !important;
-    border-radius: 0.75rem !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
-}
-.leaflet-control-layers-expanded { padding: 6px 10px !important; font-size: 11px !important; }
-.hsm-pin {
-    width: 20px; height: 20px; border-radius: 50%; border: 3px solid #ffffff;
-    box-shadow: 0 0 0 5px var(--pin, rgba(255, 101, 0, 0.4)), 0 4px 12px rgba(0, 0, 0, 0.7);
-    background: var(--pin-solid, #ff6500);
-}
-.hsm-pin.me { --pin-solid: #00d2ff; --pin: rgba(0, 210, 255, 0.4); }
-
-/* Print */
-@media print {
-    body { background: #ffffff !important; }
+    border: 1px solid #e2e8f0;
+    border-bottom: 2px solid #cbd5e1;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
 }

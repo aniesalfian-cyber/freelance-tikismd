@@ -48,11 +48,11 @@
              x-transition:leave-start="translate-y-0 opacity-100"
              x-transition:leave-end="translate-y-full opacity-0"
              class="more-sheet glass-strong">
-            <div class="w-12 h-1.5 bg-white/20 rounded-full mx-auto mb-4"></div>
+            <div class="w-12 h-1.5 bg-slate-300 rounded-full mx-auto mb-4"></div>
             <div class="flex items-center justify-between mb-3 px-1">
                 <div>
-                    <div class="text-sm font-extrabold text-white">Menu Navigasi Lengkap</div>
-                    <div class="text-xs text-slate-400">{{ auth()->user()->roleLabel() }}</div>
+                    <div class="text-sm font-extrabold text-slate-900">Menu Navigasi Lengkap</div>
+                    <div class="text-xs text-slate-500">{{ auth()->user()->roleLabel() }}</div>
                 </div>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
@@ -64,8 +64,8 @@
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                 @foreach($moreItems as $mItem)
                     <a href="{{ $mItem['url'] }}"
-                       class="flex items-center gap-2.5 p-3 rounded-xl border transition {{ $mItem['active'] ? 'bg-orange-500/20 border-orange-500/50 text-white' : 'bg-white/[0.04] border-white/10 text-slate-300 hover:text-white' }}">
-                        <x-icon :name="$mItem['icon']" class="w-5 h-5 text-orange-400 flex-none" />
+                       class="flex items-center gap-2.5 p-3 rounded-xl border transition {{ $mItem['active'] ? 'bg-orange-50 border-orange-300 text-orange-950 font-bold' : 'bg-white border-slate-200 text-slate-700 hover:text-slate-950 shadow-xs' }}">
+                        <x-icon :name="$mItem['icon']" class="w-5 h-5 text-orange-500 flex-none" />
                         <span class="text-xs font-bold truncate">{{ $mItem['label'] }}</span>
                     </a>
                 @endforeach
