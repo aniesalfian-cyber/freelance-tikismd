@@ -2,6 +2,23 @@
 
 @section('content')
 <div class="max-w-xl mx-auto space-y-5">
+    <!-- Courier Division & Vehicle Operational Card -->
+    @php $curUser = auth()->user(); @endphp
+    <div class="glass p-4 border border-slate-200 rise flex items-center justify-between gap-3 shadow-xs">
+        <div class="space-y-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+                <span class="badge {{ $curUser->divisionBadge() }}">{{ $curUser->specialization }}</span>
+                <span class="badge badge-muted font-bold">{{ $curUser->vehicleName() }}</span>
+            </div>
+            <div class="text-xs text-slate-600 font-medium truncate">
+                Tugas Operasional: <b class="text-slate-900">{{ $curUser->operationalScope() }}</b>
+            </div>
+        </div>
+        <div class="w-10 h-10 rounded-2xl bg-orange-50 border border-orange-200 flex items-center justify-center text-orange-600 flex-none shadow-xs">
+            <x-icon name="pin" class="w-5 h-5" />
+        </div>
+    </div>
+
     <!-- Attendance Status Banner -->
     <div class="glass p-5 border {{ $attendance ? 'border-emerald-500/40' : 'border-orange-500/45' }} rise">
         <div class="flex items-center justify-between gap-3">

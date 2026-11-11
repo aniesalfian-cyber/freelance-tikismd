@@ -23,6 +23,7 @@ class TaskAssignmentController extends Controller
 
         $base = TaskAssignment::query()
             ->when(! $range, fn ($q) => $q->whereDate('assigned_date', $date))
+            ->when($request->filled('division'), fn ($q) => $q->whereHas('user', fn ($u) => $u->where('specialization', $request->division)))
             ->when($request->filled('user_id'), fn ($q) => $q->where('user_id', $request->user_id))
             ->when($request->filled('outlet_id'), fn ($q) => $q->where('outlet_id', $request->outlet_id))
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
@@ -31,7 +32,7 @@ class TaskAssignmentController extends Controller
 
         $counts = (clone $base)->select('status', DB::raw('COUNT(*) as c'))->groupBy('status')->pluck('c', 'status');
 
-        $tasks = (clone $base)->with(['user:id,name', 'outlet:id,name'])
+        $tasks = (clone $base)->with(['user:id,name,specialization', 'outlet:id,name'])
             ->orderByDesc('assigned_date')->orderBy('scheduled_start_time')->paginate(20)->withQueryString();
 
         return view('hrd.tasks.index', [
@@ -39,8 +40,9 @@ class TaskAssignmentController extends Controller
             'counts' => $counts,
             'date' => $date,
             'range' => $range,
-            'freelancers' => User::freelancers()->orderBy('name')->get(['id', 'name']),
+            'freelancers' => User::freelancers()->orderBy('name')->get(['id', 'name', 'specialization']),
             'outlets' => Outlet::orderBy('name')->get(['id', 'name']),
+            'divisions' => User::DIVISIONS,
         ]);
     }
 

@@ -61,6 +61,7 @@ class TaskTemplateController extends Controller
             'template' => $template,
             'outlets' => Outlet::active()->orderBy('name')->get(),
             'freelancers' => User::freelancers()->active()->orderBy('name')->get(),
+            'divisions' => User::DIVISIONS,
         ];
     }
 
@@ -69,6 +70,7 @@ class TaskTemplateController extends Controller
         $data = $request->validate([
             'title' => ['required', 'string', 'max:200'],
             'description' => ['nullable', 'string', 'max:2000'],
+            'target_division' => ['nullable', 'string', 'max:100'],
             'scheduled_start_time' => ['required', 'date_format:H:i'],
             'estimated_duration_minutes' => ['required', 'integer', 'min:5', 'max:720'],
             'default_outlet_id' => ['required', 'exists:outlets,id'],
@@ -82,6 +84,7 @@ class TaskTemplateController extends Controller
         $data['task_type'] = TaskAssignment::TYPE_FIXED;
         $data['is_active'] = $request->boolean('is_active');
         $data['default_user_id'] = $data['default_user_id'] ?? null;
+        $data['target_division'] = $data['target_division'] ?: null;
 
         return $data;
     }

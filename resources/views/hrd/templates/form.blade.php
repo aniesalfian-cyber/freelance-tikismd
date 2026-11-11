@@ -19,7 +19,7 @@
             <textarea name="description" rows="2" class="input">{{ old('description', $template->description) }}</textarea>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
                 <label class="label">Lokasi Gerai Pengerjaan</label>
                 <select name="default_outlet_id" required class="input">
@@ -30,11 +30,22 @@
                 </select>
             </div>
             <div>
-                <label class="label">Ditugaskan Kepada</label>
+                <label class="label">Target Divisi Operasional</label>
+                <select name="target_division" class="input">
+                    <option value="">Semua Divisi Operasional</option>
+                    @foreach($divisions as $dKey => $dData)
+                        <option value="{{ $dKey }}" @selected(old('target_division', $template->target_division) === $dKey)>
+                            {{ $dData['name'] }} &mdash; {{ $dData['vehicle_short'] }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="label">Karyawan Khusus (Opsional)</label>
                 <select name="default_user_id" class="input">
-                    <option value="">Semua Karyawan Aktif</option>
+                    <option value="">Otomatis Sesuai Divisi</option>
                     @foreach($freelancers as $fl)
-                        <option value="{{ $fl->id }}" @selected(old('default_user_id', $template->default_user_id) == $fl->id)>{{ $fl->name }}</option>
+                        <option value="{{ $fl->id }}" @selected(old('default_user_id', $template->default_user_id) == $fl->id)>{{ $fl->name }} ({{ $fl->specialization }})</option>
                     @endforeach
                 </select>
             </div>

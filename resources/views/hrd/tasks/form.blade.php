@@ -58,24 +58,58 @@
             <div>
                 <label class="label">Karyawan Penerima Tugas</label>
                 <select name="user_id" required class="input">
-                    @foreach($freelancers as $fl)
-                        <option value="{{ $fl->id }}" @selected(old('user_id', $task->user_id) == $fl->id)>{{ $fl->name }} ({{ $fl->nik }})</option>
+                    @foreach($freelancers->groupBy('specialization') as $grpName => $grpUsers)
+                        <optgroup label="{{ $grpName }} ({{ $grpUsers->first()?->vehicleShort() }})">
+                            @foreach($grpUsers as $fl)
+                                <option value="{{ $fl->id }}" @selected(old('user_id', $task->user_id) == $fl->id)>{{ $fl->name }} ({{ $fl->phone }})</option>
+                            @endforeach
+                        </optgroup>
                     @endforeach
                 </select>
             </div>
         @else
-            <div>
-                <label class="label">Pilih Karyawan Penerima Tugas (Dapat pilih lebih dari satu)</label>
+            <div x-data="{
+                selectDivision(divName) {
+                    let boxes = document.querySelectorAll(`input[data-division='${divName}']`);
+                    let allChecked = Array.from(boxes).every(b => b.checked);
+                    boxes.forEach(b => b.checked = !allChecked);
+                }
+            }">
+                <div class="flex items-center justify-between mb-1.5 flex-wrap gap-2">
+                    <label class="label mb-0">Pilih Karyawan Penerima Tugas (Berdasarkan Divisi)</label>
+                    <div class="text-[11px] text-slate-500 font-medium">Klik tombol divisi untuk memilih tim sekaligus</div>
+                </div>
+
+                <!-- Quick Selection per Division -->
+                <div class="flex flex-wrap gap-1.5 mb-2.5">
+                    @foreach($freelancers->groupBy('specialization') as $dName => $dUsers)
+                        <button type="button" @click="selectDivision('{{ $dName }}')"
+                                class="btn btn-ghost btn-sm text-[11px] py-1 px-2.5 shadow-xs">
+                            + {{ $dName }} ({{ $dUsers->count() }})
+                        </button>
+                    @endforeach
+                </div>
+
                 @php $oldUsers = (array) old('user_ids', []); @endphp
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3 rounded-2xl bg-navy-950/60 border border-white/10 max-h-56 overflow-y-auto">
-                    @foreach($freelancers as $fl)
-                        <label class="flex items-center gap-2.5 p-2 rounded-xl hover:bg-white/5 cursor-pointer text-xs">
-                            <input type="checkbox" name="user_ids[]" value="{{ $fl->id }}" @checked(in_array($fl->id, $oldUsers)) class="check">
-                            <div>
-                                <div class="font-bold text-white">{{ $fl->name }}</div>
-                                <div class="text-[11px] text-slate-400">{{ $fl->nik }} &bull; {{ $fl->specialization ?: 'Operasional' }}</div>
+                <div class="space-y-3 max-h-72 overflow-y-auto p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                    @foreach($freelancers->groupBy('specialization') as $dName => $dUsers)
+                        <div class="space-y-1.5">
+                            <div class="flex items-center justify-between px-1">
+                                <span class="badge {{ $dUsers->first()?->divisionBadge() }} text-[10px] uppercase font-bold">{{ $dName }}</span>
+                                <span class="text-[11px] text-slate-500 font-semibold">{{ $dUsers->first()?->vehicleName() }} &bull; {{ $dUsers->first()?->operationalScopeShort() }}</span>
                             </div>
-                        </label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                @foreach($dUsers as $fl)
+                                    <label class="flex items-center gap-2.5 p-2 rounded-xl bg-white border border-slate-200 hover:border-orange-300 cursor-pointer text-xs shadow-xs transition">
+                                        <input type="checkbox" name="user_ids[]" value="{{ $fl->id }}" data-division="{{ $dName }}" @checked(in_array($fl->id, $oldUsers)) class="check">
+                                        <div class="min-w-0">
+                                            <div class="font-bold text-slate-900 truncate">{{ $fl->name }}</div>
+                                            <div class="text-[11px] text-slate-500 font-mono">{{ $fl->phone }}</div>
+                                        </div>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </div>
                     @endforeach
                 </div>
             </div>

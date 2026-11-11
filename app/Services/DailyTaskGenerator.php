@@ -12,6 +12,7 @@ class DailyTaskGenerator
 {
     /**
      * Generate tugas pasti harian dari template aktif untuk tanggal tertentu.
+     * Tugas dialokasikan otomatis sesuai Divisi & Unit Operasional kurir (R2/R4, Delivery/Pickup).
      * Idempoten: kombinasi (user, template, tanggal) tidak pernah ganda.
      *
      * @return int jumlah tugas baru yang dibuat
@@ -36,9 +37,17 @@ class DailyTaskGenerator
         $activeFreelancers = User::freelancers()->active()->get();
 
         foreach ($templates as $template) {
-            $assignees = $template->default_user_id
-                ? $activeFreelancers->where('id', $template->default_user_id)
-                : $activeFreelancers;
+            $assignees = $activeFreelancers;
+
+            // Filter otomatis sesuai Divisi / Unit Operasional target
+            if ($template->target_division) {
+                $assignees = $assignees->where('specialization', $template->target_division);
+            }
+
+            // Jika ditujukan khusus ke satu personel tertentu
+            if ($template->default_user_id) {
+                $assignees = $assignees->where('id', $template->default_user_id);
+            }
 
             foreach ($assignees as $user) {
                 $exists = TaskAssignment::where('user_id', $user->id)

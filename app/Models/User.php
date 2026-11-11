@@ -24,6 +24,63 @@ class User extends Authenticatable
         self::ROLE_OWNER => 'Owner',
     ];
 
+    // 4 Divisi Resmi Operasional Kurir PT. HSM
+    public const DIVISION_R4_DELIVERY = 'R4 Kurier Delivery';
+    public const DIVISION_R4_GERAI_CORP = 'R4 Gerai, Corporate & Delivery';
+    public const DIVISION_R2_DELIVERY = 'R2 Delivery';
+    public const DIVISION_R2_PICKUP_CORP = 'R2 Pickup Corporate';
+
+    public const DIVISIONS = [
+        self::DIVISION_R4_DELIVERY => [
+            'name' => 'R4 Kurier Delivery',
+            'code' => 'R4-DEL',
+            'vehicle' => 'Mobil Box (Roda 4)',
+            'vehicle_short' => 'R4 Mobil Box',
+            'vehicle_type' => 'R4',
+            'scope' => 'Hanya bertugas untuk pengantaran paket (Delivery)',
+            'scope_short' => 'Hanya Pengantaran',
+            'activities' => ['delivery'],
+            'badge' => 'badge-info',
+            'icon' => 'truck',
+        ],
+        self::DIVISION_R4_GERAI_CORP => [
+            'name' => 'R4 Gerai, Corporate & Delivery',
+            'code' => 'R4-GCD',
+            'vehicle' => 'Mobil Box (Roda 4)',
+            'vehicle_short' => 'R4 Mobil Box',
+            'vehicle_type' => 'R4',
+            'scope' => 'Bertugas pickup dan delivery baik dari gerai atau corporate rekanan TIKISMD',
+            'scope_short' => 'Pickup & Delivery (Gerai & Corporate)',
+            'activities' => ['pickup', 'delivery'],
+            'badge' => 'badge-orange',
+            'icon' => 'truck',
+        ],
+        self::DIVISION_R2_DELIVERY => [
+            'name' => 'R2 Delivery',
+            'code' => 'R2-DEL',
+            'vehicle' => 'Sepeda Motor (Roda 2)',
+            'vehicle_short' => 'R2 Motor',
+            'vehicle_type' => 'R2',
+            'scope' => 'Hanya bertugas untuk pengantaran paket ke penerima',
+            'scope_short' => 'Hanya Pengantaran',
+            'activities' => ['delivery'],
+            'badge' => 'badge-success',
+            'icon' => 'bike',
+        ],
+        self::DIVISION_R2_PICKUP_CORP => [
+            'name' => 'R2 Pickup Corporate',
+            'code' => 'R2-PC',
+            'vehicle' => 'Sepeda Motor (Roda 2)',
+            'vehicle_short' => 'R2 Motor',
+            'vehicle_type' => 'R2',
+            'scope' => 'Hanya bertugas pickup paket dari perusahaan rekanan TIKISMD',
+            'scope_short' => 'Hanya Pickup Perusahaan Mitra',
+            'activities' => ['pickup'],
+            'badge' => 'badge-warning',
+            'icon' => 'package',
+        ],
+    ];
+
     protected $fillable = [
         'nik', 'name', 'email', 'phone', 'password', 'role', 'avatar',
         'specialization', 'hourly_rate', 'is_active', 'last_login_at', 'last_login_ip',
@@ -70,6 +127,11 @@ class User extends Authenticatable
         return $query->where('is_active', true);
     }
 
+    public function scopeDivision($query, string $division)
+    {
+        return $query->where('specialization', $division);
+    }
+
     // ---- Helpers ----
 
     public function hasRole(string ...$roles): bool
@@ -96,6 +158,41 @@ class User extends Authenticatable
     public function roleLabel(): string
     {
         return self::ROLES[$this->role] ?? $this->role;
+    }
+
+    public function divisionInfo(): ?array
+    {
+        return self::DIVISIONS[$this->specialization] ?? null;
+    }
+
+    public function divisionName(): string
+    {
+        return $this->specialization ?: 'Operasional Kurir';
+    }
+
+    public function vehicleName(): string
+    {
+        return $this->divisionInfo()['vehicle'] ?? (str_starts_with((string)$this->specialization, 'R4') ? 'Mobil Box (R4)' : 'Sepeda Motor (R2)');
+    }
+
+    public function vehicleShort(): string
+    {
+        return $this->divisionInfo()['vehicle_short'] ?? (str_starts_with((string)$this->specialization, 'R4') ? 'R4 Box' : 'R2 Motor');
+    }
+
+    public function operationalScope(): string
+    {
+        return $this->divisionInfo()['scope'] ?? ($this->specialization ?: 'Operasional Kurir');
+    }
+
+    public function operationalScopeShort(): string
+    {
+        return $this->divisionInfo()['scope_short'] ?? 'Kurir';
+    }
+
+    public function divisionBadge(): string
+    {
+        return $this->divisionInfo()['badge'] ?? 'badge-muted';
     }
 
     public function dashboardRoute(): string

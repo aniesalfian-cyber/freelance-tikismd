@@ -29,6 +29,12 @@
             <label class="inline-flex items-center gap-1.5 text-xs text-slate-300 px-2">
                 <input type="checkbox" name="range" value="all" @checked($range) class="check"> Semua Tanggal
             </label>
+            <select name="division" class="input sm:w-56">
+                <option value="">Semua Divisi</option>
+                @foreach($divisions as $dKey => $dData)
+                    <option value="{{ $dKey }}" @selected(request('division') === $dKey)>{{ $dData['name'] }} ({{ $dData['vehicle_short'] }})</option>
+                @endforeach
+            </select>
             <select name="user_id" class="input sm:w-44">
                 <option value="">Semua Karyawan</option>
                 @foreach($freelancers as $fl)
@@ -105,8 +111,11 @@
                         </td>
                         <td data-label="Karyawan Pelaksana">
                             <div>
-                                <div class="font-semibold text-white">{{ $t->user?->name }}</div>
-                                <div class="text-[11px] font-mono text-slate-400">{{ $t->user?->nik }}</div>
+                                <div class="font-bold text-slate-900">{{ $t->user?->name }}</div>
+                                <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                                    <span class="badge {{ $t->user?->divisionBadge() }} text-[9px]">{{ $t->user?->specialization }}</span>
+                                    <span class="text-[10px] text-slate-500 font-bold">({{ $t->user?->vehicleShort() }})</span>
+                                </div>
                             </div>
                         </td>
                         <td data-label="Gerai Lokasi" class="text-xs text-slate-300">

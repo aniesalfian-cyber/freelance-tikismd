@@ -18,8 +18,8 @@
             <thead>
                 <tr>
                     <th>Judul Tugas Rutin</th>
+                    <th>Target Divisi & Kendaraan</th>
                     <th>Gerai Default</th>
-                    <th>Penerima</th>
                     <th>Jam Mulai</th>
                     <th>Target SLA</th>
                     <th>Hari Aktif</th>
@@ -36,8 +36,21 @@
                             <div class="font-extrabold text-white text-sm">{{ $tpl->title }}</div>
                             <div class="text-xs text-slate-400 mt-0.5">{{ $tpl->description }}</div>
                         </td>
-                        <td data-label="Gerai Lokasi" class="text-xs font-semibold text-white">{{ $tpl->outlet?->name ?? '-' }}</td>
-                        <td data-label="Penerima Default" class="text-xs">{{ $tpl->user?->name ?? 'Semua Karyawan Aktif' }}</td>
+                        <td data-label="Target Divisi" class="text-xs">
+                            @if($tpl->target_division)
+                                @php $dInfo = $tpl->targetDivisionInfo(); @endphp
+                                <div>
+                                    <span class="badge {{ $dInfo['badge'] ?? 'badge-orange' }}">{{ $tpl->target_division }}</span>
+                                    <div class="text-[11px] text-slate-500 font-semibold mt-0.5">{{ $dInfo['vehicle'] ?? '' }}</div>
+                                </div>
+                            @elseif($tpl->user)
+                                <div class="font-bold text-slate-800">{{ $tpl->user->name }}</div>
+                                <div class="text-[11px] text-slate-500">{{ $tpl->user->specialization }}</div>
+                            @else
+                                <span class="badge badge-muted">Semua Divisi</span>
+                            @endif
+                        </td>
+                        <td data-label="Gerai Lokasi" class="text-xs font-semibold text-slate-800">{{ $tpl->outlet?->name ?? '-' }}</td>
                         <td data-label="Jam Target Mulai" class="font-mono text-xs text-orange-300 font-bold">{{ $tpl->startTimeShort() }}</td>
                         <td data-label="Target Durasi SLA"><span class="badge badge-info">{{ $tpl->estimated_duration_minutes }} menit</span></td>
                         <td data-label="Jadwal Hari Aktif" class="text-xs">{{ $tpl->activeDaysLabel() }}</td>

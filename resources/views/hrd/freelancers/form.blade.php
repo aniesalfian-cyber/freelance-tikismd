@@ -33,23 +33,30 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-                <label class="label">Bidang / Spesialisasi</label>
-                <input type="text" name="specialization" value="{{ old('specialization', $freelancer->specialization) }}" placeholder="Operasional Gerai / Audit Stok" class="input">
+                <label class="label">Divisi Operasional & Jenis Kendaraan</label>
+                <select name="specialization" required class="input">
+                    @foreach($divisions as $dKey => $dData)
+                        <option value="{{ $dKey }}" @selected(old('specialization', $freelancer->specialization) === $dKey)>
+                            {{ $dData['name'] }} &mdash; {{ $dData['vehicle'] }} ({{ $dData['scope_short'] }})
+                        </option>
+                    @endforeach
+                </select>
+                <p class="text-[11px] text-slate-500 mt-1">R2 = Sepeda Motor, R4 = Mobil Box.</p>
             </div>
             <div>
-                <label class="label">Tarif Satuan Jam (Rp)</label>
-                <input type="number" step="500" min="0" name="hourly_rate" value="{{ old('hourly_rate', $freelancer->hourly_rate ?? 25000) }}" class="input">
+                <label class="label">Tarif Satuan Jam / Shift (Rp)</label>
+                <input type="number" step="500" min="0" name="hourly_rate" value="{{ old('hourly_rate', $freelancer->hourly_rate ?? 0) }}" class="input">
             </div>
         </div>
 
         <label class="inline-flex items-center gap-2 cursor-pointer pt-1">
             <input type="checkbox" name="is_active" value="1" @checked(old('is_active', $freelancer->is_active ?? true)) class="check">
-            <span class="text-sm font-semibold text-white">Status Aktif Bertugas</span>
+            <span class="text-sm font-semibold text-slate-800">Status Aktif Bertugas</span>
         </label>
 
         @if(!$freelancer->exists)
-            <p class="text-xs text-slate-400">
-                Akun login akan otomatis dibuat dengan password acak dan ditampilkan dalam modal siap kirim ke WhatsApp.
+            <p class="text-xs text-slate-500">
+                Akun login akan otomatis dibuat dengan password default 123456 dan nomor HP terdaftar.
             </p>
         @endif
 

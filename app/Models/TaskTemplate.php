@@ -11,7 +11,7 @@ class TaskTemplate extends Model
     public const DAY_LABELS = [1 => 'Sen', 2 => 'Sel', 3 => 'Rab', 4 => 'Kam', 5 => 'Jum', 6 => 'Sab', 7 => 'Min'];
 
     protected $fillable = [
-        'title', 'description', 'task_type', 'scheduled_start_time',
+        'title', 'description', 'task_type', 'target_division', 'scheduled_start_time',
         'estimated_duration_minutes', 'default_outlet_id', 'default_user_id',
         'active_days', 'is_active',
     ];
@@ -47,18 +47,23 @@ class TaskTemplate extends Model
         return empty($days) || in_array($isoDay, array_map('intval', $days), true);
     }
 
-    public function activeDaysLabel(): string
+    public function targetDivisionInfo(): ?array
     {
-        $days = $this->active_days;
-        if (empty($days) || count($days) === 7) {
-            return 'Setiap hari';
-        }
-
-        return collect($days)->map(fn ($d) => self::DAY_LABELS[(int) $d] ?? $d)->implode(', ');
+        return $this->target_division ? (User::DIVISIONS[$this->target_division] ?? null) : null;
     }
 
     public function startTimeShort(): string
     {
         return substr((string) $this->scheduled_start_time, 0, 5);
+    }
+
+    public function activeDaysLabel(): string
+    {
+        if (empty($this->active_days)) {
+            return 'Setiap Hari';
+        }
+        $sorted = collect($this->active_days)->map('intval')->sort()->values();
+
+        return $sorted->map(fn ($d) => self::DAY_LABELS[$d] ?? (string) $d)->implode(', ');
     }
 }
