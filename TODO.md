@@ -1,9 +1,38 @@
 # MASTER TODO & PANDUAN MANDOR IMPLEMENTASI
-## Monitoring Freelancer HSM (`freelance.tikismd.id`)
+## Delivery & Pick-Up PT. HSM (`freelance.tikismd.id`)
 
 **Dokumen Acuan:** [konsep.md](file:///root/.gemini/antigravity-cli/scratch/freelance.tikismd.id/konsep.md) & [PRD.md](file:///root/.gemini/antigravity-cli/scratch/freelance.tikismd.id/PRD.md)  
-**Status Proyek:** 100% COMPLETED & VERIFIED (PRODUCTION READY)  
-**Target Platform:** Laravel 11, MySQL, Tailwind CSS, Alpine.js, PWA Mobile-First & Responsive Web  
+**Status Proyek:** 100% COMPLETED, POLISHED & DEPLOYED (PAPER 3D SKEUOMORPHISM)  
+**Target Platform:** Laravel 11, MySQL, Tailwind CSS, Alpine.js, PWA Mobile-First & Responsive Web (Paper 3D Skeuomorphism)  
+
+---
+
+## 🎨 Pembaruan Desain: Paper 3D Skeuomorphism (Mobile-First Ultra Professional)
+- [x] **Paper 3D Skeuomorphism Design System:**
+  - Tekstur paper fiber & permukaan berlapis (`#080f1d` / `#0d1726` / `#162338`).
+  - Bevel fisik atas (*top specular highlight* `rgba(255,255,255,0.28)`) dan bevel bawah gelap (`rgba(0,0,0,0.65)`).
+  - Multi-drop shadows 4 lapis (ambient + direct + contact paper shadow).
+  - Tombol taktil dengan sensasi kedalaman fisik (*depressed active state* `scale(0.98)` dengan inner shadow).
+  - Input field bergaya ukiran/cekung (*engraved inset cavity*).
+  - Raised physical enamel badges dengan pantulan cahaya specular.
+- [x] **Mobile Table to Card Transformation:**
+  - Seluruh elemen tabel (`.tbl`) pada resolusi mobile (< 768px) otomatis bertransformasi menjadi kartu data 3D sheet vertikal yang lapang dan detail.
+- [x] **Flush Bottom Dock & Upward Light Beam:**
+  - Bottom bar menempel presisi di bagian bawah layar tanpa floating gap.
+  - Animasi sorotan pendaran cahaya dari bawah (*upward light cone*) saat tab aktif dipilih.
+- [x] **Pemberian Nama & Terminologi Resmi:**
+  - Nama Aplikasi: `D&P PT. HSM` (Delivery & Pick-Up PT. HSM).
+  - Terminologi "freelance" sepenuhnya digantikan dengan "Karyawan".
+- [x] **Master Divisi Operasional Armada & Kurir:**
+  - R4 Kurier Delivery (Roda 4 pengantaran)
+  - R4 Gerai, Corporate & Delivery (Roda 4 pickup & delivery gerai/corporate)
+  - R2 Delivery (Roda 2 pengantaran)
+  - R2 Pickup Corporate (Roda 2 khusus pickup corporate)
+- [x] **Form Import Penugasan dari Excel & Unduh Template Resmi:**
+  - Generator template Excel multi-sheet (`.xlsx`) dengan lembar `Formulir Tugas` dan `Referensi Kurir & Gerai`.
+  - Form Drag & Drop upload berkas Excel di HRD dengan validasi otomatis no. HP kurir, kode gerai, waktu, dan SLA.
+  - Rangkuman import instan dengan pelaporan baris yang sukses dan deteksi baris bermasalah.
+  
 
 ---
 
