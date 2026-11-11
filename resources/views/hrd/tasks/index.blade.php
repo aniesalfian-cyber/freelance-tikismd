@@ -57,7 +57,13 @@
         </form>
 
         @if(auth()->user()->canManage())
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
+                <a href="{{ route('hrd.tasks.template') }}" class="btn btn-ghost btn-sm" title="Unduh Format Excel Penugasan Kurir">
+                    <x-icon name="download" class="w-4 h-4" /> Format Excel
+                </a>
+                <a href="{{ route('hrd.tasks.import.show') }}" class="btn btn-ghost btn-sm" title="Import Penugasan Massal dari File Excel">
+                    <x-icon name="upload" class="w-4 h-4" /> Import Excel
+                </a>
                 <form method="POST" action="{{ route('hrd.tasks.generate') }}">
                     @csrf
                     <input type="hidden" name="date" value="{{ max(today()->toDateString(), $date->toDateString()) }}">

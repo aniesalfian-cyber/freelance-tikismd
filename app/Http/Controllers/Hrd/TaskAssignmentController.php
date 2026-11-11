@@ -97,6 +97,45 @@ class TaskAssignmentController extends Controller
             ->with('success', "{$created->count()} penugasan berhasil dibuat.");
     }
 
+    public function downloadTemplate(\App\Services\TaskExcelService $excelService)
+    {
+        return $excelService->generateTemplate();
+    }
+
+    public function showImport()
+    {
+        return view('hrd.tasks.import');
+    }
+
+    public function import(Request $request, \App\Services\TaskExcelService $excelService): RedirectResponse
+    {
+        $request->validate([
+            'excel_file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:10240'],
+        ], [
+            'excel_file.required' => 'Pilih file Excel format (.xlsx / .csv) yang akan diimpor.',
+            'excel_file.mimes' => 'Format file harus berupa Excel (.xlsx / .xls) atau .csv.',
+            'excel_file.max' => 'Ukuran file maksimal adalah 10 MB.',
+        ]);
+
+        $result = $excelService->importTasks($request->file('excel_file'), $request->user()->id);
+
+        if (! $result['success']) {
+            return back()->with('error', 'Gagal mengimpor tugas: '.implode(' | ', array_slice($result['errors'], 0, 3)))
+                ->with('import_errors', $result['errors']);
+        }
+
+        ActivityLogger::log('task.imported', "Mengimpor {$result['imported']} tugas kurir dari Excel");
+
+        $msg = "{$result['imported']} penugasan kurir berhasil diimpor ke sistem.";
+        if (! empty($result['errors'])) {
+            $msg .= ' Namun '.count($result['errors']).' baris dilewati karena format tidak sesuai.';
+        }
+
+        return redirect()->route('hrd.tasks.index')
+            ->with('success', $msg)
+            ->with('import_errors', $result['errors']);
+    }
+
     public function show(TaskAssignment $task)
     {
         $task->load(['user', 'outlet', 'creator:id,name', 'template:id,title']);

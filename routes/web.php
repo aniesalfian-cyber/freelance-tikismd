@@ -99,6 +99,9 @@ Route::middleware('auth')->group(function () {
         Route::put('templates/{template}', [Hrd\TaskTemplateController::class, 'update'])->name('templates.update');
         Route::delete('templates/{template}', [Hrd\TaskTemplateController::class, 'destroy'])->name('templates.destroy');
 
+        Route::get('tasks/template', [Hrd\TaskAssignmentController::class, 'downloadTemplate'])->name('tasks.template');
+        Route::get('tasks/import', [Hrd\TaskAssignmentController::class, 'showImport'])->name('tasks.import.show');
+        Route::post('tasks/import', [Hrd\TaskAssignmentController::class, 'import'])->name('tasks.import');
         Route::get('tasks/create', [Hrd\TaskAssignmentController::class, 'create'])->name('tasks.create');
         Route::post('tasks', [Hrd\TaskAssignmentController::class, 'store'])->name('tasks.store');
         Route::post('tasks/generate', [Hrd\TaskAssignmentController::class, 'generate'])->name('tasks.generate');
