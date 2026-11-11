@@ -13,6 +13,12 @@
             </div>
 
             <div class="p-3.5 rounded-2xl bg-navy-950/80 border border-white/10 space-y-2 text-xs">
+                @if(!empty($cred['phone']))
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Nomor HP:</span>
+                        <span class="font-mono font-bold text-white select-all">{{ $cred['phone'] }}</span>
+                    </div>
+                @endif
                 <div class="flex justify-between">
                     <span class="text-slate-400">Email:</span>
                     <span class="font-mono font-bold text-white select-all">{{ $cred['email'] }}</span>

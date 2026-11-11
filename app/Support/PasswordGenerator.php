@@ -33,8 +33,9 @@ class PasswordGenerator
     public static function credentialPayload(\App\Models\User $user, string $password, string $heading = 'Kredensial akun Anda'): array
     {
         $message = "Halo {$user->name},\n\n{$heading} pada aplikasi *D&P PT. HSM*:\n\n"
+            .($user->phone ? "Nomor HP: {$user->phone}\n" : "")
             ."Email: {$user->email}\nPassword: {$password}\nLink: ".url('/login')
-            ."\n\nDemi keamanan, segera ganti password Anda setelah login pertama (menu Profil).\nTerima kasih.";
+            ."\n\n(Anda dapat login langsung menggunakan Nomor Handphone terdaftar)\n\nDemi keamanan, segera ganti password Anda setelah login pertama (menu Profil).\nTerima kasih.";
 
         $phone = preg_replace('/\D+/', '', (string) $user->phone);
         if ($phone && str_starts_with($phone, '0')) {
@@ -43,6 +44,8 @@ class PasswordGenerator
 
         return [
             'name' => $user->name,
+            'phone' => $user->phone,
+            'email' => $user->email,
             'email' => $user->email,
             'password' => $password,
             'message' => $message,

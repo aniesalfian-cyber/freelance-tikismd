@@ -25,13 +25,13 @@ class HsmEndToEndTest extends TestCase
     {
         $map = [
             'superadmin@hsm.id' => '/admin/dashboard',
-            'hrd@hsm.id' => '/hrd/dashboard',
-            'freelancer@hsm.id' => '/pwa/workspace',
-            'owner@hsm.id' => '/owner/executive-dashboard',
+            '085250815716' => '/hrd/dashboard',          // Arif (Admin HRD) login via No. HP
+            '081349497879' => '/pwa/workspace',          // Dedy Endra (Kurir) login via No. HP
+            '08115557089' => '/owner/executive-dashboard', // Bpk. Olly (Owner) login via No. HP
         ];
 
-        foreach ($map as $email => $expectedPath) {
-            $res = $this->post('/login', ['email' => $email, 'password' => 'Password123!']);
+        foreach ($map as $login => $expectedPath) {
+            $res = $this->post('/login', ['login' => $login, 'password' => '123456']);
             $res->assertRedirect($expectedPath);
             $this->get($expectedPath)->assertOk();
             $this->post('/logout');
@@ -40,7 +40,7 @@ class HsmEndToEndTest extends TestCase
 
     public function test_geofencing_attendance_accepts_inside_radius_and_rejects_outside(): void
     {
-        $freelancer = User::where('email', 'freelancer@hsm.id')->firstOrFail();
+        $freelancer = User::where('role', User::ROLE_FREELANCER)->firstOrFail();
         $office = Outlet::mainOffice();
 
         // 1. Di luar radius (~180m) -> Ditolak (422)
@@ -73,17 +73,17 @@ class HsmEndToEndTest extends TestCase
 
     public function test_task_lifecycle_blocks_without_attendance_then_tracks_3_states_and_scores_kpi(): void
     {
-        $hrd = User::where('email', 'hrd@hsm.id')->firstOrFail();
-        $freelancer = User::where('email', 'freelancer@hsm.id')->firstOrFail();
+        $hrd = User::where('role', User::ROLE_HRD)->firstOrFail();
+        $freelancer = User::where('role', User::ROLE_FREELANCER)->firstOrFail();
         $office = Outlet::mainOffice();
         $gerai = Outlet::where('code', 'GR-001')->firstOrFail();
 
-        // HRD membuat tugas untuk freelancer hari ini
+        // HRD membuat tugas untuk kurir hari ini
         $this->actingAs($hrd)->post('/hrd/tasks', [
             'user_ids' => [$freelancer->id],
             'outlet_id' => $gerai->id,
-            'title' => 'Audit Stok Pagi Gerai Ilir',
-            'description' => 'Cek seluruh rak utama',
+            'title' => 'Audit Pengiriman Paket Gerai Ilir',
+            'description' => 'Cek serah terima paket kurir',
             'task_type' => TaskAssignment::TYPE_FIXED,
             'assigned_date' => today()->toDateString(),
             'scheduled_start_time' => '09:00',
@@ -93,7 +93,7 @@ class HsmEndToEndTest extends TestCase
         $task = TaskAssignment::where('user_id', $freelancer->id)->firstOrFail();
         $this->assertSame('pending', $task->status);
 
-        // Freelancer mencoba mulai sebelum presensi -> Ditolak
+        // Karyawan kurir mencoba mulai sebelum presensi -> Ditolak
         $this->actingAs($freelancer)
             ->postJson("/pwa/tasks/{$task->id}/start", [
                 'latitude' => $gerai->latitude,
@@ -131,7 +131,7 @@ class HsmEndToEndTest extends TestCase
                 'latitude' => $gerai->latitude + 0.00005,
                 'longitude' => $gerai->longitude,
                 'accuracy' => 10,
-                'notes' => 'Pengecekan stok rak A sampai F selesai tanpa selisih.',
+                'notes' => 'Pengecekan serah terima paket selesai.',
             ])
             ->assertOk()
             ->assertJson(['ok' => true, 'location_valid' => true]);
@@ -149,10 +149,10 @@ class HsmEndToEndTest extends TestCase
 
     public function test_owner_reports_and_superadmin_features_work(): void
     {
-        $superadmin = User::where('email', 'superadmin@hsm.id')->firstOrFail();
-        $hrd = User::where('email', 'hrd@hsm.id')->firstOrFail();
-        $owner = User::where('email', 'owner@hsm.id')->firstOrFail();
-        $freelancer = User::where('email', 'freelancer@hsm.id')->firstOrFail();
+        $superadmin = User::where('role', User::ROLE_SUPERADMIN)->firstOrFail();
+        $hrd = User::where('role', User::ROLE_HRD)->firstOrFail();
+        $owner = User::where('role', User::ROLE_OWNER)->firstOrFail();
+        $freelancer = User::where('role', User::ROLE_FREELANCER)->firstOrFail();
 
         // SuperAdmin pages & quick reset password
         foreach (['/admin/dashboard', '/admin/users', '/admin/users/create', '/admin/backups', '/admin/settings', '/admin/logs'] as $url) {
@@ -169,7 +169,7 @@ class HsmEndToEndTest extends TestCase
         }
         $this->actingAs($hrd)->post('/hrd/tasks/generate', ['date' => today()->toDateString()])->assertRedirect();
 
-        // Freelancer PWA pages
+        // Karyawan PWA pages
         foreach (['/pwa/workspace', '/pwa/tasks', '/pwa/attendance', '/pwa/performance', '/profile'] as $url) {
             $this->actingAs($freelancer)->get($url)->assertOk();
         }
