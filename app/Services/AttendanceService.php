@@ -64,6 +64,8 @@ class AttendanceService
             'status' => $status,
         ]);
 
+        $user->recordLiveLocation($lat, $lng, $accuracy);
+
         ActivityLogger::log('attendance.check_in', "Presensi masuk {$user->name} ({$status}, jarak ".round($distance).' m)', $attendance, $user->id);
 
         return $attendance;

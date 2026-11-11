@@ -59,7 +59,7 @@ class DailyTaskGenerator
                 }
 
                 DB::transaction(function () use ($template, $user, $date, $creatorId, &$created) {
-                    TaskAssignment::create([
+                    $task = TaskAssignment::create([
                         'task_number' => TaskAssignment::generateNumber($date),
                         'user_id' => $user->id,
                         'outlet_id' => $template->default_outlet_id,
@@ -73,6 +73,7 @@ class DailyTaskGenerator
                         'status' => TaskAssignment::STATUS_PENDING,
                         'created_by' => $creatorId,
                     ]);
+                    \App\Models\AppNotification::notifyTaskAssigned($task);
                     $created++;
                 });
             }

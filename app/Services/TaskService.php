@@ -49,6 +49,8 @@ class TaskService
             'start_distance_meters' => $distance,
         ]);
 
+        $user->recordLiveLocation($lat, $lng, $accuracy);
+
         ActivityLogger::log('task.start', "Mulai tugas {$task->task_number} ({$task->title}), jarak {$distance} m dari gerai", $task, $user->id);
 
         return $task->fresh();
@@ -99,6 +101,8 @@ class TaskService
                 'is_location_valid' => $startValid && $endValid,
             ]);
         });
+
+        $user->recordLiveLocation($lat, $lng, $accuracy);
 
         ActivityLogger::log('task.complete', "Selesai tugas {$task->task_number} durasi {$actual} menit (SLA {$task->estimated_duration_minutes})", $task, $user->id);
 

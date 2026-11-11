@@ -199,4 +199,95 @@ class DashboardService
             'freelancers_total' => $freelancers->count(),
         ];
     }
+
+    /**
+     * Data sebaran posisi real-time seluruh karyawan kurir aktif untuk Peta Monitoring HRD.
+     */
+    public function liveCouriersMap(): array
+    {
+        $today = today()->toDateString();
+        $office = Outlet::mainOffice();
+        $defaultLat = $office?->latitude ?? -0.502106;
+        $defaultLng = $office?->longitude ?? 117.153709;
+
+        $attendances = Attendance::whereDate('date', $today)->get()->keyBy('user_id');
+        $todayTasks = TaskAssignment::query()
+            ->notCancelled()
+            ->with('outlet:id,name,code,latitude,longitude')
+            ->whereDate('assigned_date', $today)
+            ->get()
+            ->groupBy('user_id');
+
+        $couriers = User::freelancers()->active()->orderBy('name')->get();
+
+        return $couriers->values()->map(function (User $u, int $idx) use ($attendances, $todayTasks, $defaultLat, $defaultLng) {
+            /** @var Attendance|null $att */
+            $att = $attendances->get($u->id);
+            $userTasks = $todayTasks->get($u->id, collect());
+            /** @var TaskAssignment|null $activeTask */
+            $activeTask = $userTasks->firstWhere('status', TaskAssignment::STATUS_IN_PROGRESS);
+            $pendingCount = $userTasks->where('status', TaskAssignment::STATUS_PENDING)->count();
+            $doneCount = $userTasks->where('status', TaskAssignment::STATUS_COMPLETED)->count();
+
+            $isWorking = $att !== null && $att->check_out_at === null;
+            $hasCheckedIn = $att !== null;
+
+            // Tentukan koordinat posisi terbaik karyawan
+            $lat = $u->last_latitude;
+            $lng = $u->last_longitude;
+            $source = 'GPS Live Aplikasi';
+
+            if (! $lat || ! $lng) {
+                if ($activeTask && $activeTask->start_latitude && $activeTask->start_longitude) {
+                    $lat = (float) $activeTask->start_latitude;
+                    $lng = (float) $activeTask->start_longitude;
+                    $source = 'Titik Mulai Tugas';
+                } elseif ($att && $att->check_in_latitude && $att->check_in_longitude) {
+                    $lat = (float) $att->check_in_latitude;
+                    $lng = (float) $att->check_in_longitude;
+                    $source = 'Titik Presensi Masuk';
+                } elseif ($hasCheckedIn) {
+                    // Sebarkan sedikit di sekitar kantor utama agar pin tidak bertumpuk
+                    $angle = ($idx * 45) * (M_PI / 180);
+                    $offset = 0.00035 * (($idx % 3) + 1);
+                    $lat = round($defaultLat + sin($angle) * $offset, 6);
+                    $lng = round($defaultLng + cos($angle) * $offset, 6);
+                    $source = 'Area Kantor Utama';
+                }
+            }
+
+            $isFresh = $u->last_location_at && $u->last_location_at->diffInMinutes(now()) <= 10;
+
+            return [
+                'id' => $u->id,
+                'name' => $u->name,
+                'initials' => $u->initials(),
+                'phone' => $u->phone,
+                'nik' => $u->nik,
+                'division' => $u->specialization ?? User::DIVISION_R2_DELIVERY,
+                'vehicle_type' => $u->vehicleType(),
+                'vehicle_name' => $u->vehicleName(),
+                'scope_short' => $u->divisionInfo()['scope_short'] ?? 'Operasional Kurir',
+                'is_working' => $isWorking,
+                'has_checked_in' => $hasCheckedIn,
+                'check_in_time' => $att?->check_in_at?->format('H:i'),
+                'check_out_time' => $att?->check_out_at?->format('H:i'),
+                'lat' => $lat ? (float) $lat : null,
+                'lng' => $lng ? (float) $lng : null,
+                'accuracy' => $u->last_accuracy_meters,
+                'location_source' => $source,
+                'last_seen' => $u->last_location_at ? $u->last_location_at->diffForHumans() : ($att?->check_in_at ? 'Presensi '.$att->check_in_at->format('H:i') : 'Belum aktif'),
+                'last_time' => $u->last_location_at?->format('H:i:s'),
+                'is_fresh' => (bool) $isFresh,
+                'active_task' => $activeTask ? [
+                    'id' => $activeTask->id,
+                    'title' => $activeTask->title,
+                    'outlet' => $activeTask->outlet?->name,
+                ] : null,
+                'pending_count' => $pendingCount,
+                'done_count' => $doneCount,
+                'total_tasks' => $userTasks->count(),
+            ];
+        })->all();
+    }
 }

@@ -25,7 +25,8 @@ class LoginController extends Controller
         $request->validate([
             'login' => ['sometimes', 'nullable', 'string'],
             'email' => ['sometimes', 'nullable', 'string'],
-            'password' => ['required', 'string'],
+            'password' => ['sometimes', 'nullable', 'string'],
+            'pin' => ['sometimes', 'nullable', 'string'],
         ]);
 
         $rawLogin = trim((string) ($request->input('login') ?: $request->input('email')));
@@ -36,7 +37,18 @@ class LoginController extends Controller
             ]);
         }
 
-        $password = (string) $request->input('password');
+        $loginMode = (string) $request->input('login_mode', 'password');
+        $secret = $loginMode === 'pin'
+            ? trim((string) ($request->input('pin') ?: $request->input('password')))
+            : (string) ($request->input('password') ?: $request->input('pin'));
+
+        if ($secret === '') {
+            throw ValidationException::withMessages([
+                'login' => 'PIN 4 Digit atau Password wajib diisi.',
+                'email' => 'PIN 4 Digit atau Password wajib diisi.',
+            ]);
+        }
+
         $throttleKey = Str::lower($rawLogin).'|'.$request->ip();
 
         // Maks 5 percobaan gagal per menit.
@@ -65,13 +77,25 @@ class LoginController extends Controller
             ->orWhereIn('phone', $phoneVariants)
             ->first();
 
-        if (! $user || ! Hash::check($password, $user->password)) {
+        $authenticated = false;
+        if ($user) {
+            // Cek kecocokan Password atau PIN 4 Digit (default 1234)
+            if (Hash::check($secret, $user->password)) {
+                $authenticated = true;
+            } elseif ($user->pin && Hash::check($secret, $user->pin)) {
+                $authenticated = true;
+            } elseif (! $user->pin && $secret === '1234') {
+                $authenticated = true;
+            }
+        }
+
+        if (! $authenticated) {
             RateLimiter::hit($throttleKey, 60);
             ActivityLogger::log('auth.login_failed', 'Login gagal untuk '.$rawLogin);
 
             throw ValidationException::withMessages([
-                'login' => 'Nomor HP/Email atau password salah.',
-                'email' => 'Nomor HP/Email atau password salah.',
+                'login' => 'Nomor HP/Email, PIN, atau Password yang Anda masukkan salah.',
+                'email' => 'Nomor HP/Email, PIN, atau Password yang Anda masukkan salah.',
             ]);
         }
 

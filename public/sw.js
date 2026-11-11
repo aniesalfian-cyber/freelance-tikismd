@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hsm-freelance-v1';
+const CACHE_NAME = 'hsm-freelance-v2';
 const OFFLINE_URL = '/offline';
 const PRECACHE = [OFFLINE_URL, '/manifest.webmanifest', '/icons/icon-192.svg'];
 
@@ -44,4 +44,52 @@ self.addEventListener('fetch', (event) => {
             fetch(req).catch(() => caches.match(OFFLINE_URL))
         );
     }
+});
+
+// Push Notification Event Listener
+self.addEventListener('push', (event) => {
+    let payload = {
+        title: 'Tugas Baru — D&P PT. HSM',
+        body: 'Anda menerima penugasan operasional baru.',
+        url: '/pwa/workspace',
+    };
+
+    if (event.data) {
+        try {
+            payload = Object.assign(payload, event.data.json());
+        } catch (e) {
+            payload.body = event.data.text();
+        }
+    }
+
+    const options = {
+        body: payload.body,
+        icon: '/icons/icon-192.svg',
+        badge: '/icons/icon-192.svg',
+        vibrate: [200, 100, 200],
+        tag: 'hsm-task-' + Date.now(),
+        renotify: true,
+        data: { url: payload.url || '/pwa/workspace' },
+    };
+
+    event.waitUntil(self.registration.showNotification(payload.title, options));
+});
+
+// Notification Click Handler -> Buka Halaman Detail Tugas
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    const targetUrl = event.notification.data?.url || '/pwa/workspace';
+
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+            for (const client of windowClients) {
+                if (client.url.includes(targetUrl) && 'focus' in client) {
+                    return client.focus();
+                }
+            }
+            if (clients.openWindow) {
+                return clients.openWindow(targetUrl);
+            }
+        })
+    );
 });

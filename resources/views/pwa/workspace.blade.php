@@ -23,9 +23,17 @@
     <div class="glass p-5 border {{ $attendance ? 'border-emerald-500/40' : 'border-orange-500/45' }} rise">
         <div class="flex items-center justify-between gap-3">
             <div>
-                <span class="badge {{ $attendance ? 'badge-success' : 'badge-orange' }}">
-                    {{ $attendance ? 'Presensi Terkonfirmasi' : 'Wajib Presensi Kantor Utama' }}
-                </span>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="badge {{ $attendance ? 'badge-success' : 'badge-orange' }}">
+                        {{ $attendance ? 'Presensi Terkonfirmasi' : 'Wajib Presensi Kantor Utama' }}
+                    </span>
+                    @if($attendance && !$attendance->check_out_at)
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                            GPS Live Terhubung ke HRD
+                        </span>
+                    @endif
+                </div>
                 <h2 class="text-base font-extrabold text-white mt-1.5">
                     @if($attendance)
                         Masuk pukul {{ $attendance->check_in_at->format('H:i') }} WIB
@@ -37,7 +45,11 @@
                     @endif
                 </h2>
                 <p class="text-xs text-slate-400 mt-0.5">
-                    Lokasi wajib: {{ $office?->name ?? 'Kantor Utama HSM' }} (Radius {{ $office?->radius_meters ?? 50 }}m)
+                    @if($attendance && !$attendance->check_out_at)
+                        Aplikasi otomatis mengirim titik lokasi Anda ke Dashboard HRD selama jam kerja aktif.
+                    @else
+                        Lokasi wajib: {{ $office?->name ?? 'Kantor Utama HSM' }} (Radius {{ $office?->radius_meters ?? 50 }}m)
+                    @endif
                 </p>
             </div>
             <a href="{{ route('pwa.attendance') }}" class="btn {{ $attendance ? 'btn-ghost' : 'btn-primary' }} btn-sm flex-none">

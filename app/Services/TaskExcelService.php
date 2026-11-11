@@ -419,9 +419,10 @@ class TaskExcelService
             foreach ($tasksToCreate as $tData) {
                 $dateObj = Carbon::parse($tData['assigned_date']);
                 unset($tData['row']);
-                TaskAssignment::create($tData + [
+                $task = TaskAssignment::create($tData + [
                     'task_number' => TaskAssignment::generateNumber($dateObj),
                 ]);
+                \App\Models\AppNotification::notifyTaskAssigned($task);
                 $imported++;
             }
         });

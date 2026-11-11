@@ -199,6 +199,114 @@ window.hsmPinIcon = function (color = '#ff6500', glow = 'rgba(255,101,0,0.4)') {
     });
 };
 
+window.hsmCourierPinIcon = function (c) {
+    const isWorking = Boolean(c.is_working);
+    const isR4 = c.vehicle_type === 'R4';
+    const bg = isWorking ? (isR4 ? '#2563eb' : '#10b981') : '#64748b';
+    const ring = isWorking ? '0 0 0 4px rgba(16,185,129,0.28), 0 4px 10px rgba(15,23,42,0.35)' : '0 2px 6px rgba(15,23,42,0.25)';
+    const badgeBg = isR4 ? '#1e3a8a' : '#ea580c';
+    const html = `
+        <div style="position:relative;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+            <div style="width:32px;height:32px;border-radius:9999px;background:${bg};border:2.5px solid #ffffff;box-shadow:${ring};display:flex;align-items:center;justify-content:center;color:#ffffff;font-weight:900;font-size:11px;font-family:'Plus Jakarta Sans Variable',sans-serif;">
+                ${c.initials || 'KR'}
+            </div>
+            <span style="position:absolute;bottom:-3px;right:-3px;background:${badgeBg};color:#fff;font-size:8px;font-weight:800;padding:1px 4px;border-radius:6px;border:1.5px solid #fff;line-height:1;">
+                ${c.vehicle_type || 'R2'}
+            </span>
+        </div>
+    `;
+    return L.divIcon({
+        className: '',
+        html,
+        iconSize: [36, 36],
+        iconAnchor: [18, 18],
+        popupAnchor: [0, -18],
+    });
+};
+
+// PWA Install Prompt Handling
+window.__hsmDeferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    window.__hsmDeferredPrompt = e;
+    window.dispatchEvent(new CustomEvent('hsm-pwa-ready'));
+});
+
+window.hsmTriggerPwaInstall = async function () {
+    if (window.__hsmDeferredPrompt) {
+        window.__hsmDeferredPrompt.prompt();
+        const { outcome } = await window.__hsmDeferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+            window.__hsmDeferredPrompt = null;
+            window.HsmSwal.toast('Aplikasi D&P PT. HSM sedang dipasang!', 'success');
+        }
+        return;
+    }
+
+    // Fallback panduan jika browser sudah menginstal atau memerlukan menu manual (iOS Safari / Chrome Mobile)
+    window.HsmSwal.popup({
+        icon: 'info',
+        title: 'Cara Pasang Aplikasi (PWA)',
+        html: `
+            <div style="text-align:left;font-size:13px;line-height:1.6;">
+                <p style="margin-bottom:8px;">Untuk memasang aplikasi <b>D&P PT. HSM</b> di layar utama HP Anda:</p>
+                <ol style="padding-left:18px;margin:0;space-y:4px;">
+                    <li><b>Android (Chrome/Edge):</b> Ketuk ikon menu <b>⋮</b> di pojok kanan atas browser, lalu pilih <b>"Instal aplikasi"</b> atau <b>"Tambahkan ke Layar utama"</b>.</li>
+                    <li style="margin-top:6px;"><b>iPhone / iOS (Safari):</b> Ketuk tombol <b>Bagikan (Share)</b> di bagian bawah layar, lalu pilih <b>"Tambah ke Layar Utama (Add to Home Screen)"</b>.</li>
+                </ol>
+            </div>
+        `,
+        confirmButtonText: 'Mengerti',
+    });
+};
+
+// Web Notification & ServiceWorker Push Helper
+window.hsmRequestNotificationPermission = async function () {
+    if (!('Notification' in window)) {
+        window.HsmSwal.toast('Browser perangkat ini tidak mendukung notifikasi.', 'warning');
+        return 'unsupported';
+    }
+    const perm = await Notification.requestPermission();
+    if (perm === 'granted') {
+        window.HsmSwal.toast('Push Notifikasi berhasil diaktifkan!', 'success');
+        window.hsmShowPushNotification(
+            'Notifikasi Aktif — D&P PT. HSM',
+            'Anda akan menerima pemberitahuan instan setiap kali ada tugas baru dari Admin HRD.',
+            '/pwa/workspace'
+        );
+    } else if (perm === 'denied') {
+        window.HsmSwal.toast('Izin notifikasi ditolak di pengaturan browser.', 'warning');
+    }
+    return perm;
+};
+
+window.hsmShowPushNotification = function (title, body, url = '/pwa/workspace') {
+    if (window.HsmSwal) {
+        window.HsmSwal.toast(title, 'info');
+    }
+    if (!('Notification' in window) || Notification.permission !== 'granted') {
+        return;
+    }
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready
+            .then((reg) => {
+                reg.showNotification(title, {
+                    body,
+                    icon: '/icons/icon-192.svg',
+                    badge: '/icons/icon-192.svg',
+                    vibrate: [200, 100, 200],
+                    data: { url },
+                });
+            })
+            .catch(() => {
+                try {
+                    const n = new Notification(title, { body, icon: '/icons/icon-192.svg' });
+                    n.onclick = () => { window.location.href = url; };
+                } catch (_) {}
+            });
+    }
+};
+
 // Auto-enhance all .tbl tables so every cell has data-label from thead on mobile card view
 window.hsmEnhanceTables = function () {
     document.querySelectorAll('table.tbl').forEach((table) => {

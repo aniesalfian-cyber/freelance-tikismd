@@ -76,25 +76,83 @@ class TaskAssignmentController extends Controller
         }
 
         $created = DB::transaction(function () use ($data, $users, $request, $date) {
-            return $users->map(fn (User $u) => TaskAssignment::create([
-                'task_number' => TaskAssignment::generateNumber($date),
-                'user_id' => $u->id,
-                'outlet_id' => $data['outlet_id'],
-                'title' => $data['title'],
-                'description' => $data['description'] ?? null,
-                'task_type' => $data['task_type'],
-                'assigned_date' => $date->toDateString(),
-                'scheduled_start_time' => $data['scheduled_start_time'].':00',
-                'estimated_duration_minutes' => $data['estimated_duration_minutes'],
-                'status' => TaskAssignment::STATUS_PENDING,
-                'created_by' => $request->user()->id,
-            ]));
+            return $users->map(function (User $u) use ($data, $request, $date) {
+                $task = TaskAssignment::create([
+                    'task_number' => TaskAssignment::generateNumber($date),
+                    'user_id' => $u->id,
+                    'outlet_id' => $data['outlet_id'],
+                    'title' => $data['title'],
+                    'description' => $data['description'] ?? null,
+                    'task_type' => $data['task_type'],
+                    'assigned_date' => $date->toDateString(),
+                    'scheduled_start_time' => $data['scheduled_start_time'].':00',
+                    'estimated_duration_minutes' => $data['estimated_duration_minutes'],
+                    'status' => TaskAssignment::STATUS_PENDING,
+                    'created_by' => $request->user()->id,
+                ]);
+                \App\Models\AppNotification::notifyTaskAssigned($task);
+
+                return $task;
+            });
         });
 
         ActivityLogger::log('task.created', "Menugaskan '{$data['title']}' kepada {$created->count()} karyawan", $created->first());
 
         return redirect()->route('hrd.tasks.index', ['date' => $date->toDateString()])
-            ->with('success', "{$created->count()} penugasan berhasil dibuat.");
+            ->with('success', "{$created->count()} penugasan berhasil dibuat dan notifikasi dikirim ke kurir.");
+    }
+
+    /**
+     * Penugasan dadakan langsung dari Peta Sebaran Posisi Karyawan (Dashboard HRD).
+     */
+    public function quickAssign(Request $request)
+    {
+        $data = $request->validate([
+            'user_id' => ['required', 'exists:users,id'],
+            'outlet_id' => ['required', 'exists:outlets,id'],
+            'title' => ['required', 'string', 'max:200'],
+            'description' => ['nullable', 'string', 'max:2000'],
+            'estimated_duration_minutes' => ['required', 'integer', 'min:5', 'max:720'],
+        ]);
+
+        $courier = User::freelancers()->active()->findOrFail($data['user_id']);
+        $today = today();
+
+        $task = DB::transaction(function () use ($data, $courier, $request, $today) {
+            $t = TaskAssignment::create([
+                'task_number' => TaskAssignment::generateNumber($today),
+                'user_id' => $courier->id,
+                'outlet_id' => $data['outlet_id'],
+                'title' => $data['title'],
+                'description' => $data['description'] ?? null,
+                'task_type' => TaskAssignment::TYPE_ADHOC,
+                'assigned_date' => $today->toDateString(),
+                'scheduled_start_time' => now()->addMinutes(5)->format('H:i:00'),
+                'estimated_duration_minutes' => (int) $data['estimated_duration_minutes'],
+                'status' => TaskAssignment::STATUS_PENDING,
+                'created_by' => $request->user()->id,
+            ]);
+
+            \App\Models\AppNotification::notifyTaskAssigned($t);
+
+            return $t;
+        });
+
+        ActivityLogger::log('task.quick_assigned', "Tugas dadakan '{$task->title}' dikirim ke {$courier->name} dari Peta Live", $task);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'ok' => true,
+                'message' => "Tugas dadakan '{$task->title}' berhasil dikirim ke {$courier->name} beserta Push Notifikasi!",
+                'task' => [
+                    'id' => $task->id,
+                    'task_number' => $task->task_number,
+                    'title' => $task->title,
+                ],
+            ]);
+        }
+
+        return back()->with('success', "Tugas dadakan '{$task->title}' berhasil dikirim ke {$courier->name}!");
     }
 
     public function downloadTemplate(\App\Services\TaskExcelService $excelService)

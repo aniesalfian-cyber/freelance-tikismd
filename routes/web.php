@@ -33,7 +33,12 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role')->group(function () {
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::put('/profile/pin', [ProfileController::class, 'updatePin'])->name('profile.pin');
         Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+
+        Route::post('/pwa/heartbeat', [Pwa\LiveSyncController::class, 'heartbeat'])->name('pwa.heartbeat');
+        Route::post('/notifications/{id}/read', [Pwa\LiveSyncController::class, 'markRead'])->whereNumber('id')->name('notifications.read');
+        Route::post('/notifications/read-all', [Pwa\LiveSyncController::class, 'markAllRead'])->name('notifications.read-all');
     });
 
     // -------------------------------------------------------------- SuperAdmin
@@ -64,6 +69,8 @@ Route::middleware('auth')->group(function () {
     // ------------------------------------------- HRD & SuperAdmin (dashboard)
     Route::middleware('role:superadmin,admin_hrd')->prefix('hrd')->name('hrd.')->group(function () {
         Route::get('/dashboard', [Hrd\DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/live-couriers', [Hrd\DashboardController::class, 'liveCouriers'])->name('live-couriers');
+        Route::post('/tasks/quick-assign', [Hrd\TaskAssignmentController::class, 'quickAssign'])->name('tasks.quick-assign');
     });
 
     // ---------------------------- Data master & operasional: baca (incl. Owner)

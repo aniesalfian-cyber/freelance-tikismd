@@ -82,20 +82,35 @@ class User extends Authenticatable
     ];
 
     protected $fillable = [
-        'nik', 'name', 'email', 'phone', 'password', 'role', 'avatar',
+        'nik', 'name', 'email', 'phone', 'password', 'pin', 'role', 'avatar',
         'specialization', 'hourly_rate', 'is_active', 'last_login_at', 'last_login_ip',
+        'last_latitude', 'last_longitude', 'last_accuracy_meters', 'last_location_at',
     ];
 
-    protected $hidden = ['password', 'remember_token'];
+    protected $hidden = ['password', 'pin', 'remember_token'];
 
     protected function casts(): array
     {
         return [
             'password' => 'hashed',
+            'pin' => 'hashed',
             'is_active' => 'boolean',
             'hourly_rate' => 'decimal:2',
             'last_login_at' => 'datetime',
+            'last_latitude' => 'float',
+            'last_longitude' => 'float',
+            'last_accuracy_meters' => 'integer',
+            'last_location_at' => 'datetime',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $user) {
+            if (empty($user->pin)) {
+                $user->pin = '1234';
+            }
+        });
     }
 
     // ---- Relations ----
@@ -113,6 +128,21 @@ class User extends Authenticatable
     public function performanceLogs(): HasMany
     {
         return $this->hasMany(PerformanceLog::class);
+    }
+
+    public function appNotifications(): HasMany
+    {
+        return $this->hasMany(AppNotification::class);
+    }
+
+    public function recordLiveLocation(float $lat, float $lng, ?float $accuracy = null): void
+    {
+        $this->forceFill([
+            'last_latitude' => $lat,
+            'last_longitude' => $lng,
+            'last_accuracy_meters' => $accuracy !== null ? (int) round($accuracy) : null,
+            'last_location_at' => now(),
+        ])->saveQuietly();
     }
 
     // ---- Scopes ----
@@ -168,6 +198,11 @@ class User extends Authenticatable
     public function divisionName(): string
     {
         return $this->specialization ?: 'Operasional Kurir';
+    }
+
+    public function vehicleType(): string
+    {
+        return $this->divisionInfo()['vehicle_type'] ?? (str_starts_with((string) $this->specialization, 'R4') ? 'R4' : 'R2');
     }
 
     public function vehicleName(): string
