@@ -1,40 +1,40 @@
 @extends('layouts.app', ['title' => 'Delivery & Pick-Up PT. HSM', 'dashboard_name' => 'Dashboard Operasional HRD & Supervisor', 'subtitle' => 'Monitoring real-time posisi GPS kurir, kehadiran, distribusi tugas, dan status gerai hari ini'])
 
 @section('content')
-<!-- Top Operational KPI Cards -->
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 rise">
-    <div class="glass glass-hover p-5">
-        <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Kehadiran Hari Ini</div>
-        <div class="mt-2 flex items-baseline gap-2">
-            <span class="text-3xl font-extrabold text-emerald-400">{{ $today['present'] }}</span>
-            <span class="text-xs text-slate-400">/ {{ $today['freelancers_total'] }} karyawan</span>
+<!-- Top Operational KPI Cards (Compact) -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 rise">
+    <div class="glass glass-hover p-3.5">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Kehadiran Hari Ini</div>
+        <div class="mt-1 flex items-baseline gap-1.5">
+            <span class="text-2xl font-extrabold text-emerald-400">{{ $today['present'] }}</span>
+            <span class="text-xs text-slate-400">/ {{ $today['freelancers_total'] }}</span>
         </div>
-        <div class="mt-1 text-xs text-amber-400">{{ $today['late_attendance'] }} hadir terlambat</div>
+        <div class="text-[11px] text-amber-400">{{ $today['late_attendance'] }} hadir terlambat</div>
     </div>
 
-    <div class="glass glass-hover p-5">
-        <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Sedang Diproses</div>
-        <div class="mt-2 text-3xl font-extrabold text-orange-400">{{ $today['task_counts']['in_progress'] }}</div>
-        <div class="mt-1 text-xs text-slate-400">Dari {{ $today['task_counts']['total'] }} tugas hari ini</div>
+    <div class="glass glass-hover p-3.5">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Sedang Diproses</div>
+        <div class="mt-1 text-2xl font-extrabold text-orange-400">{{ $today['task_counts']['in_progress'] }}</div>
+        <div class="text-[11px] text-slate-400">Dari {{ $today['task_counts']['total'] }} tugas hari ini</div>
     </div>
 
-    <div class="glass glass-hover p-5">
-        <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Selesai Diproses</div>
-        <div class="mt-2 text-3xl font-extrabold text-white">{{ $today['task_counts']['completed'] }}</div>
-        <div class="mt-1 text-xs text-emerald-400">
-            {{ $today['task_counts']['total'] ? round($today['task_counts']['completed'] / $today['task_counts']['total'] * 100) : 0 }}% penyelesaian hari ini
+    <div class="glass glass-hover p-3.5">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Selesai Diproses</div>
+        <div class="mt-1 text-2xl font-extrabold text-white">{{ $today['task_counts']['completed'] }}</div>
+        <div class="text-[11px] text-emerald-400">
+            {{ $today['task_counts']['total'] ? round($today['task_counts']['completed'] / $today['task_counts']['total'] * 100) : 0 }}% penyelesaian
         </div>
     </div>
 
-    <div class="glass glass-hover p-5">
-        <div class="text-xs font-bold uppercase tracking-wider text-slate-400">Melewati Jam Mulai</div>
-        <div class="mt-2 text-3xl font-extrabold text-red-400">{{ $today['late_tasks'] }}</div>
-        <div class="mt-1 text-xs text-slate-400">{{ $today['task_counts']['pending'] }} total belum diproses</div>
+    <div class="glass glass-hover p-3.5">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Melewati Jam Mulai</div>
+        <div class="mt-1 text-2xl font-extrabold text-red-400">{{ $today['late_tasks'] }}</div>
+        <div class="text-[11px] text-slate-400">{{ $today['task_counts']['pending'] }} belum diproses</div>
     </div>
 </div>
 
-<!-- Quick Actions Bar -->
-<div class="glass p-4 flex flex-wrap items-center justify-between gap-3 rise rise-2">
+<!-- Quick Actions Bar (Compact) -->
+<div class="glass p-3 flex flex-wrap items-center justify-between gap-2 rise rise-2">
     <div class="flex flex-wrap gap-2">
         <a href="{{ route('hrd.tasks.create') }}" class="btn btn-primary btn-sm">
             <x-icon name="plus" class="w-4 h-4" /> Beri Tugas Baru
@@ -125,16 +125,16 @@
         </div>
 
         <!-- Map + Interactive Courier Roster Layout -->
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4" :class="isFullscreen ? 'flex-1 min-h-0' : ''">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-3" :class="isFullscreen ? 'flex-1 min-h-0' : ''">
             <!-- Map Canvas -->
             <div class="lg:col-span-3 relative rounded-2xl overflow-hidden border border-slate-300 shadow-inner"
-                 :class="isFullscreen ? 'h-full min-h-[420px]' : 'h-[430px]'">
+                 :class="isFullscreen ? 'h-full min-h-[420px]' : 'h-[330px]'">
                 <div id="hrd-live-map" class="w-full h-full"></div>
             </div>
 
             <!-- Courier Live Roster Sidebar (Click to focus & assign task) -->
-            <div class="glass p-3.5 flex flex-col justify-between border border-slate-200 overflow-hidden"
-                 :class="isFullscreen ? 'h-full' : 'max-h-[430px]'">
+            <div class="glass p-3 flex flex-col justify-between border border-slate-200 overflow-hidden"
+                 :class="isFullscreen ? 'h-full' : 'max-h-[330px]'">
                 <div class="pb-2 border-b border-slate-200 flex items-center justify-between">
                     <span class="text-xs font-extrabold text-slate-900">Daftar Posisi Kurir (<span x-text="filteredCouriers().length"></span>)</span>
                     <span class="text-[10px] font-bold text-orange-600">Klik untuk Fokus / Tugas</span>

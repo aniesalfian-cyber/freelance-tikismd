@@ -144,11 +144,11 @@
     @include('partials.sidebar', ['menuItems' => $menuItems])
 
     <!-- Main Content Area -->
-    <div class="min-h-dvh flex flex-col transition-all duration-300 pb-28 lg:pb-10"
+    <div class="min-h-dvh flex flex-col transition-all duration-300 pb-20 lg:pb-6"
          :class="sidebarCollapsed ? 'lg:pl-[5.25rem]' : 'lg:pl-[17rem]'">
 
         <!-- Topbar -->
-        <header class="topbar sticky top-0 z-30 px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+        <header class="topbar sticky top-0 z-30 px-3 sm:px-5 h-14 flex items-center justify-between gap-2">
             <div class="flex items-center gap-3 min-w-0">
                 <a href="{{ $currentUser->dashboardRoute() }}" class="lg:hidden flex-none">
                     <x-logo size="sm" />
@@ -260,7 +260,7 @@
         </header>
 
         <!-- Page Body -->
-        <main class="flex-1 px-4 sm:px-6 pt-5 max-w-7xl w-full mx-auto space-y-6">
+        <main class="flex-1 px-3 sm:px-5 pt-3 max-w-7xl w-full mx-auto space-y-3.5">
             @if(session('success'))
                 <div class="glass px-4 py-3 border-emerald-300 bg-emerald-50 text-emerald-900 text-sm flex items-center justify-between gap-3 shadow-sm">
                     <span>{{ session('success') }}</span>

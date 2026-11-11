@@ -11,7 +11,7 @@
     <title>{{ $title ?? 'Login' }} — {{ config('app.name', 'D&P PT. HSM') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-dvh flex flex-col justify-center items-center p-4 sm:p-6">
+<body class="h-dvh overflow-y-auto flex flex-col justify-center items-center px-3 py-2 sm:p-4">
     @yield('content')
 </body>
 </html>
