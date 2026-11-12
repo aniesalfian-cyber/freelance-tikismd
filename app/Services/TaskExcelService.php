@@ -59,7 +59,7 @@ class TaskExcelService
     {
         $spreadsheet = new Spreadsheet();
         $spreadsheet->getProperties()
-            ->setCreator('PT. Harvest Samarinda Mandiri (HSM)')
+            ->setCreator('PT. Hubungan Saudara Mulia (HSM)')
             ->setTitle('Format Import Penugasan Kurir PT HSM')
             ->setDescription('Template resmi untuk import penugasan kurir operasional TIKISMD');
 
@@ -70,7 +70,7 @@ class TaskExcelService
         $sheet->setTitle('Formulir Tugas');
 
         // Header Perusahaan & Petunjuk
-        $sheet->setCellValue('A1', 'PT. HARVEST SAMARINDA MANDIRI (HSM) — FORMAT IMPORT TUGAS KURIR');
+        $sheet->setCellValue('A1', 'PT. HUBUNGAN SAUDARA MULIA (HSM) — FORMAT IMPORT TUGAS KURIR');
         $sheet->setCellValue('A2', 'Petunjuk: Kolom dengan tanda (*) wajib diisi. Nomor HP Kurir harus terdaftar pada sistem.');
         $sheet->setCellValue('A3', 'Tipe Tugas: "pasti_harian" atau "tidak_pasti" | Format Tanggal: YYYY-MM-DD | Format Jam: HH:MM');
 

@@ -14,7 +14,7 @@ class Setting extends Model
 
     /** Nilai bawaan seluruh konfigurasi sistem. */
     public const DEFAULTS = [
-        'company_name' => ['PT HSM', 'Nama Perusahaan', 'umum'],
+        'company_name' => ['PT. Hubungan Saudara Mulia (HSM)', 'Nama Perusahaan', 'umum'],
         'company_address' => ['Samarinda, Kalimantan Timur', 'Alamat Perusahaan', 'umum'],
         'company_contact' => ['info@hsm.id | (0541) 000000', 'Kontak Perusahaan (Telp/Email)', 'umum'],
         'work_start_time' => ['08:00', 'Jam Mulai Kerja (batas tepat waktu presensi)', 'presensi'],
