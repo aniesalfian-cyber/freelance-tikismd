@@ -75,7 +75,8 @@ class UserSeeder extends Seeder
                 'nik' => 'OWN-0001',
                 'role' => User::ROLE_OWNER,
                 'specialization' => 'Direksi / Owner PT. HSM',
-                'password' => $defaultPassword,
+                'password' => 'tikismd123',
+                'pin' => '1478',
                 'is_active' => true,
             ],
 
