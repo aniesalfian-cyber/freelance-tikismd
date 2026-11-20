@@ -87,39 +87,96 @@ window.hsmDistanceMeters = function (lat1, lon1, lat2, lon2) {
     return Math.round(2 * R * Math.asin(Math.min(1, Math.sqrt(a))));
 };
 
-// Client-side image compression (< 800KB) for task proof upload
-window.hsmCompressImage = function (file, maxWidth = 1280, quality = 0.8) {
+// Helper format bytes (B, KB, MB)
+window.hsmFormatBytes = function (bytes) {
+    if (!bytes || bytes <= 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+};
+
+// Client-side image compression (max 1280px, ~70% JPEG quality) for fast mobile upload and storage savings
+window.hsmCompressImage = function (file, maxDimension = 1280, quality = 0.70) {
     return new Promise((resolve) => {
-        if (!file || !file.type.startsWith('image/') || file.size <= 600 * 1024) {
-            resolve(file);
+        if (!file || !file.type.startsWith('image/')) {
+            resolve({
+                file: file,
+                blob: file,
+                previewUrl: file ? URL.createObjectURL(file) : null,
+                originalSize: file ? file.size : 0,
+                compressedSize: file ? file.size : 0,
+                width: null,
+                height: null,
+                savedPercent: 0
+            });
             return;
         }
+
         const reader = new FileReader();
         reader.onload = (ev) => {
             const img = new Image();
             img.onload = () => {
-                const scale = Math.min(1, maxWidth / img.width);
+                let width = img.width;
+                let height = img.height;
+
+                // Proporsional resize dengan batas maksimum 1280px di sisi terpanjang
+                if (width > maxDimension || height > maxDimension) {
+                    if (width > height) {
+                        height = Math.round((height * maxDimension) / width);
+                        width = maxDimension;
+                    } else {
+                        width = Math.round((width * maxDimension) / height);
+                        height = maxDimension;
+                    }
+                }
+
                 const canvas = document.createElement('canvas');
-                canvas.width = Math.round(img.width * scale);
-                canvas.height = Math.round(img.height * scale);
+                canvas.width = width;
+                canvas.height = height;
                 const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                // High-quality smoothing
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                ctx.drawImage(img, 0, 0, width, height);
+
                 canvas.toBlob(
                     (blob) => {
                         if (!blob) {
-                            resolve(file);
+                            const previewUrl = URL.createObjectURL(file);
+                            resolve({ file, blob: file, previewUrl, originalSize: file.size, compressedSize: file.size, width, height, savedPercent: 0 });
                             return;
                         }
-                        resolve(new File([blob], file.name.replace(/\.\w+$/, '.jpg'), { type: 'image/jpeg' }));
+                        const newName = (file.name || 'foto_bukti.jpg').replace(/\.[^.]+$/, '') + '.jpg';
+                        const compressedFile = new File([blob], newName, { type: 'image/jpeg', lastModified: Date.now() });
+                        const previewUrl = URL.createObjectURL(blob);
+                        const savedPercent = file.size > blob.size ? Math.round(((file.size - blob.size) / file.size) * 100) : 0;
+
+                        resolve({
+                            file: compressedFile,
+                            blob: blob,
+                            previewUrl: previewUrl,
+                            originalSize: file.size,
+                            compressedSize: blob.size,
+                            width: width,
+                            height: height,
+                            savedPercent: savedPercent
+                        });
                     },
                     'image/jpeg',
                     quality
                 );
             };
-            img.onerror = () => resolve(file);
+            img.onerror = () => {
+                const previewUrl = URL.createObjectURL(file);
+                resolve({ file, blob: file, previewUrl, originalSize: file.size, compressedSize: file.size, width: null, height: null, savedPercent: 0 });
+            };
             img.src = ev.target.result;
         };
-        reader.onerror = () => resolve(file);
+        reader.onerror = () => {
+            resolve({ file, blob: file, previewUrl: null, originalSize: file ? file.size : 0, compressedSize: file ? file.size : 0, width: null, height: null, savedPercent: 0 });
+        };
         reader.readAsDataURL(file);
     });
 };

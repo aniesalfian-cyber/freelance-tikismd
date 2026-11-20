@@ -112,4 +112,60 @@ class GeraiCorporateAndProofPhotoTest extends TestCase
         $res->assertSee($task->proofUrl());
         $res->assertSee('Corporate');
     }
+
+    public function test_courier_can_complete_task_with_camera_proof_and_auto_compression(): void
+    {
+        Storage::fake('public');
+        $courier = User::freelancers()->first();
+        $outlet = Outlet::active()->branches()->first();
+
+        // Buat tugas in_progress
+        $task = TaskAssignment::create([
+            'task_number' => 'TSK-TEST-CAM01',
+            'user_id' => $courier->id,
+            'outlet_id' => $outlet->id,
+            'title' => 'Pengantaran Paket Hasil Jepretan Kamera',
+            'description' => 'Uji coba upload kamera langsung',
+            'task_type' => TaskAssignment::TYPE_ADHOC,
+            'assigned_date' => today(),
+            'scheduled_start_time' => '08:00:00',
+            'estimated_duration_minutes' => 60,
+            'status' => TaskAssignment::STATUS_IN_PROGRESS,
+            'started_at' => now()->subMinutes(15),
+            'start_latitude' => $outlet->latitude,
+            'start_longitude' => $outlet->longitude,
+            'start_distance_meters' => 5,
+            'created_by' => User::where('role', User::ROLE_HRD)->first()->id,
+        ]);
+
+        // Simulasikan foto resolusi tinggi dari kamera smartphone (2000 x 1500 px)
+        $largePhoto = UploadedFile::fake()->image('camera_capture.jpg', 2000, 1500);
+
+        $res = $this->actingAs($courier)->post(route('pwa.tasks.complete', $task), [
+            'latitude' => $outlet->latitude,
+            'longitude' => $outlet->longitude,
+            'accuracy' => 10,
+            'notes' => 'Paket berhasil diserahterimakan dengan bukti jepretan kamera.',
+            'proof' => $largePhoto,
+        ], ['Accept' => 'application/json']);
+
+        $res->assertOk();
+        $res->assertJson(['ok' => true]);
+
+        $task->refresh();
+        $this->assertEquals(TaskAssignment::STATUS_COMPLETED, $task->status);
+        $this->assertNotNull($task->proof_image);
+
+        // Pastikan tersimpan di disk public
+        Storage::disk('public')->assertExists($task->proof_image);
+
+        // Jika GD tersedia, pastikan dimensi gambar telah di-resize agar max dimension <= 1280px
+        if (extension_loaded('gd')) {
+            $path = Storage::disk('public')->path($task->proof_image);
+            $size = getimagesize($path);
+            $this->assertNotFalse($size);
+            $this->assertLessThanOrEqual(1280, $size[0]);
+            $this->assertLessThanOrEqual(1280, $size[1]);
+        }
+    }
 }

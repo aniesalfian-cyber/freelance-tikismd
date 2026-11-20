@@ -113,9 +113,87 @@
                 <textarea x-model="notes" rows="3" placeholder="Tuliskan hasil pengecekan/pengerjaan dengan jelas..." class="input"></textarea>
             </div>
 
-            <div>
-                <label class="label">Foto Bukti Pengerjaan (Opsional, dikompresi otomatis)</label>
-                <input type="file" accept="image/*" @change="handleFile($event)" class="input text-xs">
+            <!-- Bukti Pengerjaan (Kamera Langsung & Kompresi Otomatis) -->
+            <div class="space-y-3 border-t border-white/10 pt-4">
+                <div class="flex items-center justify-between">
+                    <label class="label mb-0 text-white font-bold flex items-center gap-1.5">
+                        <span class="text-orange-400">📷</span> Foto Bukti Pengerjaan
+                    </label>
+                    <span class="text-[11px] text-slate-400">Opsional • Auto-kompresi 1280px</span>
+                </div>
+
+                <!-- Hidden file inputs -->
+                <input type="file" x-ref="cameraInput" accept="image/*" capture="environment" @change="processProof($event)" class="hidden">
+                <input type="file" x-ref="galleryInput" accept="image/*" @change="processProof($event)" class="hidden">
+
+                <!-- Loading Indikator saat proses kompresi foto berlangsung -->
+                <div x-show="compressingPhoto" class="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center gap-3 text-xs text-orange-200">
+                    <svg class="w-5 h-5 animate-spin text-orange-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                        <path d="M3 3v5h5"/>
+                        <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+                        <path d="M16 16h5v5"/>
+                    </svg>
+                    <span class="font-bold">Mengompresi foto otomatis (1280px • JPEG 70%)...</span>
+                </div>
+
+                <!-- Pilihan Tombol Jika BELUM Ada Foto -->
+                <div x-show="!proofPreview && !compressingPhoto" class="space-y-2">
+                    <button type="button" @click="$refs.cameraInput.click()"
+                            class="btn btn-primary btn-block py-3.5 px-4 rounded-2xl shadow-lg flex items-center justify-center gap-2.5 text-sm font-extrabold transition active:scale-[0.98]">
+                        <svg class="w-5 h-5 flex-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        <span>Ambil Foto Kamera Langsung</span>
+                    </button>
+
+                    <div class="flex items-center gap-2">
+                        <div class="h-px bg-white/10 flex-1"></div>
+                        <span class="text-[10px] uppercase font-bold text-slate-500">atau</span>
+                        <div class="h-px bg-white/10 flex-1"></div>
+                    </div>
+
+                    <button type="button" @click="$refs.galleryInput.click()"
+                            class="btn btn-ghost btn-block py-2.5 px-3 rounded-xl border border-white/10 text-xs text-slate-300 hover:text-white flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4 flex-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <span>Pilih Foto dari Galeri / File</span>
+                    </button>
+                </div>
+
+                <!-- Tampilan Preview Foto yang Berhasil Diambil & Dikompresi -->
+                <div x-show="proofPreview && !compressingPhoto" class="space-y-2 p-3 rounded-2xl bg-white/5 border border-white/10" style="display:none;">
+                    <div class="relative rounded-xl overflow-hidden border border-white/15 bg-black/40">
+                        <img :src="proofPreview" alt="Preview Bukti" class="w-full max-h-72 object-contain mx-auto">
+                        
+                        <!-- Badge status kompresi -->
+                        <div class="absolute bottom-2 left-2 right-2 flex flex-wrap items-center justify-between gap-1 p-2 rounded-lg bg-black/80 backdrop-blur-xs text-[11px] text-white">
+                            <span class="font-bold flex items-center gap-1 text-emerald-400">
+                                ✓ Foto Siap Diunggah
+                            </span>
+                            <span class="font-mono text-slate-300" x-text="proofInfo ? `${proofInfo.comp} (${proofInfo.saved > 0 ? 'hemat ' + proofInfo.saved + '%' : 'optimal'})` : ''"></span>
+                        </div>
+                    </div>
+
+                    <!-- Tombol Aksi Ulangi atau Hapus Foto -->
+                    <div class="grid grid-cols-2 gap-2 pt-1">
+                        <button type="button" @click="$refs.cameraInput.click()" class="btn btn-ghost btn-sm text-xs flex items-center justify-center gap-1.5 border border-white/10 hover:border-orange-400">
+                            <svg class="w-3.5 h-3.5 text-orange-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            <span>Ulangi Foto</span>
+                        </button>
+                        <button type="button" @click="removeProof()" class="btn btn-danger btn-sm text-xs flex items-center justify-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                            <span>Hapus Foto</span>
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <button type="button" @click="completeTask()" :disabled="busy" class="btn btn-success btn-lg btn-block">
@@ -166,6 +244,9 @@ function taskRunner(cfg) {
         outletRadius: cfg.outletRadius,
         notes: '',
         proofFile: null,
+        proofPreview: null,
+        proofInfo: null,
+        compressingPhoto: false,
         busy: false,
         elapsedText: '00:00',
         map: null,
@@ -225,9 +306,44 @@ function taskRunner(cfg) {
                 window.HsmSwal?.toast('Koordinat disimulasikan di dekat gerai Samarinda (±12m)', 'info');
             }
         },
-        async handleFile(e) {
+        async processProof(e) {
             const f = e.target.files?.[0];
-            this.proofFile = f ? await window.hsmCompressImage(f) : null;
+            if (!f) return;
+            this.compressingPhoto = true;
+            try {
+                const res = await window.hsmCompressImage(f, 1280, 0.70);
+                this.proofFile = res.file;
+                this.proofPreview = res.previewUrl;
+                this.proofInfo = {
+                    orig: window.hsmFormatBytes(res.originalSize),
+                    comp: window.hsmFormatBytes(res.compressedSize),
+                    saved: res.savedPercent || 0,
+                    dim: res.width ? `${res.width}x${res.height}` : ''
+                };
+            } catch (err) {
+                console.error('Kompresi foto gagal:', err);
+                this.proofFile = f;
+                this.proofPreview = URL.createObjectURL(f);
+                this.proofInfo = {
+                    orig: window.hsmFormatBytes(f.size),
+                    comp: window.hsmFormatBytes(f.size),
+                    saved: 0,
+                    dim: ''
+                };
+            } finally {
+                this.compressingPhoto = false;
+                e.target.value = '';
+            }
+        },
+        removeProof() {
+            if (this.proofPreview && this.proofPreview.startsWith('blob:')) {
+                URL.revokeObjectURL(this.proofPreview);
+            }
+            this.proofFile = null;
+            this.proofPreview = null;
+            this.proofInfo = null;
+            if (this.$refs.cameraInput) this.$refs.cameraInput.value = '';
+            if (this.$refs.galleryInput) this.$refs.galleryInput.value = '';
         },
         async startTask() {
             if (this.lat === null) this.simulateAtOutlet();

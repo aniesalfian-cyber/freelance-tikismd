@@ -63,7 +63,7 @@ class TaskController extends Controller
             'longitude' => ['required', 'numeric', 'between:-180,180'],
             'accuracy' => ['nullable', 'numeric', 'min:0'],
             'notes' => ['required', 'string', 'min:10', 'max:2000'],
-            'proof' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'proof' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:12288'],
         ], ['notes.min' => 'Catatan pengerjaan minimal 10 karakter.', 'notes.required' => 'Catatan pengerjaan wajib diisi.']);
 
         $task = $tasks->complete(

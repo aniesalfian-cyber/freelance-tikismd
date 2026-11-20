@@ -6,9 +6,11 @@ use App\Exceptions\BusinessRuleException;
 use App\Models\TaskAssignment;
 use App\Models\User;
 use App\Support\ActivityLogger;
+use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class TaskService
 {
@@ -85,7 +87,7 @@ class TaskService
 
         $proofPath = null;
         if ($proof) {
-            $proofPath = $proof->store('proofs/'.$now->format('Y/m'), 'public');
+            $proofPath = $this->storeCompressedProof($proof, $now);
         }
 
         DB::transaction(function () use ($task, $now, $lat, $lng, $distance, $actual, $notes, $proofPath, $startValid, $endValid) {
@@ -130,6 +132,82 @@ class TaskService
         if ($task->proof_image) {
             Storage::disk('public')->delete($task->proof_image);
         }
+    }
+
+    /**
+     * Simpan dan lakukan kompresi/resize sekunder di server (GD) agar ukuran file
+     * konsisten ringan (< 350 KB) dan dimensi maksimal 1280px.
+     */
+    protected function storeCompressedProof(UploadedFile $file, Carbon $now): string
+    {
+        $dir = 'proofs/'.$now->format('Y/m');
+        $fileName = Str::random(40).'.jpg';
+        $relativeStoragePath = $dir.'/'.$fileName;
+
+        // Jika ekstensi GD aktif, lakukan auto-resize max 1280px dan kompresi JPEG 75%
+        if (extension_loaded('gd') && function_exists('imagecreatefromstring')) {
+            try {
+                $rawContent = file_get_contents($file->getRealPath());
+                $srcImage = @imagecreatefromstring($rawContent);
+
+                if ($srcImage !== false) {
+                    // Normalisasi orientasi EXIF (kamera smartphone Samsung/iPhone)
+                    if (function_exists('exif_read_data')) {
+                        $exif = @exif_read_data($file->getRealPath());
+                        if (! empty($exif['Orientation'])) {
+                            switch ($exif['Orientation']) {
+                                case 3:
+                                    $srcImage = imagerotate($srcImage, 180, 0);
+                                    break;
+                                case 6:
+                                    $srcImage = imagerotate($srcImage, -90, 0);
+                                    break;
+                                case 8:
+                                    $srcImage = imagerotate($srcImage, 90, 0);
+                                    break;
+                            }
+                        }
+                    }
+
+                    $origWidth = imagesx($srcImage);
+                    $origHeight = imagesy($srcImage);
+                    $maxDimension = 1280;
+
+                    if ($origWidth > $maxDimension || $origHeight > $maxDimension) {
+                        if ($origWidth > $origHeight) {
+                            $targetWidth = $maxDimension;
+                            $targetHeight = (int) round(($origHeight * $maxDimension) / $origWidth);
+                        } else {
+                            $targetHeight = $maxDimension;
+                            $targetWidth = (int) round(($origWidth * $maxDimension) / $origHeight);
+                        }
+
+                        $destImage = imagecreatetruecolor($targetWidth, $targetHeight);
+                        $white = imagecolorallocate($destImage, 255, 255, 255);
+                        imagefill($destImage, 0, 0, $white);
+                        imagecopyresampled($destImage, $srcImage, 0, 0, 0, 0, $targetWidth, $targetHeight, $origWidth, $origHeight);
+                        imagedestroy($srcImage);
+                        $srcImage = $destImage;
+                    }
+
+                    // Tulis hasil kompresi langsung ke storage disk
+                    ob_start();
+                    imagejpeg($srcImage, null, 75);
+                    $compressedData = ob_get_clean();
+                    imagedestroy($srcImage);
+
+                    if (! empty($compressedData)) {
+                        Storage::disk('public')->put($relativeStoragePath, $compressedData);
+
+                        return $relativeStoragePath;
+                    }
+                }
+            } catch (\Throwable $e) {
+                // Fallback ke penyimpanan default jika terjadi kegagalan pemrosesan grafis
+            }
+        }
+
+        return $file->store($dir, 'public');
     }
 
     protected function assertOwner(TaskAssignment $task, User $user): void
