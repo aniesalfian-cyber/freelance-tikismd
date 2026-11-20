@@ -1,29 +1,61 @@
-@extends('layouts.app', ['title' => $outlet->exists ? 'Edit Gerai' : 'Tambah Gerai Baru', 'subtitle' => 'Geser pin pada peta untuk menentukan koordinat GPS dan radius geofencing'])
+@extends('layouts.app', ['title' => $outlet->exists ? 'Edit Gerai & Corporate' : 'Tambah Gerai / Corporate Baru', 'subtitle' => 'Geser pin pada peta untuk menentukan koordinat GPS dan radius geofencing'])
 
 @section('content')
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <div class="glass p-6">
         <div class="orn-line mb-2"></div>
-        <h2 class="text-base font-extrabold text-white mb-4">{{ $outlet->exists ? 'Perbarui Gerai '.$outlet->name : 'Formulir Data Gerai' }}</h2>
+        <h2 class="text-base font-extrabold text-white mb-4">
+            {{ $outlet->exists ? 'Perbarui Lokasi: '.$outlet->name : 'Formulir Data Gerai & Corporate Baru' }}
+        </h2>
 
         <form method="POST" action="{{ $outlet->exists ? route('hrd.outlets.update', $outlet) : route('hrd.outlets.store') }}" class="space-y-4">
             @csrf
             @if($outlet->exists) @method('PUT') @endif
 
+            <!-- Pilih Tipe Lokasi -->
+            <div>
+                <label class="label">Kategori / Tipe Lokasi (*)</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <label class="flex items-start gap-3 p-3 rounded-2xl border cursor-pointer transition"
+                           :class="locType === 'gerai' ? 'bg-cyan-500/10 border-cyan-500/40 text-cyan-200' : 'bg-white/5 border-white/10 text-slate-300 hover:border-white/20'"
+                           x-data="{ locType: '{{ old('type', $outlet->type ?? \App\Models\Outlet::TYPE_GERAI) }}' }">
+                        <input type="radio" name="type" value="gerai" @checked(old('type', $outlet->type ?? \App\Models\Outlet::TYPE_GERAI) === \App\Models\Outlet::TYPE_GERAI) class="mt-0.5">
+                        <div class="min-w-0">
+                            <div class="font-bold text-xs text-white flex items-center gap-1.5">
+                                <span>🏪</span> Gerai Cabang
+                            </div>
+                            <div class="text-[11px] text-slate-400 mt-0.5 leading-snug">Titik gerai/cabang TIKISMD operasional pickup & delivery paket.</div>
+                        </div>
+                    </label>
+
+                    <label class="flex items-start gap-3 p-3 rounded-2xl border cursor-pointer transition"
+                           :class="locType === 'corporate' ? 'bg-purple-500/10 border-purple-500/40 text-purple-200' : 'bg-white/5 border-white/10 text-slate-300 hover:border-white/20'"
+                           x-data="{ locType: '{{ old('type', $outlet->type ?? \App\Models\Outlet::TYPE_GERAI) }}' }">
+                        <input type="radio" name="type" value="corporate" @checked(old('type', $outlet->type) === \App\Models\Outlet::TYPE_CORPORATE) class="mt-0.5">
+                        <div class="min-w-0">
+                            <div class="font-bold text-xs text-white flex items-center gap-1.5">
+                                <span>🏢</span> Perusahaan Rekan (Corporate)
+                            </div>
+                            <div class="text-[11px] text-slate-400 mt-0.5 leading-snug">Perusahaan/kantor mitra kerja sama B2B untuk jadwal penjemputan paket.</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                    <label class="label">Kode Gerai</label>
-                    <input type="text" name="code" value="{{ old('code', $outlet->code) }}" placeholder="GR-004" required class="input font-mono uppercase">
+                    <label class="label">Kode Lokasi (*)</label>
+                    <input type="text" name="code" value="{{ old('code', $outlet->code) }}" placeholder="Contoh: CORP-001 / GR-004" required class="input font-mono uppercase">
                 </div>
                 <div class="sm:col-span-2">
-                    <label class="label">Nama Gerai / Kantor</label>
-                    <input type="text" name="name" value="{{ old('name', $outlet->name) }}" placeholder="Gerai Samarinda Kota" required class="input">
+                    <label class="label">Nama Gerai / Perusahaan Rekan (*)</label>
+                    <input type="text" name="name" value="{{ old('name', $outlet->name) }}" placeholder="Contoh: PT. Sumber Makmur / Gerai Antasari" required class="input">
                 </div>
             </div>
 
             <div>
-                <label class="label">Alamat Lengkap</label>
-                <textarea name="address" rows="2" required class="input">{{ old('address', $outlet->address) }}</textarea>
+                <label class="label">Alamat Lengkap (*)</label>
+                <textarea name="address" rows="2" placeholder="Tuliskan nama jalan, kelurahan, kecamatan di Samarinda..." required class="input">{{ old('address', $outlet->address) }}</textarea>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -48,13 +80,13 @@
                 </label>
                 <label class="inline-flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" name="is_active" value="1" @checked(old('is_active', $outlet->is_active ?? true)) class="check">
-                    <span class="text-xs font-semibold text-white">Gerai Aktif</span>
+                    <span class="text-xs font-semibold text-white">Status Lokasi Aktif</span>
                 </label>
             </div>
 
             <div class="flex items-center justify-end gap-2 pt-3">
                 <a href="{{ route('hrd.outlets.index') }}" class="btn btn-ghost">Batal</a>
-                <button type="submit" class="btn btn-primary">Simpan Data Gerai</button>
+                <button type="submit" class="btn btn-primary">Simpan Data Lokasi</button>
             </div>
         </form>
     </div>

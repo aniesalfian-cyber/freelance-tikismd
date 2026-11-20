@@ -21,12 +21,30 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-                <label class="label">Lokasi Gerai Pengerjaan</label>
+                <label class="label">Lokasi Pengerjaan (Gerai / Corporate)</label>
                 <select name="default_outlet_id" required class="input">
-                    <option value="">-- Pilih Gerai --</option>
-                    @foreach($outlets as $o)
-                        <option value="{{ $o->id }}" @selected(old('default_outlet_id', $template->default_outlet_id) == $o->id)>{{ $o->name }} ({{ $o->code }})</option>
-                    @endforeach
+                    <option value="">-- Pilih Lokasi (Gerai / Corporate) --</option>
+                    @if($outlets->where('is_main_office', true)->isNotEmpty())
+                        <optgroup label="⭐ Kantor Utama">
+                            @foreach($outlets->where('is_main_office', true) as $o)
+                                <option value="{{ $o->id }}" @selected(old('default_outlet_id', $template->default_outlet_id) == $o->id)>{{ $o->name }} ({{ $o->code }})</option>
+                            @endforeach
+                        </optgroup>
+                    @endif
+                    @if($outlets->where('is_main_office', false)->where('type', 'corporate')->isNotEmpty())
+                        <optgroup label="🏢 Perusahaan Rekan (Corporate)">
+                            @foreach($outlets->where('is_main_office', false)->where('type', 'corporate') as $o)
+                                <option value="{{ $o->id }}" @selected(old('default_outlet_id', $template->default_outlet_id) == $o->id)>{{ $o->name }} ({{ $o->code }})</option>
+                            @endforeach
+                        </optgroup>
+                    @endif
+                    @if($outlets->where('is_main_office', false)->where('type', '!=', 'corporate')->isNotEmpty())
+                        <optgroup label="🏪 Gerai Cabang">
+                            @foreach($outlets->where('is_main_office', false)->where('type', '!=', 'corporate') as $o)
+                                <option value="{{ $o->id }}" @selected(old('default_outlet_id', $template->default_outlet_id) == $o->id)>{{ $o->name }} ({{ $o->code }})</option>
+                            @endforeach
+                        </optgroup>
+                    @endif
                 </select>
             </div>
             <div>

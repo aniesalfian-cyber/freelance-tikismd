@@ -41,11 +41,29 @@
                     <option value="{{ $fl->id }}" @selected(request('user_id') == $fl->id)>{{ $fl->name }}</option>
                 @endforeach
             </select>
-            <select name="outlet_id" class="input sm:w-44">
-                <option value="">Semua Gerai</option>
-                @foreach($outlets as $o)
-                    <option value="{{ $o->id }}" @selected(request('outlet_id') == $o->id)>{{ $o->name }}</option>
-                @endforeach
+            <select name="outlet_id" class="input sm:w-52">
+                <option value="">Semua Gerai & Corporate</option>
+                @if($outlets->where('is_main_office', false)->where('type', 'corporate')->isNotEmpty())
+                    <optgroup label="🏢 Corporate Rekan">
+                        @foreach($outlets->where('is_main_office', false)->where('type', 'corporate') as $o)
+                            <option value="{{ $o->id }}" @selected(request('outlet_id') == $o->id)>{{ $o->name }}</option>
+                        @endforeach
+                    </optgroup>
+                @endif
+                @if($outlets->where('is_main_office', false)->where('type', '!=', 'corporate')->isNotEmpty())
+                    <optgroup label="🏪 Gerai Cabang">
+                        @foreach($outlets->where('is_main_office', false)->where('type', '!=', 'corporate') as $o)
+                            <option value="{{ $o->id }}" @selected(request('outlet_id') == $o->id)>{{ $o->name }}</option>
+                        @endforeach
+                    </optgroup>
+                @endif
+                @if($outlets->where('is_main_office', true)->isNotEmpty())
+                    <optgroup label="⭐ Kantor Utama">
+                        @foreach($outlets->where('is_main_office', true) as $o)
+                            <option value="{{ $o->id }}" @selected(request('outlet_id') == $o->id)>{{ $o->name }}</option>
+                        @endforeach
+                    </optgroup>
+                @endif
             </select>
             <select name="status" class="input sm:w-40">
                 <option value="">Semua Status</option>
@@ -88,7 +106,7 @@
                     <th>No. Tugas & Tanggal</th>
                     <th>Judul Tugas & Tipe</th>
                     <th>Karyawan</th>
-                    <th>Gerai Lokasi</th>
+                    <th>Lokasi (Gerai / Corp)</th>
                     <th>Jadwal & Durasi</th>
                     <th>Lokasi GPS</th>
                     <th>Status</th>
@@ -124,10 +142,21 @@
                                 </div>
                             </div>
                         </td>
-                        <td data-label="Gerai Lokasi" class="text-xs text-slate-300">
+                        <td data-label="Lokasi Tujuan" class="text-xs text-slate-300">
                             <div>
-                                <div class="font-bold text-white">{{ $t->outlet?->name }}</div>
-                                <div class="text-[11px] text-slate-400">{{ $t->outlet?->code }}</div>
+                                <div class="font-bold text-white flex items-center gap-1.5">
+                                    <span>{{ $t->outlet?->name }}</span>
+                                </div>
+                                <div class="flex items-center gap-1.5 mt-0.5">
+                                    <span class="text-[10px] font-mono text-slate-400">{{ $t->outlet?->code }}</span>
+                                    @if($t->outlet?->is_main_office)
+                                        <span class="badge badge-orange text-[9px] py-0 px-1">Kantor Utama</span>
+                                    @elseif($t->outlet?->isCorporate())
+                                        <span class="badge text-[9px] py-0 px-1" style="background: rgba(168, 85, 247, 0.2); color: #c084fc;">Corporate</span>
+                                    @else
+                                        <span class="badge badge-info text-[9px] py-0 px-1">Gerai</span>
+                                    @endif
+                                </div>
                             </div>
                         </td>
                         <td data-label="Jadwal & Durasi SLA" class="text-xs">

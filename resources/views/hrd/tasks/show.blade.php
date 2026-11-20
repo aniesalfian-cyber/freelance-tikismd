@@ -26,8 +26,17 @@
                     <div class="font-bold text-white mt-0.5">{{ $task->user?->name }}</div>
                 </div>
                 <div>
-                    <div class="text-slate-400">Gerai Lokasi</div>
-                    <div class="font-bold text-white mt-0.5">{{ $task->outlet?->name }}</div>
+                    <div class="text-slate-400">Lokasi (Gerai / Corp)</div>
+                    <div class="font-bold text-white mt-0.5 flex items-center gap-1.5 flex-wrap">
+                        <span>{{ $task->outlet?->name }}</span>
+                        @if($task->outlet?->is_main_office)
+                            <span class="badge badge-orange text-[10px]">Kantor Utama</span>
+                        @elseif($task->outlet?->isCorporate())
+                            <span class="badge text-[10px]" style="background: rgba(168, 85, 247, 0.2); color: #c084fc;">Corporate</span>
+                        @else
+                            <span class="badge badge-info text-[10px]">Gerai</span>
+                        @endif
+                    </div>
                 </div>
                 <div>
                     <div class="text-slate-400">Target Mulai / SLA</div>
@@ -63,9 +72,24 @@
             @endif
 
             @if($task->proofUrl())
-                <div class="space-y-2">
-                    <div class="text-xs font-bold text-white">Foto Bukti Pengerjaan:</div>
-                    <img src="{{ $task->proofUrl() }}" alt="Bukti Tugas" class="rounded-2xl max-h-80 border border-white/15">
+                <div class="space-y-2 border-t border-white/10 pt-4">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                            <span class="text-emerald-400">📷</span> Foto Bukti Pengerjaan:
+                        </div>
+                        <a href="{{ $task->proofUrl() }}" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-xs text-orange-400 hover:text-orange-300 flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M10 14L21 3M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/></svg>
+                            Buka Ukuran Penuh / Unduh
+                        </a>
+                    </div>
+                    <div class="relative group inline-block">
+                        <a href="{{ $task->proofUrl() }}" target="_blank" rel="noopener noreferrer" title="Klik untuk membuka foto ukuran penuh">
+                            <img src="{{ $task->proofUrl() }}" alt="Bukti Tugas {{ $task->task_number }}" class="rounded-2xl max-h-80 border border-white/15 shadow-lg object-contain bg-slate-900/40 hover:opacity-95 transition cursor-pointer">
+                            <div class="absolute bottom-3 right-3 px-2.5 py-1 rounded-lg bg-black/75 text-[11px] text-white opacity-0 group-hover:opacity-100 transition backdrop-blur-xs flex items-center gap-1">
+                                🔍 Klik perbesar foto
+                            </div>
+                        </a>
+                    </div>
                 </div>
             @endif
         </div>

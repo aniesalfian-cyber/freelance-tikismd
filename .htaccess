@@ -1,6 +1,9 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
+    # Arahkan /storage/ langsung ke public/storage/ sebelum aturan blokir
+    RewriteRule ^storage/(.*)$ public/storage/$1 [L]
+
     # Blokir akses langsung ke file sensitif di root
     RewriteRule ^(\.env|composer\.(json|lock)|package(-lock)?\.json|artisan|phpunit\.xml)$ - [F,L,NC]
     RewriteRule ^(app|bootstrap|config|database|resources|routes|storage|tests|vendor)(/|$) - [F,L,NC]

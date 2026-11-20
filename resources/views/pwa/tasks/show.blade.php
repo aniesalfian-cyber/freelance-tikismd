@@ -36,7 +36,16 @@
         </div>
 
         <div class="border-t border-white/10 pt-3.5 text-xs space-y-1">
-            <div class="font-bold text-white">📍 Lokasi Gerai: {{ $task->outlet->name }} ({{ $task->outlet->code }})</div>
+            <div class="font-bold text-white flex items-center gap-1.5 flex-wrap">
+                <span>📍 Lokasi: {{ $task->outlet->name }} ({{ $task->outlet->code }})</span>
+                @if($task->outlet->is_main_office)
+                    <span class="badge badge-orange text-[9px]">Kantor Utama</span>
+                @elseif($task->outlet->isCorporate())
+                    <span class="badge text-[9px]" style="background: rgba(168, 85, 247, 0.2); color: #c084fc;">Corporate</span>
+                @else
+                    <span class="badge badge-info text-[9px]">Gerai</span>
+                @endif
+            </div>
             <div class="text-slate-400">{{ $task->outlet->address }}</div>
             <div class="flex items-center justify-between pt-1">
                 <span>Radius Toleransi: <b class="text-white">{{ $task->outlet->radius_meters }} m</b></span>
@@ -130,7 +139,17 @@
                 </div>
             @endif
             @if($task->proofUrl())
-                <img src="{{ $task->proofUrl() }}" alt="Bukti" class="rounded-2xl max-h-64 border border-white/10">
+                <div class="space-y-1.5 pt-2">
+                    <div class="text-[11px] font-bold text-slate-300 flex items-center justify-between">
+                        <span>Foto Bukti:</span>
+                        <a href="{{ $task->proofUrl() }}" target="_blank" rel="noopener noreferrer" class="text-orange-400 text-[11px] underline">
+                            Buka Ukuran Penuh ↗
+                        </a>
+                    </div>
+                    <a href="{{ $task->proofUrl() }}" target="_blank" rel="noopener noreferrer" class="block">
+                        <img src="{{ $task->proofUrl() }}" alt="Bukti {{ $task->task_number }}" class="rounded-2xl max-h-64 border border-white/10 shadow object-contain bg-slate-900/40">
+                    </a>
+                </div>
             @endif
         </div>
     @endif

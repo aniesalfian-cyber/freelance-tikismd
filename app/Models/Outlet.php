@@ -7,8 +7,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Outlet extends Model
 {
+    public const TYPE_GERAI = 'gerai';
+    public const TYPE_CORPORATE = 'corporate';
+
+    public const TYPE_LABELS = [
+        self::TYPE_GERAI => 'Gerai Cabang',
+        self::TYPE_CORPORATE => 'Perusahaan Rekan (Corporate)',
+    ];
+
     protected $fillable = [
-        'code', 'name', 'address', 'latitude', 'longitude',
+        'code', 'name', 'type', 'address', 'latitude', 'longitude',
         'radius_meters', 'is_main_office', 'is_active',
     ];
 
@@ -33,6 +41,34 @@ class Outlet extends Model
         return $this->hasMany(Attendance::class);
     }
 
+    public function isCorporate(): bool
+    {
+        return $this->type === self::TYPE_CORPORATE;
+    }
+
+    public function isGerai(): bool
+    {
+        return $this->type !== self::TYPE_CORPORATE;
+    }
+
+    public function typeLabel(): string
+    {
+        if ($this->is_main_office) {
+            return 'Kantor Utama';
+        }
+
+        return $this->isCorporate() ? 'Corporate (Rekan)' : 'Gerai Cabang';
+    }
+
+    public function typeBadge(): string
+    {
+        if ($this->is_main_office) {
+            return 'badge-orange';
+        }
+
+        return $this->isCorporate() ? 'badge-primary' : 'badge-info';
+    }
+
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
@@ -41,6 +77,16 @@ class Outlet extends Model
     public function scopeBranches($query)
     {
         return $query->where('is_main_office', false);
+    }
+
+    public function scopeGerai($query)
+    {
+        return $query->where('type', self::TYPE_GERAI);
+    }
+
+    public function scopeCorporate($query)
+    {
+        return $query->where('type', self::TYPE_CORPORATE);
     }
 
     /** Kantor utama aktif yang menjadi titik presensi wajib. */

@@ -37,7 +37,7 @@
                 <span class="badge badge-orange font-bold">Langkah 1</span>
                 <h3 class="text-base font-extrabold text-slate-900">Unduh Format Resmi Excel</h3>
                 <p class="text-xs text-slate-600 leading-relaxed">
-                    Gunakan template resmi yang telah dilengkapi dengan contoh pengisian serta <b>Sheet Referensi</b> berisi daftar 17 Nomor Handphone Kurir, Divisi Operasional (R2 / R4), dan Kode Gerai Samarinda.
+                    Gunakan template resmi yang telah dilengkapi dengan contoh pengisian serta <b>Sheet Referensi</b> berisi daftar 17 Nomor Handphone Kurir, Divisi Operasional (R2 / R4), dan Kode Titik Gerai & Corporate Rekan Samarinda.
                 </p>
             </div>
             <a href="{{ route('hrd.tasks.template') }}" class="btn btn-primary flex-none py-2.5 px-4 shadow-sm">
@@ -105,8 +105,8 @@
                 <p>Kunci pencocokan utama kurir. Masukkan no HP kurir terdaftar (misal: <code>081349497879</code> atau <code>6281349497879</code>).</p>
             </div>
             <div class="p-3 rounded-xl bg-white border border-slate-200 space-y-1">
-                <div class="font-bold text-slate-800">2. Kode Gerai (Kolom E)</div>
-                <p>Lokasi titik awal/pos tugas. Contoh: <code>PST-001</code> (Kantor Utama Samarinda), <code>GR-001</code> (Cabang Ilir).</p>
+                <div class="font-bold text-slate-800">2. Kode Lokasi Tujuan (Kolom E)</div>
+                <p>Kunci kode titik tujuan tugas. Bisa berupa kode Gerai Cabang maupun Perusahaan Rekan (Corporate). Contoh: <code>SMD01-SC01</code>, <code>SMD01-GR001</code>, <code>CORP-001</code> (Lihat Sheet 2).</p>
             </div>
             <div class="p-3 rounded-xl bg-white border border-slate-200 space-y-1">
                 <div class="font-bold text-slate-800">3. Tanggal & Jam Mulai (Kolom I & J)</div>

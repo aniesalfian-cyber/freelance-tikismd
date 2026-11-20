@@ -29,12 +29,30 @@
                 </select>
             </div>
             <div>
-                <label class="label">Titik Lokasi Gerai Pengerjaan</label>
+                <label class="label">Titik Lokasi Pengerjaan (Gerai / Corporate)</label>
                 <select name="outlet_id" required class="input">
-                    <option value="">-- Pilih Gerai --</option>
-                    @foreach($outlets as $o)
-                        <option value="{{ $o->id }}" @selected(old('outlet_id', $task->outlet_id) == $o->id)>{{ $o->name }} ({{ $o->code }})</option>
-                    @endforeach
+                    <option value="">-- Pilih Lokasi (Gerai / Corporate) --</option>
+                    @if($outlets->where('is_main_office', true)->isNotEmpty())
+                        <optgroup label="⭐ Kantor Utama">
+                            @foreach($outlets->where('is_main_office', true) as $o)
+                                <option value="{{ $o->id }}" @selected(old('outlet_id', $task->outlet_id) == $o->id)>{{ $o->name }} ({{ $o->code }})</option>
+                            @endforeach
+                        </optgroup>
+                    @endif
+                    @if($outlets->where('is_main_office', false)->where('type', 'corporate')->isNotEmpty())
+                        <optgroup label="🏢 Perusahaan Rekan (Corporate)">
+                            @foreach($outlets->where('is_main_office', false)->where('type', 'corporate') as $o)
+                                <option value="{{ $o->id }}" @selected(old('outlet_id', $task->outlet_id) == $o->id)>{{ $o->name }} ({{ $o->code }})</option>
+                            @endforeach
+                        </optgroup>
+                    @endif
+                    @if($outlets->where('is_main_office', false)->where('type', '!=', 'corporate')->isNotEmpty())
+                        <optgroup label="🏪 Gerai Cabang">
+                            @foreach($outlets->where('is_main_office', false)->where('type', '!=', 'corporate') as $o)
+                                <option value="{{ $o->id }}" @selected(old('outlet_id', $task->outlet_id) == $o->id)>{{ $o->name }} ({{ $o->code }})</option>
+                            @endforeach
+                        </optgroup>
+                    @endif
                 </select>
             </div>
         </div>

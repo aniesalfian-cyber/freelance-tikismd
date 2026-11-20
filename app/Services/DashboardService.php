@@ -165,6 +165,7 @@ class DashboardService
                 'id' => $o->id,
                 'name' => $o->name,
                 'code' => $o->code,
+                'type' => $o->type ?? Outlet::TYPE_GERAI,
                 'lat' => $o->latitude,
                 'lng' => $o->longitude,
                 'radius' => $o->radius_meters,

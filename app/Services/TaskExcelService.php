@@ -230,13 +230,13 @@ class TaskExcelService
             'font' => ['size' => 9.5],
         ]);
 
-        // Tabel Gerai
+        // Tabel Gerai & Corporate
         $gStart = $cRow + 2;
-        $refSheet->setCellValue('A'.$gStart, 'DAFTAR TITIK GERAI / KANTOR HSM SAMARINDA');
+        $refSheet->setCellValue('A'.$gStart, 'DAFTAR TITIK GERAI & CORPORATE (REKAN) HSM SAMARINDA');
         $refSheet->getStyle('A'.$gStart)->getFont()->setBold(true)->setSize(11);
 
         $gHeaderRow = $gStart + 1;
-        $outletHeaders = ['A'.$gHeaderRow => 'No', 'B'.$gHeaderRow => 'Kode Gerai (Kunci)', 'C'.$gHeaderRow => 'Nama Gerai', 'D'.$gHeaderRow => 'Alamat Lokasi', 'E'.$gHeaderRow => 'Kategori'];
+        $outletHeaders = ['A'.$gHeaderRow => 'No', 'B'.$gHeaderRow => 'Kode Lokasi (Kunci)', 'C'.$gHeaderRow => 'Nama Gerai / Corporate', 'D'.$gHeaderRow => 'Alamat Lokasi', 'E'.$gHeaderRow => 'Kategori Tipe'];
         foreach ($outletHeaders as $cell => $val) {
             $refSheet->setCellValue($cell, $val);
         }
@@ -246,14 +246,14 @@ class TaskExcelService
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
         ]);
 
-        $outlets = Outlet::active()->orderBy('is_main_office', 'desc')->orderBy('name')->get();
+        $outlets = Outlet::active()->orderBy('is_main_office', 'desc')->orderBy('type')->orderBy('name')->get();
         $oRow = $gHeaderRow + 1;
         foreach ($outlets as $idx => $out) {
             $refSheet->setCellValue('A'.$oRow, $idx + 1);
             $refSheet->setCellValueExplicit('B'.$oRow, (string) $out->code, DataType::TYPE_STRING);
             $refSheet->setCellValue('C'.$oRow, $out->name);
             $refSheet->setCellValue('D'.$oRow, $out->address ?: 'Kota Samarinda');
-            $refSheet->setCellValue('E'.$oRow, $out->is_main_office ? 'Kantor Utama (Pusat)' : 'Gerai Cabang');
+            $refSheet->setCellValue('E'.$oRow, $out->typeLabel());
             $oRow++;
         }
 

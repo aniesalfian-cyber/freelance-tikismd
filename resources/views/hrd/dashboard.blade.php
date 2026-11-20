@@ -50,7 +50,7 @@
             </button>
         </form>
         <a href="{{ route('hrd.freelancers.create') }}" class="btn btn-ghost btn-sm">+ Tambah Karyawan</a>
-        <a href="{{ route('hrd.outlets.create') }}" class="btn btn-ghost btn-sm">+ Tambah Gerai</a>
+        <a href="{{ route('hrd.outlets.create') }}" class="btn btn-ghost btn-sm">+ Tambah Gerai & Corp</a>
     </div>
     <a href="{{ route('reports.index', ['type' => 'performa']) }}" class="btn btn-ghost btn-sm">
         <x-icon name="document" class="w-4 h-4" /> Cetak Laporan Corporate
@@ -69,7 +69,7 @@
                 <div class="orn-line mb-1"></div>
                 <div class="flex items-center gap-2 flex-wrap">
                     <h2 class="text-base sm:text-lg font-extrabold text-slate-900">
-                        Peta Sebaran Posisi Karyawan & Gerai Live
+                        Peta Sebaran Posisi Karyawan, Gerai & Corporate Live
                     </h2>
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
@@ -84,7 +84,7 @@
             <div class="flex flex-wrap items-center gap-2">
                 <!-- Filter Posisi Kurir -->
                 <select x-model="filterMode" @change="renderMarkers(false)" class="input py-1.5 px-3 text-xs w-auto font-semibold">
-                    <option value="all">Semua Kurir & Gerai</option>
+                    <option value="all">Semua Kurir, Gerai & Corporate</option>
                     <option value="working">Hanya Kurir Masuk Kerja</option>
                     <option value="R4">Divisi R4 (Mobil Box)</option>
                     <option value="R2">Divisi R2 (Sepeda Motor)</option>
@@ -117,7 +117,9 @@
                 <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500 border border-white shadow-xs"></span> Kurir R2 Masuk Kerja</span>
                 <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-blue-600 border border-white shadow-xs"></span> Kurir R4 Masuk Kerja</span>
                 <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-slate-400 border border-white shadow-xs"></span> Belum Presensi / Pulang</span>
-                <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span> Titik Gerai HSM</span>
+                <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-cyan-500"></span> Gerai Cabang</span>
+                <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> Corporate Rekan</span>
+                <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span> Kantor Utama</span>
             </div>
             <div class="text-slate-500 font-medium">
                 Auto-update GPS setiap 15 detik
@@ -203,11 +205,30 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                        <label class="label">Titik Gerai / Lokasi Tujuan (*)</label>
+                        <label class="label">Titik Tujuan (Gerai / Corporate) (*)</label>
                         <select x-model="form.outlet_id" required class="input">
-                            @foreach($outlets as $o)
-                                <option value="{{ $o->id }}">{{ $o->name }} ({{ $o->code }})</option>
-                            @endforeach
+                            <option value="">-- Pilih Lokasi Tujuan --</option>
+                            @if($outlets->where('is_main_office', true)->isNotEmpty())
+                                <optgroup label="⭐ Kantor Utama">
+                                    @foreach($outlets->where('is_main_office', true) as $o)
+                                        <option value="{{ $o->id }}">{{ $o->name }} ({{ $o->code }})</option>
+                                    @endforeach
+                                </optgroup>
+                            @endif
+                            @if($outlets->where('is_main_office', false)->where('type', 'corporate')->isNotEmpty())
+                                <optgroup label="🏢 Perusahaan Rekan (Corporate)">
+                                    @foreach($outlets->where('is_main_office', false)->where('type', 'corporate') as $o)
+                                        <option value="{{ $o->id }}">{{ $o->name }} ({{ $o->code }})</option>
+                                    @endforeach
+                                </optgroup>
+                            @endif
+                            @if($outlets->where('is_main_office', false)->where('type', '!=', 'corporate')->isNotEmpty())
+                                <optgroup label="🏪 Gerai Cabang">
+                                    @foreach($outlets->where('is_main_office', false)->where('type', '!=', 'corporate') as $o)
+                                        <option value="{{ $o->id }}">{{ $o->name }} ({{ $o->code }})</option>
+                                    @endforeach
+                                </optgroup>
+                            @endif
                         </select>
                     </div>
                     <div>
@@ -337,16 +358,21 @@ window.hrdLiveMapController = function () {
             this.courierMarkers = {};
             const bounds = [];
 
-            // 1. Render Titik Gerai HSM
+            // 1. Render Titik Gerai & Corporate HSM
             this.outlets.forEach((p) => {
-                const color = p.status === 'danger' ? '#ef4444' : (p.status === 'orange' ? '#ff6500' : '#10b981');
+                let color = p.main ? '#ff6500' : (p.type === 'corporate' ? '#a855f7' : '#06b6d4');
+                if (p.status === 'danger') color = '#ef4444';
+                const typeName = p.main ? 'Kantor Utama Presensi' : (p.type === 'corporate' ? 'Perusahaan Rekan (Corporate)' : 'Gerai Cabang');
+                const typeIcon = p.main ? '⭐' : (p.type === 'corporate' ? '🏢' : '🏪');
+
                 L.circle([p.lat, p.lng], { radius: p.radius, color, fillColor: color, fillOpacity: 0.12, weight: 1.5 }).addTo(this.outletLayer);
                 L.marker([p.lat, p.lng], { icon: window.hsmPinIcon(color) })
                     .addTo(this.outletLayer)
                     .bindPopup(`
                         <div style="min-width:190px;font-size:12px;line-height:1.45;">
-                            <div style="font-weight:800;color:#0f172a;">🏢 ${p.name} (${p.code})</div>
-                            <div style="color:#475569;margin-top:2px;">Tugas Hari Ini: <b>${p.done}/${p.tasks}</b> selesai</div>
+                            <div style="font-weight:800;color:#0f172a;">${typeIcon} ${p.name} (${p.code})</div>
+                            <div style="color:${color};font-weight:700;font-size:11px;margin-top:1px;">${typeName}</div>
+                            <div style="color:#475569;margin-top:3px;">Tugas Hari Ini: <b>${p.done}/${p.tasks}</b> selesai</div>
                             <div style="color:#64748b;font-size:11px;">Radius Geofencing: ${p.radius} m</div>
                         </div>
                     `);

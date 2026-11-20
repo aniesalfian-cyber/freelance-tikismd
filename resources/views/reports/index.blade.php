@@ -24,12 +24,30 @@
             <input type="date" name="to" value="{{ $query['to'] ?? now()->toDateString() }}" class="input">
         </div>
         <div>
-            <label class="label">Gerai</label>
+            <label class="label">Gerai & Corporate</label>
             <select name="outlet_id" class="input">
-                <option value="">Semua Gerai</option>
-                @foreach($outlets as $o)
-                    <option value="{{ $o->id }}" @selected(($query['outlet_id'] ?? '') == $o->id)>{{ $o->name }}</option>
-                @endforeach
+                <option value="">Semua Lokasi (Gerai & Corporate)</option>
+                @if($outlets->where('is_main_office', false)->where('type', 'corporate')->isNotEmpty())
+                    <optgroup label="🏢 Corporate Rekan">
+                        @foreach($outlets->where('is_main_office', false)->where('type', 'corporate') as $o)
+                            <option value="{{ $o->id }}" @selected(($query['outlet_id'] ?? '') == $o->id)>{{ $o->name }}</option>
+                        @endforeach
+                    </optgroup>
+                @endif
+                @if($outlets->where('is_main_office', false)->where('type', '!=', 'corporate')->isNotEmpty())
+                    <optgroup label="🏪 Gerai Cabang">
+                        @foreach($outlets->where('is_main_office', false)->where('type', '!=', 'corporate') as $o)
+                            <option value="{{ $o->id }}" @selected(($query['outlet_id'] ?? '') == $o->id)>{{ $o->name }}</option>
+                        @endforeach
+                    </optgroup>
+                @endif
+                @if($outlets->where('is_main_office', true)->isNotEmpty())
+                    <optgroup label="⭐ Kantor Utama">
+                        @foreach($outlets->where('is_main_office', true) as $o)
+                            <option value="{{ $o->id }}" @selected(($query['outlet_id'] ?? '') == $o->id)>{{ $o->name }}</option>
+                        @endforeach
+                    </optgroup>
+                @endif
             </select>
         </div>
         <div>
