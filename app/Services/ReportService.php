@@ -59,7 +59,7 @@ class ReportService
                 'contact' => Setting::get('company_contact'),
             ],
             'document_number' => $this->documentNumber(),
-            'printed_at' => now()->translatedFormat('d F Y H:i').' WIB',
+            'printed_at' => now()->translatedFormat('d F Y H:i').' WITA',
         ], $data);
     }
 

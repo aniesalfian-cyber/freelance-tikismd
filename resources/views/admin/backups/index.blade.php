@@ -9,7 +9,7 @@
             <h2 class="text-base font-extrabold text-white">One-Click Database Backup</h2>
             <p class="text-xs text-slate-400 leading-relaxed">
                 Membuat cadangan penuh seluruh tabel MySQL (<code class="text-orange-300">freelance_hsm</code>) terkompresi <code class="text-orange-300">.sql.gz</code>.
-                Penjadwal otomatis juga berjalan setiap pukul 01:00 WIB.
+                Penjadwal otomatis juga berjalan setiap pukul 01:00 WITA.
             </p>
             <form method="POST" action="{{ route('admin.backups.store') }}">
                 @csrf

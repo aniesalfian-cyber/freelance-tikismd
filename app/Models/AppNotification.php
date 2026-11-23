@@ -45,7 +45,7 @@ class AppNotification extends Model
         return self::create([
             'user_id' => $task->user_id,
             'title' => '📦 Tugas Baru: '.$task->title,
-            'body' => "Lokasi: {$outletName} • Jadwal: {$timeStr} WIB (SLA {$task->estimated_duration_minutes} menit) • No: {$task->task_number}",
+            'body' => "Lokasi: {$outletName} • Jadwal: {$timeStr} WITA (SLA {$task->estimated_duration_minutes} menit) • No: {$task->task_number}",
             'url' => route('pwa.tasks.show', $task),
             'type' => 'task_assigned',
             'task_id' => $task->id,

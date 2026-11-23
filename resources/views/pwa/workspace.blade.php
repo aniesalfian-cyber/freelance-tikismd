@@ -22,9 +22,9 @@
             <div class="min-w-0">
                 <h2 class="text-xs sm:text-sm font-extrabold text-white truncate">
                     @if($attendance)
-                        Hadir {{ $attendance->check_in_at->format('H:i') }} WIB
+                        Hadir {{ $attendance->check_in_at->format('H:i') }} WITA
                         @if($attendance->check_out_at)
-                            &bull; Pulang {{ $attendance->check_out_at->format('H:i') }} WIB
+                            &bull; Pulang {{ $attendance->check_out_at->format('H:i') }} WITA
                         @endif
                     @else
                         Belum Presensi Hadir Hari Ini

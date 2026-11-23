@@ -3,7 +3,7 @@
 @section('content')
 <div class="glass p-5 flex items-center justify-between gap-3">
     <p class="text-xs text-slate-300">
-        Template tugas di bawah ini akan digenerate otomatis setiap pagi pukul 06:00 WIB atau melalui tombol <b>Generate Tugas Pasti</b> di menu Penugasan.
+        Template tugas di bawah ini akan digenerate otomatis setiap pagi pukul 06:00 WITA atau melalui tombol <b>Generate Tugas Pasti</b> di menu Penugasan.
     </p>
     @if(auth()->user()->canManage())
         <a href="{{ route('hrd.templates.create') }}" class="btn btn-primary">
