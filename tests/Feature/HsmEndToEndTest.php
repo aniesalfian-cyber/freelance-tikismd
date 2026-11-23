@@ -24,16 +24,16 @@ class HsmEndToEndTest extends TestCase
     public function test_all_four_roles_redirect_to_their_respective_dashboards(): void
     {
         $map = [
-            'superadmin@hsm.id' => '/admin/dashboard',
-            '085250815716' => '/hrd/dashboard',          // Arif (Admin HRD) login via No. HP
-            '081349497879' => '/pwa/workspace',          // Dedy Endra (Kurir) login via No. HP
-            '08115557089' => '/owner/executive-dashboard', // Bpk. Olly (Owner) login via No. HP
+            ['login' => 'superadmin@hsm.id', 'password' => '123456', 'path' => '/admin/dashboard'],
+            ['login' => '085250815716', 'password' => '123456', 'path' => '/hrd/dashboard'], // Arif (Admin HRD)
+            ['login' => '081349497879', 'password' => '123456', 'path' => '/pwa/workspace'], // Dedy Endra (Kurir)
+            ['login' => '08115557089', 'password' => 'tikismd123', 'path' => '/owner/executive-dashboard'], // Bpk. Olly (Owner)
         ];
 
-        foreach ($map as $login => $expectedPath) {
-            $res = $this->post('/login', ['login' => $login, 'password' => '123456']);
-            $res->assertRedirect($expectedPath);
-            $this->get($expectedPath)->assertOk();
+        foreach ($map as $entry) {
+            $res = $this->post('/login', ['login' => $entry['login'], 'password' => $entry['password']]);
+            $res->assertRedirect($entry['path']);
+            $this->get($entry['path'])->assertOk();
             $this->post('/logout');
         }
     }
