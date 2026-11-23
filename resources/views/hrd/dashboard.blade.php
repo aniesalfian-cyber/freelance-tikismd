@@ -3,14 +3,25 @@
 @section('content')
 <!-- Top Operational KPI Cards (Compact) -->
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 rise">
-    <div class="glass glass-hover p-3.5">
-        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Kehadiran Hari Ini</div>
+    <button type="button"
+            onclick="window.hsmShowWorkingCouriers ? window.hsmShowWorkingCouriers() : null"
+            class="glass glass-hover p-3.5 text-left w-full cursor-pointer transition hover:border-emerald-400/60 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 group relative rounded-2xl"
+            title="Klik untuk langsung menampilkan kurir yang masuk kerja hari ini di peta & daftar tugas">
+        <div class="flex items-center justify-between">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-emerald-400 transition flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                Kehadiran Hari Ini
+            </div>
+            <span class="text-[10px] text-emerald-400 font-bold opacity-75 group-hover:opacity-100 transition flex items-center gap-0.5">
+                Tampilkan &darr;
+            </span>
+        </div>
         <div class="mt-1 flex items-baseline gap-1.5">
             <span class="text-2xl font-extrabold text-emerald-400">{{ $today['present'] }}</span>
             <span class="text-xs text-slate-400">/ {{ $today['freelancers_total'] }}</span>
         </div>
         <div class="text-[11px] text-amber-400">{{ $today['late_attendance'] }} hadir terlambat</div>
-    </div>
+    </button>
 
     <div class="glass glass-hover p-3.5">
         <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Sedang Diproses</div>
@@ -58,7 +69,8 @@
 </div>
 
 <!-- Live Courier Position & Quick Task Assignment Map Section -->
-<div x-data="hrdLiveMapController()" x-init="initMap()"
+<div id="hrd-live-map-section"
+     x-data="hrdLiveMapController()" x-init="initMap()"
      @keydown.escape.window="if (quickModalOpen) { quickModalOpen = false; } else if (isFullscreen) { toggleFullscreen(); }"
      :class="isFullscreen ? 'fixed inset-0 z-50 bg-slate-100 p-3 sm:p-6 flex flex-col overflow-hidden' : 'rise rise-3'">
 
@@ -71,7 +83,9 @@
                     <h2 class="text-base sm:text-lg font-extrabold text-slate-900">
                         Peta Sebaran Posisi Karyawan, Gerai & Corporate Live
                     </h2>
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-300 cursor-pointer hover:bg-emerald-100 transition"
+                          @click="showWorkingCouriers()"
+                          title="Klik untuk langsung memfilter kurir masuk kerja">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
                         <span x-text="workingCouriersCount() + ' Kurir Masuk Kerja'"></span>
                     </span>
@@ -84,8 +98,8 @@
             <div class="flex flex-wrap items-center gap-2">
                 <!-- Filter Posisi Kurir -->
                 <select x-model="filterMode" @change="renderMarkers(false)" class="input py-1.5 px-3 text-xs w-auto font-semibold">
-                    <option value="all">Semua Kurir, Gerai & Corporate</option>
                     <option value="working">Hanya Kurir Masuk Kerja</option>
+                    <option value="all">Semua Kurir, Gerai & Corporate</option>
                     <option value="R4">Divisi R4 (Mobil Box)</option>
                     <option value="R2">Divisi R2 (Sepeda Motor)</option>
                 </select>
@@ -303,7 +317,7 @@ window.hrdLiveMapController = function () {
         outlets: @js($map),
         couriers: @js($couriersMap),
         templates: @js($templates),
-        filterMode: 'all',
+        filterMode: 'working',
         isFullscreen: false,
         loading: false,
         lastUpdated: '{{ now()->format('H:i:s') }}',
@@ -321,6 +335,14 @@ window.hrdLiveMapController = function () {
             title: '',
             description: '',
             estimated_duration_minutes: 45,
+        },
+        showWorkingCouriers() {
+            this.filterMode = 'working';
+            this.renderMarkers(false);
+            const el = document.getElementById('hrd-live-map-section');
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         },
         workingCouriersCount() {
             return this.couriers.filter(c => c.is_working).length;
@@ -349,6 +371,11 @@ window.hrdLiveMapController = function () {
                     if (found) {
                         this.openQuickAssign(found);
                     }
+                };
+
+                // Global helper agar tombol Kehadiran Hari Ini dapat langsung menampilkan kurir masuk kerja
+                window.hsmShowWorkingCouriers = () => {
+                    this.showWorkingCouriers();
                 };
 
                 setInterval(() => this.refreshPositions(), 15000);
