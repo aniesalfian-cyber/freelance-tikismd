@@ -158,4 +158,60 @@ class LiveCourierPinAndNotificationTest extends TestCase
         $this->assertNotEmpty($pushQueue);
         $this->assertStringContainsString('Pickup Dokumen Dadakan via Peta', $pushQueue[0]['title']);
     }
+
+    public function test_courier_who_checked_out_is_still_available_for_tasks_in_live_map(): void
+    {
+        $courier = User::where('role', User::ROLE_FREELANCER)->firstOrFail();
+        $hrd = User::where('role', User::ROLE_HRD)->firstOrFail();
+        $office = Outlet::mainOffice();
+
+        // 1. Presensi masuk
+        $this->actingAs($courier)
+            ->postJson('/pwa/attendance/check-in', [
+                'latitude' => $office->latitude,
+                'longitude' => $office->longitude,
+                'accuracy' => 10,
+            ])
+            ->assertOk();
+
+        // 2. Presensi pulang (checkout)
+        $this->actingAs($courier)
+            ->postJson('/pwa/attendance/check-out', [
+                'latitude' => $office->latitude,
+                'longitude' => $office->longitude,
+                'accuracy' => 10,
+            ])
+            ->assertOk();
+
+        // 3. Pada Peta Live HRD, kurir yang sudah presensi hari ini tetap berstatus is_working = true
+        // dan is_checked_out = true, sehingga tetap muncul pada daftar kurir masuk kerja & dapat diberi tugas
+        $liveRes = $this->actingAs($hrd)
+            ->getJson('/hrd/live-couriers')
+            ->assertOk();
+
+        $couriersData = collect($liveRes->json('couriers'));
+        $tracked = $couriersData->firstWhere('id', $courier->id);
+        $this->assertNotNull($tracked);
+        $this->assertTrue($tracked['is_working'], 'Kurir yang sudah presensi hari ini harus tetap is_working = true');
+        $this->assertTrue($tracked['is_checked_out'], 'Status is_checked_out harus bernilai true');
+        $this->assertTrue($tracked['has_checked_in'], 'Status has_checked_in harus bernilai true');
+
+        // 4. HRD tetap dapat memberikan tugas dadakan ke kurir tersebut
+        $this->actingAs($hrd)
+            ->postJson('/hrd/tasks/quick-assign', [
+                'user_id' => $courier->id,
+                'outlet_id' => $office->id,
+                'title' => 'Tugas Tambahan Sore Hari',
+                'description' => 'Tugas pickup tambahan setelah checkout',
+                'estimated_duration_minutes' => 30,
+            ])
+            ->assertOk()
+            ->assertJsonPath('ok', true);
+
+        $this->assertTrue(
+            TaskAssignment::where('user_id', $courier->id)
+                ->where('title', 'Tugas Tambahan Sore Hari')
+                ->exists()
+        );
+    }
 }

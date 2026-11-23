@@ -148,13 +148,16 @@
                             <button type="button" @click="focusCourier(c)" class="text-left min-w-0 flex-1">
                                 <div class="flex items-center gap-1.5">
                                     <span class="w-2 h-2 rounded-full flex-none"
-                                          :class="c.is_working ? 'bg-emerald-500' : 'bg-slate-400'"></span>
+                                          :class="c.is_working ? (c.is_checked_out ? 'bg-amber-500' : 'bg-emerald-500') : 'bg-slate-400'"></span>
                                     <span class="text-xs font-extrabold text-slate-900 truncate" x-text="c.name"></span>
                                     <span class="badge badge-muted text-[9px] px-1.5 py-0" x-text="c.vehicle_type"></span>
+                                    <template x-if="c.is_checked_out">
+                                        <span class="badge badge-warning text-[8px] px-1 py-0 font-bold" title="Sudah presensi pulang, namun tetap siap menerima tugas">Pulang</span>
+                                    </template>
                                 </div>
                                 <div class="text-[10px] text-slate-500 truncate mt-0.5" x-text="c.division"></div>
                                 <div class="text-[10px] mt-0.5" :class="c.is_working ? 'text-emerald-700 font-semibold' : 'text-slate-400'">
-                                    <span x-text="c.is_working ? ('Masuk ' + c.check_in_time + ' • ' + c.last_seen) : 'Belum masuk kerja'"></span>
+                                    <span x-text="c.is_working ? ('Masuk ' + c.check_in_time + (c.check_out_time ? ' (Plg ' + c.check_out_time + ')' : '') + ' • ' + c.last_seen) : 'Belum masuk kerja'"></span>
                                 </div>
                             </button>
                             <button type="button" @click="openQuickAssign(c)"
@@ -383,8 +386,10 @@ window.hrdLiveMapController = function () {
             this.filteredCouriers().forEach((c) => {
                 if (!c.lat || !c.lng) return;
                 const statusBadge = c.is_working
-                    ? `<span style="background:#dcfce7;color:#166534;padding:2px 6px;border-radius:999px;font-size:10px;font-weight:800;">🟢 Masuk Kerja (${c.check_in_time || '-'})</span>`
-                    : `<span style="background:#f1f5f9;color:#475569;padding:2px 6px;border-radius:999px;font-size:10px;font-weight:700;">⚪ Belum Aktif / Pulang</span>`;
+                    ? (c.is_checked_out
+                        ? `<span style="background:#fef3c7;color:#92400e;padding:2px 6px;border-radius:999px;font-size:10px;font-weight:800;">🟡 Hadir (Masuk ${c.check_in_time || '-'}, Pulang ${c.check_out_time || '-'})</span>`
+                        : `<span style="background:#dcfce7;color:#166534;padding:2px 6px;border-radius:999px;font-size:10px;font-weight:800;">🟢 Masuk Kerja (${c.check_in_time || '-'})</span>`)
+                    : `<span style="background:#f1f5f9;color:#475569;padding:2px 6px;border-radius:999px;font-size:10px;font-weight:700;">⚪ Belum Presensi</span>`;
 
                 const activeTaskHtml = c.active_task
                     ? `<div style="margin-top:6px;padding:5px 7px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:11px;color:#9a3412;">

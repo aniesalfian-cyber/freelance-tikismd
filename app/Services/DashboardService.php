@@ -230,8 +230,11 @@ class DashboardService
             $pendingCount = $userTasks->where('status', TaskAssignment::STATUS_PENDING)->count();
             $doneCount = $userTasks->where('status', TaskAssignment::STATUS_COMPLETED)->count();
 
-            $isWorking = $att !== null && $att->check_out_at === null;
             $hasCheckedIn = $att !== null;
+            $isCheckedOut = $att !== null && $att->check_out_at !== null;
+            // Sesuai SOP & regulasi operasional: kurir yang sudah absen hadir hari ini berstatus
+            // masuk kerja dan siap menerima penugasan (meskipun sudah presensi pulang / checkout).
+            $isWorking = $hasCheckedIn;
 
             // Tentukan koordinat posisi terbaik karyawan
             $lat = $u->last_latitude;
@@ -247,6 +250,10 @@ class DashboardService
                     $lat = (float) $att->check_in_latitude;
                     $lng = (float) $att->check_in_longitude;
                     $source = 'Titik Presensi Masuk';
+                } elseif ($att && $att->check_out_latitude && $att->check_out_longitude) {
+                    $lat = (float) $att->check_out_latitude;
+                    $lng = (float) $att->check_out_longitude;
+                    $source = 'Titik Presensi Pulang';
                 } elseif ($hasCheckedIn) {
                     // Sebarkan sedikit di sekitar kantor utama agar pin tidak bertumpuk
                     $angle = ($idx * 45) * (M_PI / 180);
@@ -269,8 +276,9 @@ class DashboardService
                 'vehicle_type' => $u->vehicleType(),
                 'vehicle_name' => $u->vehicleName(),
                 'scope_short' => $u->divisionInfo()['scope_short'] ?? 'Operasional Kurir',
-                'is_working' => $isWorking,
-                'has_checked_in' => $hasCheckedIn,
+                'is_working' => (bool) $isWorking,
+                'has_checked_in' => (bool) $hasCheckedIn,
+                'is_checked_out' => (bool) $isCheckedOut,
                 'check_in_time' => $att?->check_in_at?->format('H:i'),
                 'check_out_time' => $att?->check_out_at?->format('H:i'),
                 'lat' => $lat ? (float) $lat : null,

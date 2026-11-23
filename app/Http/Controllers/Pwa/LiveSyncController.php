@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Pwa;
 use App\Http\Controllers\Controller;
 use App\Models\AppNotification;
 use App\Models\Attendance;
+use App\Models\TaskAssignment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -12,7 +13,7 @@ class LiveSyncController extends Controller
 {
     /**
      * Endpoint sinkronisasi berkala:
-     * 1. Jika karyawan berstatus masuk kerja hari ini (sudah check-in & belum check-out),
+     * 1. Jika karyawan berstatus masuk kerja hari ini (sudah check-in & belum check-out, atau memiliki tugas aktif hari ini),
      *    otomatis simpan titik koordinat GPS terkini ke server untuk dipantau Admin HRD.
      * 2. Ambil daftar notifikasi terbaru & antrean push notifikasi tugas baru.
      */
@@ -24,7 +25,12 @@ class LiveSyncController extends Controller
             ->whereDate('date', today())
             ->first();
 
-        $isWorking = $todayAttendance !== null && $todayAttendance->check_out_at === null;
+        $hasActiveTasks = TaskAssignment::where('user_id', $user->id)
+            ->whereDate('assigned_date', today())
+            ->whereIn('status', [TaskAssignment::STATUS_PENDING, TaskAssignment::STATUS_IN_PROGRESS])
+            ->exists();
+
+        $isWorking = ($todayAttendance !== null && $todayAttendance->check_out_at === null) || $hasActiveTasks;
         $locationSaved = false;
 
         if ($user->isFreelancer() && $isWorking && $request->filled(['latitude', 'longitude'])) {
