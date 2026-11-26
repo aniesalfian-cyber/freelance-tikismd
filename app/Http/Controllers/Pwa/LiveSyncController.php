@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Pwa;
 
 use App\Http\Controllers\Controller;
 use App\Models\AppNotification;
-use App\Models\Attendance;
 use App\Models\TaskAssignment;
+use App\Services\AttendanceService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -13,17 +13,15 @@ class LiveSyncController extends Controller
 {
     /**
      * Endpoint sinkronisasi berkala:
-     * 1. Jika karyawan berstatus masuk kerja hari ini (sudah check-in & belum check-out, atau memiliki tugas aktif hari ini),
+     * 1. Jika karyawan berstatus masuk kerja hari ini di Portal Absensi HSM (tikismd.id) atau memiliki tugas aktif hari ini,
      *    otomatis simpan titik koordinat GPS terkini ke server untuk dipantau Admin HRD.
      * 2. Ambil daftar notifikasi terbaru & antrean push notifikasi tugas baru.
      */
-    public function heartbeat(Request $request): JsonResponse
+    public function heartbeat(Request $request, AttendanceService $attendance): JsonResponse
     {
         $user = $request->user();
 
-        $todayAttendance = Attendance::where('user_id', $user->id)
-            ->whereDate('date', today())
-            ->first();
+        $todayAttendance = $user->isFreelancer() ? $attendance->today($user) : null;
 
         $hasActiveTasks = TaskAssignment::where('user_id', $user->id)
             ->whereDate('assigned_date', today())

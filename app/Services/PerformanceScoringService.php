@@ -15,6 +15,8 @@ use Carbon\Carbon;
  */
 class PerformanceScoringService
 {
+    public function __construct(protected HsmAttendanceBridgeService $attendanceBridge) {}
+
     public function calculateForUserDate(User $user, Carbon|string $date): ?PerformanceLog
     {
         $date = Carbon::parse($date)->startOfDay();
@@ -54,8 +56,8 @@ class PerformanceScoringService
         $validLocation = $tasks->where('is_location_valid', true)->count();
         $locationScore = $validLocation / $total * 100;
 
-        // 4. Kedisiplinan presensi
-        $attendance = Attendance::where('user_id', $user->id)->whereDate('date', $date->toDateString())->first();
+        // 4. Kedisiplinan presensi (bersumber dari Portal Absensi HSM)
+        $attendance = $this->attendanceBridge->forUserOnDate($user, $date);
         $attendanceScore = self::attendanceScore($attendance);
 
         [$wc, $wt, $wl, $wa] = $this->weights();
@@ -123,11 +125,14 @@ class PerformanceScoringService
 
     public static function attendanceScore(?Attendance $attendance): float
     {
-        if (! $attendance) {
+        if (! $attendance || ! $attendance->hasCheckedIn()) {
             return 0.0;
         }
         if ($attendance->status === Attendance::STATUS_ON_TIME) {
             return 100.0;
+        }
+        if ($attendance->status === Attendance::STATUS_INVALID) {
+            return 40.0;
         }
 
         return $attendance->late_minutes <= 15 ? 80.0 : 50.0;
@@ -158,8 +163,9 @@ class PerformanceScoringService
         }
         $parts[] = "{$validLocation} tugas di lokasi valid";
         $parts[] = match (true) {
-            ! $attendance => 'tidak ada presensi',
+            ! $attendance || ! $attendance->hasCheckedIn() => 'tidak ada presensi',
             $attendance->status === Attendance::STATUS_ON_TIME => 'presensi tepat waktu',
+            $attendance->status === Attendance::STATUS_INVALID => 'presensi di luar radius kantor',
             default => "presensi terlambat {$attendance->late_minutes} menit",
         };
 

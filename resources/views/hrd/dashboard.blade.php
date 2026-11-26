@@ -169,9 +169,9 @@
                                         <span class="badge badge-warning text-[8px] px-1 py-0 font-bold" title="Sudah presensi pulang, namun tetap siap menerima tugas">Pulang</span>
                                     </template>
                                 </div>
-                                <div class="text-[10px] text-slate-500 truncate mt-0.5" x-text="c.division"></div>
+                                <div class="text-[10px] text-slate-500 truncate mt-0.5" x-text="c.division + (c.attendance_office ? ' • ' + c.attendance_office : '')"></div>
                                 <div class="text-[10px] mt-0.5" :class="c.is_working ? 'text-emerald-700 font-semibold' : 'text-slate-400'">
-                                    <span x-text="c.is_working ? ('Masuk ' + c.check_in_time + (c.check_out_time ? ' (Plg ' + c.check_out_time + ')' : '') + ' • ' + c.last_seen) : 'Belum masuk kerja'"></span>
+                                    <span x-text="c.is_working ? ('Masuk ' + c.check_in_time + (c.check_out_time ? ' (Plg ' + c.check_out_time + ')' : '') + ' • ' + c.last_seen) : (c.leave_status ? ('Status HSM: ' + c.leave_status) : 'Belum masuk kerja')"></span>
                                 </div>
                             </button>
                             <button type="button" @click="openQuickAssign(c)"
@@ -274,19 +274,33 @@
 <!-- Absent Today & Active Tasks -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 rise rise-4">
     <div class="glass p-5 space-y-3">
-        <div class="orn-line mb-1"></div>
-        <h2 class="text-base font-extrabold text-white">Belum Presensi Hari Ini ({{ $today['absent']->count() }})</h2>
+        <div class="flex items-center justify-between gap-2">
+            <div>
+                <div class="orn-line mb-1"></div>
+                <h2 class="text-base font-extrabold text-white">Belum Presensi di Portal HSM ({{ $today['absent']->count() }})</h2>
+            </div>
+            <a href="{{ route('hrd.attendances.index') }}" class="btn btn-ghost btn-sm text-xs">Detail Presensi</a>
+        </div>
         <div class="divide-y divide-white/10 max-h-56 overflow-y-auto">
+            @foreach($today['on_leave'] ?? [] as $lv)
+                <div class="flex items-center justify-between py-2.5 text-xs">
+                    <div>
+                        <div class="font-bold text-white">{{ $lv->user?->name }}</div>
+                        <div class="text-slate-400">{{ $lv->user?->specialization }} @if($lv->notes) &bull; {{ $lv->notes }} @endif</div>
+                    </div>
+                    <span class="badge {{ $lv->statusBadge() }}">{{ $lv->statusLabel() }}</span>
+                </div>
+            @endforeach
             @forelse($today['absent'] as $ab)
                 <div class="flex items-center justify-between py-2.5 text-xs">
                     <div>
                         <div class="font-bold text-white">{{ $ab->name }}</div>
                         <div class="text-slate-400">{{ $ab->specialization }} &bull; {{ $ab->phone ?: $ab->email }}</div>
                     </div>
-                    <a href="{{ route('hrd.attendances.index') }}" class="badge badge-warning">Input Manual</a>
+                    <span class="badge badge-muted">Belum Absen</span>
                 </div>
             @empty
-                <p class="text-xs text-emerald-400 py-3 text-center">Semua karyawan aktif sudah presensi!</p>
+                <p class="text-xs text-emerald-700 font-semibold py-3 text-center">Semua karyawan aktif sudah tercatat kehadirannya di Portal HSM.</p>
             @endforelse
         </div>
     </div>
@@ -424,15 +438,29 @@ window.hrdLiveMapController = function () {
                        </div>`
                     : '';
 
+                const selfieHtml = c.check_in_photo_url
+                    ? `<img src="${c.check_in_photo_url}" alt="${c.name}" style="width:38px;height:38px;border-radius:10px;object-fit:cover;border:1.5px solid #cbd5e1;flex:none;">`
+                    : '';
+
+                const radiusInfoHtml = c.attendance_office
+                    ? `<div style="font-size:11px;color:#334155;margin-top:3px;">
+                           🏢 <b>Presensi HSM:</b> ${c.attendance_office} (${c.attendance_radius_summary || '-'})
+                       </div>`
+                    : '';
+
                 const popupHtml = `
-                    <div style="min-width:230px;font-family:'Plus Jakarta Sans Variable',sans-serif;font-size:12px;line-height:1.45;color:#0f172a;">
-                        <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:4px;">
-                            <strong style="font-size:13px;font-weight:800;">${c.name}</strong>
-                            ${statusBadge}
+                    <div style="min-width:240px;font-family:'Plus Jakarta Sans Variable',sans-serif;font-size:12px;line-height:1.45;color:#0f172a;">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+                            ${selfieHtml}
+                            <div style="min-width:0;flex:1;">
+                                <div style="font-size:13px;font-weight:800;margin-bottom:2px;">${c.name}</div>
+                                ${statusBadge}
+                            </div>
                         </div>
                         <div style="font-size:11px;color:#475569;font-weight:600;">${c.division} • ${c.vehicle_name}</div>
                         <div style="font-size:11px;color:#64748b;margin-top:2px;">📞 ${c.phone || '-'}</div>
-                        <div style="font-size:11px;color:#334155;margin-top:4px;">
+                        ${radiusInfoHtml}
+                        <div style="font-size:11px;color:#334155;margin-top:3px;">
                             📍 <b>${c.location_source}:</b> ${c.last_seen}
                             ${c.accuracy ? ` (±${c.accuracy}m)` : ''}
                         </div>

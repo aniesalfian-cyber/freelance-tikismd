@@ -32,6 +32,7 @@ class TaskController extends Controller
         return view('pwa.tasks.show', [
             'task' => $task,
             'attended' => (bool) $attendance->today($request->user()),
+            'portalUrl' => $attendance->portalUrl(),
         ]);
     }
 

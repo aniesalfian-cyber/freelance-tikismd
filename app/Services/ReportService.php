@@ -13,6 +13,7 @@ use Illuminate\Support\Collection;
 
 class ReportService
 {
+    public function __construct(protected HsmAttendanceBridgeService $attendanceBridge) {}
     public const TYPES = [
         'performa' => 'Laporan Evaluasi Performa Karyawan',
         'tugas' => 'Laporan Rincian Penugasan & Pengerjaan Tugas',
@@ -86,7 +87,9 @@ class ReportService
             ->when($f['user_id'], fn ($q) => $q->where('user_id', $f['user_id']))
             ->get()->groupBy('user_id');
 
-        $attendances = Attendance::query()->whereBetween('date', [$f['from'], $f['to']])->get()->groupBy('user_id');
+        $attendances = $this->attendanceBridge
+            ->forDateRange($f['from'], $f['to'], $f['user_id'] ? (int) $f['user_id'] : null)
+            ->groupBy('user_id');
 
         $users = User::freelancers()
             ->when($f['user_id'], fn ($q) => $q->where('id', $f['user_id']))
@@ -250,20 +253,22 @@ class ReportService
 
     protected function attendanceReport(array $f): array
     {
-        $items = Attendance::query()->with('user:id,name,nik')
-            ->whereBetween('date', [$f['from'], $f['to']])
-            ->when($f['user_id'], fn ($q) => $q->where('user_id', $f['user_id']))
-            ->orderBy('date')->orderBy('check_in_at')->get();
+        $items = $this->attendanceBridge->forDateRange(
+            $f['from'],
+            $f['to'],
+            $f['user_id'] ? (int) $f['user_id'] : null
+        );
 
         $rows = $items->values()->map(fn (Attendance $a, $i) => [
             'no' => $i + 1,
             'date' => $a->date->format('d/m/Y'),
             'user' => $a->user?->name,
-            'nik' => $a->user?->nik ?: '-',
-            'in' => $a->check_in_at->format('H:i'),
+            'nik' => $a->user?->nik ?: ($a->hsm_nik ?: '-'),
+            'office' => $a->officeDisplayName().' ('.$a->officeRadiusMeters().'m)',
+            'in' => $a->check_in_at?->format('H:i') ?? '-',
             'out' => $a->check_out_at?->format('H:i') ?? '-',
-            'work' => $a->workMinutes() !== null ? floor($a->workMinutes() / 60).'j '.($a->workMinutes() % 60).'m' : '-',
-            'distance' => $a->check_in_distance_meters.' m',
+            'work' => $a->workDurationFormatted() ?? '-',
+            'distance' => $a->formattedDistance($a->check_in_distance_meters !== null ? (float) $a->check_in_distance_meters : null),
             'late' => $a->late_minutes > 0 ? $a->late_minutes.' mnt' : '-',
             'status' => $a->statusLabel(),
         ]);
@@ -276,10 +281,11 @@ class ReportService
                 ['key' => 'date', 'label' => 'Tanggal', 'align' => 'center'],
                 ['key' => 'user', 'label' => 'Karyawan', 'align' => 'left'],
                 ['key' => 'nik', 'label' => 'NIK', 'align' => 'left'],
+                ['key' => 'office', 'label' => 'Lokasi & Radius', 'align' => 'left'],
                 ['key' => 'in', 'label' => 'Masuk', 'align' => 'center'],
                 ['key' => 'out', 'label' => 'Pulang', 'align' => 'center'],
                 ['key' => 'work', 'label' => 'Durasi Kerja', 'align' => 'center'],
-                ['key' => 'distance', 'label' => 'Jarak Check-in', 'align' => 'center'],
+                ['key' => 'distance', 'label' => 'Jarak GPS', 'align' => 'center'],
                 ['key' => 'late', 'label' => 'Terlambat', 'align' => 'center'],
                 ['key' => 'status', 'label' => 'Status', 'align' => 'center'],
             ],
@@ -290,12 +296,13 @@ class ReportService
                 ['label' => 'Terlambat', 'value' => (string) $late->count()],
                 ['label' => 'Rata-rata Keterlambatan', 'value' => $late->count() ? round($late->avg('late_minutes')).' mnt' : '-'],
                 ['label' => 'Karyawan Hadir', 'value' => $items->pluck('user_id')->unique()->count().' orang'],
-                ['label' => 'Belum Presensi Pulang', 'value' => (string) $items->whereNull('check_out_at')->count()],
+                ['label' => 'Belum Presensi Pulang', 'value' => (string) $items->filter(fn (Attendance $a) => $a->check_out_at === null)->count()],
             ],
             'notes' => [
                 $items->isEmpty()
                     ? 'Tidak ada data presensi pada periode dan filter yang dipilih.'
-                    : ($late->count() ? $late->count().' presensi tercatat terlambat melewati jam mulai kerja '.Setting::get('work_start_time').'.' : 'Seluruh presensi tercatat tepat waktu.'),
+                    : 'Data presensi tersinkronisasi langsung dari Portal Absensi HSM ('.$this->attendanceBridge->portalUrl().'). '
+                      .($late->count() ? $late->count().' presensi tercatat terlambat.' : 'Seluruh presensi tercatat tepat waktu.'),
             ],
         ];
     }

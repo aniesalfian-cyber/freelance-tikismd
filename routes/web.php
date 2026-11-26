@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Hrd;
+use App\Http\Controllers\HsmAttendanceMediaController;
 use App\Http\Controllers\Owner\ExecutiveDashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Pwa;
@@ -39,6 +40,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/pwa/heartbeat', [Pwa\LiveSyncController::class, 'heartbeat'])->name('pwa.heartbeat');
         Route::post('/notifications/{id}/read', [Pwa\LiveSyncController::class, 'markRead'])->whereNumber('id')->name('notifications.read');
         Route::post('/notifications/read-all', [Pwa\LiveSyncController::class, 'markAllRead'])->name('notifications.read-all');
+        Route::get('/media/hsm-attendance/{attendanceId}/{type}', [HsmAttendanceMediaController::class, 'selfie'])
+            ->whereNumber('attendanceId')
+            ->whereIn('type', ['in', 'out'])
+            ->name('media.hsm-attendance-photo');
     });
 
     // -------------------------------------------------------------- SuperAdmin

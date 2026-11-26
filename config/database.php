@@ -64,6 +64,25 @@ return [
             ]) : [],
         ],
 
+        // Read-only connection to the main HSM attendance portal (tikismd.id).
+        'hsm_attendance' => [
+            'driver' => env('HSM_ATTENDANCE_DB_DRIVER', 'mysql'),
+            'url' => env('HSM_ATTENDANCE_DB_URL'),
+            'host' => env('HSM_ATTENDANCE_DB_HOST', env('DB_HOST', '127.0.0.1')),
+            'port' => env('HSM_ATTENDANCE_DB_PORT', env('DB_PORT', '3306')),
+            'database' => env('HSM_ATTENDANCE_DB_DATABASE', ''),
+            'username' => env('HSM_ATTENDANCE_DB_USERNAME', env('DB_USERNAME', 'root')),
+            'password' => env('HSM_ATTENDANCE_DB_PASSWORD', env('DB_PASSWORD', '')),
+            'unix_socket' => env('HSM_ATTENDANCE_DB_SOCKET', env('DB_SOCKET', '')),
+            'charset' => env('DB_CHARSET', 'utf8mb4'),
+            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => false,
+            'engine' => null,
+            'foreign_key_constraints' => true,
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),

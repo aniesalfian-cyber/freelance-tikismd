@@ -4,15 +4,15 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
-use App\Models\Attendance;
 use App\Models\Outlet;
 use App\Models\SystemBackup;
 use App\Models\TaskAssignment;
 use App\Models\User;
+use App\Services\HsmAttendanceBridgeService;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(HsmAttendanceBridgeService $attendanceBridge)
     {
         $roleCounts = User::query()->selectRaw('role, COUNT(*) as c, SUM(is_active) as active')->groupBy('role')->get()->keyBy('role');
 
@@ -25,7 +25,7 @@ class DashboardController extends Controller
             'stats' => [
                 'outlets' => Outlet::active()->count(),
                 'tasks_today' => TaskAssignment::notCancelled()->whereDate('assigned_date', today())->count(),
-                'attendance_today' => Attendance::whereDate('date', today())->count(),
+                'attendance_today' => $attendanceBridge->forDate(today())['present']->count(),
                 'inactive_users' => User::where('is_active', false)->count(),
             ],
         ]);

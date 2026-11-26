@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardService
 {
+    public function __construct(protected HsmAttendanceBridgeService $attendanceBridge) {}
+
     /** Data dashboard eksekutif untuk rentang tanggal tertentu. */
     public function executive(Carbon $from, Carbon $to): array
     {
@@ -29,7 +31,7 @@ class DashboardService
         $logs = PerformanceLog::query()->whereBetween('evaluation_date', [$from->toDateString(), $to->toDateString()]);
         $avgKpi = (float) (clone $logs)->avg('final_kpi_score');
 
-        $presentToday = Attendance::whereDate('date', today())->count();
+        $presentToday = $this->attendanceBridge->forDate(today())['present']->count();
         $freelancerTotal = User::freelancers()->active()->count();
 
         return [
@@ -184,7 +186,9 @@ class DashboardService
     {
         $base = TaskAssignment::query()->notCancelled()->whereDate('assigned_date', today());
         $freelancers = User::freelancers()->active()->get();
-        $present = Attendance::whereDate('date', today())->get()->keyBy('user_id');
+        $day = $this->attendanceBridge->forDate(today());
+        $present = $day['present'];
+        $nonWorking = $day['non_working'];
 
         return [
             'task_counts' => [
@@ -194,7 +198,8 @@ class DashboardService
                 'total' => (clone $base)->count(),
             ],
             'present' => $present->count(),
-            'absent' => $freelancers->reject(fn ($u) => $present->has($u->id))->values(),
+            'on_leave' => $nonWorking->values(),
+            'absent' => $freelancers->reject(fn ($u) => $present->has($u->id) || $nonWorking->has($u->id))->values(),
             'late_attendance' => $present->where('status', Attendance::STATUS_LATE)->count(),
             'late_tasks' => (clone $base)->where('status', 'pending')->whereTime('scheduled_start_time', '<', now()->format('H:i:s'))->count(),
             'freelancers_total' => $freelancers->count(),
@@ -211,7 +216,9 @@ class DashboardService
         $defaultLat = $office?->latitude ?? -0.502106;
         $defaultLng = $office?->longitude ?? 117.153709;
 
-        $attendances = Attendance::whereDate('date', $today)->get()->keyBy('user_id');
+        $day = $this->attendanceBridge->forDate($today);
+        $attendances = $day['present'];
+        $nonWorking = $day['non_working'];
         $todayTasks = TaskAssignment::query()
             ->notCancelled()
             ->with('outlet:id,name,code,latitude,longitude')
@@ -221,19 +228,20 @@ class DashboardService
 
         $couriers = User::freelancers()->active()->orderBy('name')->get();
 
-        return $couriers->values()->map(function (User $u, int $idx) use ($attendances, $todayTasks, $defaultLat, $defaultLng) {
+        return $couriers->values()->map(function (User $u, int $idx) use ($attendances, $nonWorking, $todayTasks, $defaultLat, $defaultLng) {
             /** @var Attendance|null $att */
             $att = $attendances->get($u->id);
+            /** @var Attendance|null $leaveAtt */
+            $leaveAtt = $nonWorking->get($u->id);
             $userTasks = $todayTasks->get($u->id, collect());
             /** @var TaskAssignment|null $activeTask */
             $activeTask = $userTasks->firstWhere('status', TaskAssignment::STATUS_IN_PROGRESS);
             $pendingCount = $userTasks->where('status', TaskAssignment::STATUS_PENDING)->count();
             $doneCount = $userTasks->where('status', TaskAssignment::STATUS_COMPLETED)->count();
 
-            $hasCheckedIn = $att !== null;
-            $isCheckedOut = $att !== null && $att->check_out_at !== null;
-            // Sesuai SOP & regulasi operasional: kurir yang sudah absen hadir hari ini berstatus
-            // masuk kerja dan siap menerima penugasan (meskipun sudah presensi pulang / checkout).
+            $hasCheckedIn = $att !== null && $att->hasCheckedIn();
+            $isCheckedOut = $hasCheckedIn && $att->check_out_at !== null;
+            // Kurir yang sudah absen masuk di Portal Absensi HSM hari ini berstatus masuk kerja & siap menerima tugas.
             $isWorking = $hasCheckedIn;
 
             // Tentukan koordinat posisi terbaik karyawan
@@ -249,13 +257,12 @@ class DashboardService
                 } elseif ($att && $att->check_in_latitude && $att->check_in_longitude) {
                     $lat = (float) $att->check_in_latitude;
                     $lng = (float) $att->check_in_longitude;
-                    $source = 'Titik Presensi Masuk';
+                    $source = 'Presensi Masuk ('.$att->officeDisplayName().')';
                 } elseif ($att && $att->check_out_latitude && $att->check_out_longitude) {
                     $lat = (float) $att->check_out_latitude;
                     $lng = (float) $att->check_out_longitude;
-                    $source = 'Titik Presensi Pulang';
+                    $source = 'Presensi Pulang ('.$att->officeDisplayName().')';
                 } elseif ($hasCheckedIn) {
-                    // Sebarkan sedikit di sekitar kantor utama agar pin tidak bertumpuk
                     $angle = ($idx * 45) * (M_PI / 180);
                     $offset = 0.00035 * (($idx % 3) + 1);
                     $lat = round($defaultLat + sin($angle) * $offset, 6);
@@ -281,11 +288,18 @@ class DashboardService
                 'is_checked_out' => (bool) $isCheckedOut,
                 'check_in_time' => $att?->check_in_at?->format('H:i'),
                 'check_out_time' => $att?->check_out_at?->format('H:i'),
+                'attendance_office' => $att?->officeDisplayName(),
+                'attendance_radius_summary' => $att?->radiusSummary(),
+                'attendance_within_radius' => $att?->isWithinCheckInRadius(),
+                'attendance_status_label' => $att?->statusLabel() ?? ($leaveAtt?->statusLabel()),
+                'check_in_photo_url' => $att?->checkInPhotoUrl(),
+                'check_out_photo_url' => $att?->checkOutPhotoUrl(),
+                'leave_status' => $leaveAtt?->statusLabel(),
                 'lat' => $lat ? (float) $lat : null,
                 'lng' => $lng ? (float) $lng : null,
                 'accuracy' => $u->last_accuracy_meters,
                 'location_source' => $source,
-                'last_seen' => $u->last_location_at ? $u->last_location_at->diffForHumans() : ($att?->check_in_at ? 'Presensi '.$att->check_in_at->format('H:i') : 'Belum aktif'),
+                'last_seen' => $u->last_location_at ? $u->last_location_at->diffForHumans() : ($att?->check_in_at ? 'Presensi '.$att->check_in_at->format('H:i') : ($leaveAtt ? $leaveAtt->statusLabel() : 'Belum aktif')),
                 'last_time' => $u->last_location_at?->format('H:i:s'),
                 'is_fresh' => (bool) $isFresh,
                 'active_task' => $activeTask ? [

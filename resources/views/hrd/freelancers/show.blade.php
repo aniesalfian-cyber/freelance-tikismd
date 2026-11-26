@@ -78,31 +78,103 @@
         </div>
     </div>
 
-    <!-- Recent Attendance -->
-    <div class="table-surface">
-        <div>
-            <div class="orn-line mb-1"></div>
-            <h3 class="text-sm font-extrabold text-white">10 Presensi Terakhir</h3>
+    <!-- Recent Attendance (Integrated from HSM Portal) -->
+    <div class="table-surface" x-data="{ preview: null }">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+                <div class="orn-line mb-1"></div>
+                <h3 class="text-sm font-extrabold text-white">10 Presensi Terakhir (Portal Absensi HSM)</h3>
+            </div>
+            <span class="badge badge-info">Sinkron tikismd.id</span>
         </div>
         <div class="tbl-wrap">
             <table class="tbl">
                 <thead>
-                    <tr><th>Tanggal</th><th>Jam Masuk</th><th>Jam Pulang</th><th>Jarak</th><th>Status</th></tr>
+                    <tr>
+                        <th>Tanggal & Kantor</th>
+                        <th>Foto Selfie</th>
+                        <th>Jam Masuk</th>
+                        <th>Jam Pulang</th>
+                        <th>Radius Kantor</th>
+                        <th>Status</th>
+                    </tr>
                 </thead>
                 <tbody>
                     @forelse($attendances as $a)
+                        @php
+                            $inUrl = $a->checkInPhotoUrl();
+                            $outUrl = $a->checkOutPhotoUrl();
+                        @endphp
                         <tr>
-                            <td data-card-header="1" data-label="Tanggal Presensi" class="text-xs font-bold text-white">{{ $a->date->format('d/m/Y') }}</td>
-                            <td data-label="Jam Masuk" class="font-mono text-xs text-white">{{ $a->check_in_at->format('H:i') }} WITA</td>
-                            <td data-label="Jam Pulang" class="font-mono text-xs text-slate-300">{{ $a->check_out_at?->format('H:i') ?? '-' }}</td>
-                            <td data-label="Jarak ke Kantor Utama" class="text-xs">{{ $a->check_in_distance_meters }} m</td>
-                            <td data-label="Status Kehadiran"><span class="badge {{ $a->statusBadge() }}">{{ $a->statusLabel() }}</span></td>
+                            <td data-card-header="1" data-label="Tanggal & Kantor" class="text-xs">
+                                <div class="font-bold text-white">{{ $a->date->format('d/m/Y') }}</div>
+                                <div class="text-[11px] text-slate-500">{{ $a->officeDisplayName() }}</div>
+                            </td>
+                            <td data-label="Foto Selfie">
+                                <div class="flex items-center gap-1.5">
+                                    @if($inUrl)
+                                        <button type="button"
+                                                @click="preview = { url: @js($inUrl), title: 'Selfie Masuk ' + @js($a->date->format('d/m/Y')), meta: @js(($a->check_in_at?->format('H:i:s') ?? '-').' WITA • '.$a->officeDisplayName()) }"
+                                                class="w-10 h-10 rounded-lg overflow-hidden border border-emerald-300 bg-slate-100 relative"
+                                                aria-label="Lihat selfie masuk tanggal {{ $a->date->format('d/m/Y') }}">
+                                            <img src="{{ $inUrl }}" alt="Selfie masuk" loading="lazy" class="w-full h-full object-cover">
+                                            <span class="absolute bottom-0 inset-x-0 bg-slate-900/75 text-[8px] font-bold text-white text-center">IN</span>
+                                        </button>
+                                    @else
+                                        <span class="text-xs text-slate-400">-</span>
+                                    @endif
+                                    @if($outUrl)
+                                        <button type="button"
+                                                @click="preview = { url: @js($outUrl), title: 'Selfie Pulang ' + @js($a->date->format('d/m/Y')), meta: @js(($a->check_out_at?->format('H:i:s') ?? '-').' WITA • '.$a->officeDisplayName()) }"
+                                                class="w-10 h-10 rounded-lg overflow-hidden border border-slate-300 bg-slate-100 relative"
+                                                aria-label="Lihat selfie pulang tanggal {{ $a->date->format('d/m/Y') }}">
+                                            <img src="{{ $outUrl }}" alt="Selfie pulang" loading="lazy" class="w-full h-full object-cover">
+                                            <span class="absolute bottom-0 inset-x-0 bg-slate-900/75 text-[8px] font-bold text-white text-center">OUT</span>
+                                        </button>
+                                    @endif
+                                </div>
+                            </td>
+                            <td data-label="Jam Masuk" class="font-mono text-xs text-white">{{ $a->check_in_at ? $a->check_in_at->format('H:i').' WITA' : '-' }}</td>
+                            <td data-label="Jam Pulang" class="font-mono text-xs text-slate-300">{{ $a->check_out_at ? $a->check_out_at->format('H:i').' WITA' : '-' }}</td>
+                            <td data-label="Radius Kantor" class="text-xs">
+                                @if($a->hasCheckedIn())
+                                    <span class="{{ $a->isWithinCheckInRadius() ? 'text-emerald-700 font-semibold' : 'text-red-700 font-semibold' }}">
+                                        {{ $a->radiusSummary() }}
+                                    </span>
+                                @else
+                                    -
+                                @endif
+                            </td>
+                            <td data-label="Status Kehadiran">
+                                <span class="badge {{ $a->statusBadge() }}">{{ $a->statusLabel() }}</span>
+                            </td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="text-center text-slate-400 py-4">Belum ada presensi.</td></tr>
+                        <tr><td colspan="6" class="text-center text-slate-400 py-4">Belum ada riwayat presensi di Portal HSM.</td></tr>
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        <div x-show="preview !== null" x-cloak @keydown.escape.window="preview = null"
+             class="fixed inset-0 z-[9999] bg-slate-900/75 backdrop-blur-xs flex items-center justify-center p-4"
+             role="dialog" aria-modal="true">
+            <div @click.outside="preview = null" class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full overflow-hidden">
+                <div class="p-4 border-b border-slate-200 flex items-center justify-between gap-2">
+                    <div>
+                        <div class="text-sm font-extrabold text-slate-900" x-text="preview?.title"></div>
+                        <div class="text-xs text-slate-600" x-text="preview?.meta"></div>
+                    </div>
+                    <button type="button" @click="preview = null" class="btn btn-ghost btn-sm min-h-11 min-w-11 p-2" aria-label="Tutup foto">
+                        <x-icon name="x" class="w-4 h-4" />
+                    </button>
+                </div>
+                <div class="bg-slate-950 flex items-center justify-center max-h-[70dvh]">
+                    <template x-if="preview">
+                        <img :src="preview.url" :alt="preview.title" class="max-h-[70dvh] w-auto object-contain">
+                    </template>
+                </div>
+            </div>
         </div>
     </div>
 </div>

@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Hrd;
 
 use App\Http\Controllers\Controller;
-use App\Models\Attendance;
 use App\Models\PerformanceLog;
 use App\Models\TaskAssignment;
 use App\Models\User;
+use App\Services\HsmAttendanceBridgeService;
 use App\Support\ActivityLogger;
 use App\Support\PasswordGenerator;
 use Illuminate\Http\RedirectResponse;
@@ -56,7 +56,7 @@ class FreelancerController extends Controller
             ->with('credential', PasswordGenerator::credentialPayload($freelancer, $plain, 'Akun karyawan Anda telah dibuat'));
     }
 
-    public function show(User $freelancer)
+    public function show(User $freelancer, HsmAttendanceBridgeService $attendanceBridge)
     {
         $this->ensureFreelancer($freelancer);
 
@@ -67,7 +67,7 @@ class FreelancerController extends Controller
             'logs' => $logs,
             'avgKpi' => round((float) $logs->avg('final_kpi_score'), 2),
             'tasks' => TaskAssignment::with('outlet:id,name')->where('user_id', $freelancer->id)->latest('assigned_date')->latest('id')->limit(10)->get(),
-            'attendances' => Attendance::where('user_id', $freelancer->id)->latest('date')->limit(10)->get(),
+            'attendances' => $attendanceBridge->historyForUser($freelancer, 10),
             'taskStats' => [
                 'total' => TaskAssignment::where('user_id', $freelancer->id)->count(),
                 'completed' => TaskAssignment::where('user_id', $freelancer->id)->where('status', TaskAssignment::STATUS_COMPLETED)->count(),

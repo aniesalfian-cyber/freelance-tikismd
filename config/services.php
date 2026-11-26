@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'hsm_attendance' => [
+        'enabled' => (bool) env('HSM_ATTENDANCE_ENABLED', true),
+        'connection' => env('HSM_ATTENDANCE_DB_CONNECTION', 'hsm_attendance'),
+        'portal_url' => rtrim((string) env('HSM_ATTENDANCE_PORTAL_URL', 'https://tikismd.id'), '/'),
+        'storage_path' => rtrim((string) env('HSM_ATTENDANCE_STORAGE_PATH', '/home/u432375434/domains/tikismd.id/storage/private'), '/'),
+    ],
+
 ];

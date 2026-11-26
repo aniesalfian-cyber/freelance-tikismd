@@ -2,7 +2,7 @@
     $currentUser = auth()->user();
     $menuItems = \App\Support\Menu::for($currentUser);
     $todayAtt = $currentUser->isFreelancer()
-        ? \App\Models\Attendance::where('user_id', $currentUser->id)->whereDate('date', today())->first()
+        ? app(\App\Services\AttendanceService::class)->today($currentUser)
         : null;
     $isCourierWorking = $todayAtt !== null && $todayAtt->check_out_at === null;
     $initialUnread = \App\Models\AppNotification::where('user_id', $currentUser->id)->whereNull('read_at')->count();

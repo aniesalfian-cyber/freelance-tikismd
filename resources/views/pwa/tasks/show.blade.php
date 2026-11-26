@@ -57,10 +57,19 @@
     </div>
 
     @if(!$attended && $task->status === 'pending')
-        <div class="glass p-5 border-amber-500/45 bg-amber-500/10 space-y-3 text-xs">
-            <div class="font-extrabold text-amber-300 text-sm">Presensi Masuk Diperlukan!</div>
-            <p class="text-slate-200">Anda wajib melakukan presensi hadir di Kantor Utama HSM terlebih dahulu sebelum dapat memulai pengerjaan tugas.</p>
-            <a href="{{ route('pwa.attendance') }}" class="btn btn-primary btn-block">Buka Halaman Presensi GPS</a>
+        <div class="glass p-5 border-amber-500/45 bg-amber-50 space-y-3 text-xs">
+            <div class="font-extrabold text-amber-900 text-sm">Presensi Masuk di Portal HSM Diperlukan</div>
+            <p class="text-amber-900/90 leading-relaxed">
+                Anda belum tercatat melakukan presensi masuk hari ini pada Portal Absensi HSM. Silakan lakukan presensi masuk terlebih dahulu di <b>{{ parse_url($portalUrl ?? 'https://tikismd.id', PHP_URL_HOST) ?: 'tikismd.id' }}</b> sebelum memulai pengerjaan tugas.
+            </p>
+            <div class="flex flex-wrap gap-2">
+                <a href="{{ $portalUrl ?? 'https://tikismd.id' }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary min-h-11 flex-1">
+                    <x-icon name="external-link" class="w-4 h-4" /> Buka Portal Absensi HSM
+                </a>
+                <a href="{{ route('pwa.tasks.show', $task) }}" class="btn btn-ghost min-h-11">
+                    <x-icon name="repeat" class="w-4 h-4" /> Cek Ulang
+                </a>
+            </div>
         </div>
     @endif
 

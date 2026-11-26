@@ -38,44 +38,51 @@ class HsmEndToEndTest extends TestCase
         }
     }
 
-    public function test_geofencing_attendance_accepts_inside_radius_and_rejects_outside(): void
+    public function test_self_attendance_is_disabled_and_hsm_portal_attendance_is_displayed(): void
     {
         $freelancer = User::where('role', User::ROLE_FREELANCER)->firstOrFail();
+        $hrd = User::where('role', User::ROLE_HRD)->firstOrFail();
         $office = Outlet::mainOffice();
 
-        // 1. Di luar radius (~180m) -> Ditolak (422)
+        // 1. Percobaan presensi mandiri di kurir.tikismd.id ditolak karena sepenuhnya ditangani tikismd.id
         $this->actingAs($freelancer)
             ->postJson('/pwa/attendance/check-in', [
-                'latitude' => $office->latitude + 0.0016,
+                'latitude' => $office->latitude,
                 'longitude' => $office->longitude,
-                'accuracy' => 10,
+                'accuracy' => 8,
             ])
             ->assertStatus(422)
             ->assertJson(['ok' => false]);
 
-        $this->assertDatabaseCount('attendances', 0);
-
-        // 2. Di dalam radius (~15m) -> Diterima (200)
-        $this->actingAs($freelancer)
-            ->postJson('/pwa/attendance/check-in', [
-                'latitude' => $office->latitude + 0.0001,
-                'longitude' => $office->longitude,
-                'accuracy' => 8,
-            ])
-            ->assertOk()
-            ->assertJson(['ok' => true]);
-
-        $this->assertDatabaseHas('attendances', [
-            'user_id' => $freelancer->id,
-            'outlet_id' => $office->id,
+        // 2. Simulasikan kurir melakukan presensi di aplikasi absensi utama HSM (tikismd.id)
+        $attId = $this->seedHsmCheckIn($freelancer, [
+            'actual_check_in' => today()->toDateString().' 07:35:12',
+            'distance_meter' => 6.4,
+            'within_radius' => true,
         ]);
+
+        // 3. Data jam masuk, radius kantor, dan selfie langsung tampil di PWA Kurir & Monitoring HRD
+        $this->actingAs($freelancer)
+            ->get('/pwa/attendance')
+            ->assertOk()
+            ->assertSee('07:35:12')
+            ->assertSee('TIKI SR')
+            ->assertSee('6.4 m')
+            ->assertDontSee('Presensi Masuk Sekarang');
+
+        $this->actingAs($hrd)
+            ->get('/hrd/attendances')
+            ->assertOk()
+            ->assertSee($freelancer->name)
+            ->assertSee('07:35:12')
+            ->assertSee('Radius 25 m')
+            ->assertSee("/media/hsm-attendance/{$attId}/in");
     }
 
     public function test_task_lifecycle_blocks_without_attendance_then_tracks_3_states_and_scores_kpi(): void
     {
         $hrd = User::where('role', User::ROLE_HRD)->firstOrFail();
         $freelancer = User::where('role', User::ROLE_FREELANCER)->firstOrFail();
-        $office = Outlet::mainOffice();
         $gerai = Outlet::where('code', 'GR-001')->firstOrFail();
 
         // HRD membuat tugas untuk kurir hari ini
@@ -93,7 +100,7 @@ class HsmEndToEndTest extends TestCase
         $task = TaskAssignment::where('user_id', $freelancer->id)->firstOrFail();
         $this->assertSame('pending', $task->status);
 
-        // Karyawan kurir mencoba mulai sebelum presensi -> Ditolak
+        // Karyawan kurir mencoba mulai sebelum presensi di Portal HSM -> Ditolak
         $this->actingAs($freelancer)
             ->postJson("/pwa/tasks/{$task->id}/start", [
                 'latitude' => $gerai->latitude,
@@ -102,14 +109,8 @@ class HsmEndToEndTest extends TestCase
             ])
             ->assertStatus(422);
 
-        // Presensi masuk di Kantor Utama
-        $this->actingAs($freelancer)
-            ->postJson('/pwa/attendance/check-in', [
-                'latitude' => $office->latitude,
-                'longitude' => $office->longitude,
-                'accuracy' => 8,
-            ])
-            ->assertOk();
+        // Kurir melakukan presensi masuk di aplikasi absensi HSM (tikismd.id)
+        $this->seedHsmCheckIn($freelancer);
 
         // Mulai tugas (pending -> in_progress)
         $this->actingAs($freelancer)

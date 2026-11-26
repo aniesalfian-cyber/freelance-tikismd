@@ -21,8 +21,13 @@ class WorkspaceController extends Controller
         $active = $tasks->firstWhere('status', TaskAssignment::STATUS_IN_PROGRESS);
         $next = $tasks->firstWhere('status', TaskAssignment::STATUS_PENDING);
 
+        $todayAtt = $attendance->today($user);
+        $todayStatus = $todayAtt ?? $attendance->todayStatus($user);
+
         return view('pwa.workspace', [
-            'attendance' => $attendance->today($user),
+            'attendance' => $todayAtt,
+            'todayStatus' => $todayStatus,
+            'portalUrl' => $attendance->portalUrl(),
             'office' => Outlet::mainOffice(),
             'tasks' => $tasks,
             'done' => $done,

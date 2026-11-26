@@ -5,42 +5,54 @@ namespace App\Http\Controllers\Hrd;
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\User;
-use App\Services\AttendanceService;
+use App\Services\HsmAttendanceBridgeService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, HsmAttendanceBridgeService $bridge)
     {
         $date = $request->filled('date') ? Carbon::parse($request->date) : today();
 
-        $attendances = Attendance::with(['user:id,name,nik', 'outlet:id,name'])
-            ->whereDate('date', $date)->orderBy('check_in_at')->get();
+        $day = $bridge->forDate($date);
+        $attendances = $day['present']->values();
+        $nonWorking = $day['non_working']->values();
 
-        $absent = User::freelancers()->active()->whereNotIn('id', $attendances->pluck('user_id'))->orderBy('name')->get();
+        $accountedIds = $attendances->pluck('user_id')
+            ->merge($nonWorking->pluck('user_id'))
+            ->unique()
+            ->values();
+
+        $absent = User::freelancers()
+            ->active()
+            ->whereNotIn('id', $accountedIds)
+            ->orderBy('name')
+            ->get();
 
         return view('hrd.attendances.index', [
             'date' => $date,
             'attendances' => $attendances,
+            'nonWorking' => $nonWorking,
             'absent' => $absent,
+            'portalUrl' => $bridge->portalUrl(),
+            'stats' => [
+                'present' => $attendances->count(),
+                'on_time' => $attendances->where('status', Attendance::STATUS_ON_TIME)->count(),
+                'late' => $attendances->where('status', Attendance::STATUS_LATE)->count(),
+                'invalid' => $attendances->where('status', Attendance::STATUS_INVALID)->count(),
+                'checked_out' => $attendances->filter(fn (Attendance $a) => $a->check_out_at !== null)->count(),
+                'non_working' => $nonWorking->count(),
+                'absent' => $absent->count(),
+            ],
         ]);
     }
 
-    public function store(Request $request, AttendanceService $service): RedirectResponse
+    public function store(Request $request, HsmAttendanceBridgeService $bridge): RedirectResponse
     {
-        $data = $request->validate([
-            'user_id' => ['required', 'exists:users,id'],
-            'date' => ['required', 'date', 'before_or_equal:today'],
-            'check_in_time' => ['required', 'date_format:H:i'],
-            'check_out_time' => ['nullable', 'date_format:H:i'],
-            'notes' => ['required', 'string', 'min:5', 'max:200'],
-        ], ['notes.required' => 'Alasan input manual wajib diisi.']);
-
-        $freelancer = User::freelancers()->findOrFail($data['user_id']);
-        $service->manualEntry($freelancer, Carbon::parse($data['date']), $data['check_in_time'], $data['check_out_time'] ?? null, $data['notes'], $request->user());
-
-        return redirect()->route('hrd.attendances.index', ['date' => $data['date']])->with('success', 'Presensi manual berhasil dicatat.');
+        return redirect()
+            ->route('hrd.attendances.index', ['date' => $request->input('date', today()->toDateString())])
+            ->with('error', 'Pencatatan dan validasi presensi sepenuhnya dikelola melalui aplikasi absensi utama HSM ('.$bridge->portalUrl().').');
     }
 }

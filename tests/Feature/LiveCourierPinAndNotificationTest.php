@@ -95,14 +95,11 @@ class LiveCourierPinAndNotificationTest extends TestCase
             ->assertJsonPath('is_working', false)
             ->assertJsonPath('location_saved', false);
 
-        // 2. Kurir melakukan presensi masuk di Kantor Utama
-        $this->actingAs($courier)
-            ->postJson('/pwa/attendance/check-in', [
-                'latitude' => $office->latitude,
-                'longitude' => $office->longitude,
-                'accuracy' => 10,
-            ])
-            ->assertOk();
+        // 2. Kurir melakukan presensi masuk melalui Portal Absensi HSM (tikismd.id)
+        $this->seedHsmCheckIn($courier, [
+            'latitude' => $office->latitude,
+            'longitude' => $office->longitude,
+        ]);
 
         // 3. Saat berstatus masuk kerja, aplikasi kurir otomatis mengirim lokasi GPS terkini ke server
         $this->actingAs($courier)
@@ -165,23 +162,15 @@ class LiveCourierPinAndNotificationTest extends TestCase
         $hrd = User::where('role', User::ROLE_HRD)->firstOrFail();
         $office = Outlet::mainOffice();
 
-        // 1. Presensi masuk
-        $this->actingAs($courier)
-            ->postJson('/pwa/attendance/check-in', [
-                'latitude' => $office->latitude,
-                'longitude' => $office->longitude,
-                'accuracy' => 10,
-            ])
-            ->assertOk();
-
-        // 2. Presensi pulang (checkout)
-        $this->actingAs($courier)
-            ->postJson('/pwa/attendance/check-out', [
-                'latitude' => $office->latitude,
-                'longitude' => $office->longitude,
-                'accuracy' => 10,
-            ])
-            ->assertOk();
+        // 1. Presensi masuk & 2. Presensi pulang (checkout) di Portal Absensi HSM (tikismd.id)
+        $attId = $this->seedHsmCheckIn($courier, [
+            'latitude' => $office->latitude,
+            'longitude' => $office->longitude,
+        ]);
+        $this->seedHsmCheckOut($attId, [
+            'latitude' => $office->latitude,
+            'longitude' => $office->longitude,
+        ]);
 
         // 3. Pada Peta Live HRD, kurir yang sudah presensi hari ini tetap berstatus is_working = true
         // dan is_checked_out = true, sehingga tetap muncul pada daftar kurir masuk kerja & dapat diberi tugas
