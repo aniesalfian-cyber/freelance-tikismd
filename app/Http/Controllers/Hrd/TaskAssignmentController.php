@@ -32,8 +32,12 @@ class TaskAssignmentController extends Controller
 
         $counts = (clone $base)->select('status', DB::raw('COUNT(*) as c'))->groupBy('status')->pluck('c', 'status');
 
-        $tasks = (clone $base)->with(['user:id,name,specialization', 'outlet:id,name'])
-            ->orderByDesc('assigned_date')->orderBy('scheduled_start_time')->paginate(20)->withQueryString();
+        $tasks = (clone $base)->with([
+            'user:id,name,specialization',
+            'outlet:id,name,code,type,is_main_office',
+        ])->orderByDesc('assigned_date')->orderBy('scheduled_start_time')->paginate(18)->withQueryString();
+
+        $request->session()->put('hrd_tasks_return_url', $request->fullUrl());
 
         return view('hrd.tasks.index', [
             'tasks' => $tasks,
@@ -41,7 +45,7 @@ class TaskAssignmentController extends Controller
             'date' => $date,
             'range' => $range,
             'freelancers' => User::freelancers()->orderBy('name')->get(['id', 'name', 'specialization']),
-            'outlets' => Outlet::orderBy('name')->get(['id', 'name']),
+            'outlets' => Outlet::orderBy('name')->get(['id', 'name', 'code', 'type', 'is_main_office']),
             'divisions' => User::DIVISIONS,
         ]);
     }
@@ -194,11 +198,30 @@ class TaskAssignmentController extends Controller
             ->with('import_errors', $result['errors']);
     }
 
-    public function show(TaskAssignment $task)
+    public function show(Request $request, TaskAssignment $task)
     {
         $task->load(['user', 'outlet', 'creator:id,name', 'template:id,title']);
 
-        return view('hrd.tasks.show', ['task' => $task]);
+        $prev = url()->previous();
+        $hostPrefix = $request->getSchemeAndHttpHost();
+        $savedReturn = $request->session()->get('hrd_tasks_return_url', route('hrd.tasks.index'));
+
+        if (
+            $prev
+            && str_starts_with($prev, $hostPrefix)
+            && $prev !== $request->fullUrl()
+            && ! str_contains($prev, '/tasks/'.$task->id.'/edit')
+            && ! str_contains($prev, '/login')
+        ) {
+            $backUrl = $prev;
+        } else {
+            $backUrl = $savedReturn;
+        }
+
+        return view('hrd.tasks.show', [
+            'task' => $task,
+            'backUrl' => $backUrl,
+        ]);
     }
 
     public function edit(TaskAssignment $task)

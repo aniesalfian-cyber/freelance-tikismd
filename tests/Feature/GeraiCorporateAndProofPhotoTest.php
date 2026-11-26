@@ -168,4 +168,98 @@ class GeraiCorporateAndProofPhotoTest extends TestCase
             $this->assertLessThanOrEqual(1280, $size[1]);
         }
     }
+
+    public function test_multiple_outlets_can_share_same_location_code(): void
+    {
+        $hrd = User::where('role', User::ROLE_HRD)->firstOrFail();
+
+        $this->actingAs($hrd)->post(route('hrd.outlets.store'), [
+            'code' => 'CORPT-SHARED-01',
+            'name' => 'Tambang Damai Unit 1',
+            'type' => Outlet::TYPE_CORPORATE,
+            'address' => 'Jl.Poros Samarinda Blok A',
+            'latitude' => -0.503100,
+            'longitude' => 117.151100,
+            'radius_meters' => 50,
+            'is_active' => '1',
+        ])->assertSessionHasNoErrors()->assertRedirect(route('hrd.outlets.index'));
+
+        $this->actingAs($hrd)->post(route('hrd.outlets.store'), [
+            'code' => 'CORPT-SHARED-01',
+            'name' => 'Tambang Damai Unit 2',
+            'type' => Outlet::TYPE_CORPORATE,
+            'address' => 'Jl. Poros Samarinda Blok B',
+            'latitude' => -0.503500,
+            'longitude' => 117.151500,
+            'radius_meters' => 50,
+            'is_active' => '1',
+        ])->assertSessionHasNoErrors()->assertRedirect(route('hrd.outlets.index'));
+
+        $this->assertSame(2, Outlet::where('code', 'CORPT-SHARED-01')->count());
+    }
+
+    public function test_tasks_index_renders_corporate_card_icon_actions_and_detail_back_preserves_filters(): void
+    {
+        $hrd = User::where('role', User::ROLE_HRD)->firstOrFail();
+        $courier = User::freelancers()->firstOrFail();
+
+        $corp = Outlet::create([
+            'code' => 'CORPT-SMD010025101',
+            'name' => 'TAMBANG DAMAI',
+            'type' => Outlet::TYPE_CORPORATE,
+            'address' => 'Samarinda',
+            'latitude' => -0.504000,
+            'longitude' => 117.154000,
+            'radius_meters' => 50,
+            'is_main_office' => false,
+            'is_active' => true,
+        ]);
+
+        $task = TaskAssignment::create([
+            'task_number' => 'TSK-CORP-0001',
+            'user_id' => $courier->id,
+            'outlet_id' => $corp->id,
+            'title' => 'Pickup Dokumen Tambang Damai',
+            'task_type' => TaskAssignment::TYPE_ADHOC,
+            'assigned_date' => today(),
+            'scheduled_start_time' => '10:00:00',
+            'estimated_duration_minutes' => 45,
+            'status' => TaskAssignment::STATUS_PENDING,
+            'created_by' => $hrd->id,
+        ]);
+
+        $filteredUrl = route('hrd.tasks.index', [
+            'date' => today()->toDateString(),
+            'outlet_id' => $corp->id,
+            'q' => 'Tambang',
+        ]);
+
+        $indexRes = $this->actingAs($hrd)->get($filteredUrl);
+        $indexRes->assertOk()
+            ->assertSee('TAMBANG DAMAI')
+            ->assertSee('CORPT-SMD010025101')
+            ->assertSee('>Corporate</span>', false)
+            ->assertSee('aria-label="Detail tugas TSK-CORP-0001"', false)
+            ->assertSee('aria-label="Edit tugas TSK-CORP-0001"', false)
+            ->assertDontSee('>Detail & Peta<', false);
+
+        // Buka detail tugas lalu pastikan tombol Kembali mengarah ke URL terfilter sebelumnya
+        $detailRes = $this->actingAs($hrd)->get(route('hrd.tasks.show', $task));
+        $detailRes->assertOk()
+            ->assertSee('Kembali')
+            ->assertSee(e($filteredUrl), false);
+    }
+
+    public function test_owner_can_login_with_phone_08115557089_and_pin_1478(): void
+    {
+        $res = $this->post('/login', [
+            'login_mode' => 'pin',
+            'login' => '08115557089',
+            'pin' => '1478',
+        ]);
+
+        $res->assertRedirect('/owner/executive-dashboard');
+        $this->assertAuthenticated();
+        $this->assertSame(User::ROLE_OWNER, auth()->user()->role);
+    }
 }

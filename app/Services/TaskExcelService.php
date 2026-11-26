@@ -297,8 +297,9 @@ class TaskExcelService
 
         $imported = 0;
         $rowErrors = [];
-        $outlets = Outlet::all()->keyBy('code');
-        $mainOffice = Outlet::mainOffice() ?? Outlet::first();
+        $allOutlets = Outlet::orderByDesc('is_active')->orderBy('id')->get();
+        $outlets = $allOutlets->groupBy(fn (Outlet $o) => strtoupper(trim($o->code)));
+        $mainOffice = Outlet::mainOffice() ?? $allOutlets->first();
         $couriers = User::freelancers()->get();
 
         // Siapkan lookup map untuk kurir (nomor HP berbagai varian, NIK, nama)
@@ -353,12 +354,22 @@ class TaskExcelService
                 continue;
             }
 
-            // Validasi Gerai Lokasi
+            // Validasi Gerai / Corporate Lokasi (mendukung kode lokasi bersama maupun nama lokasi)
             $rawOutletCode = trim((string) $sheet->getCell('E'.$row)->getValue());
-            $matchedOutlet = $outlets->get($rawOutletCode);
-            if (! $matchedOutlet && $rawOutletCode !== '') {
-                // Cari partial nama gerai
-                $matchedOutlet = $outlets->first(fn ($o) => str_contains(mb_strtolower($o->name), mb_strtolower($rawOutletCode)));
+            $matchedOutlet = null;
+            if ($rawOutletCode !== '') {
+                $upperCode = strtoupper($rawOutletCode);
+                $lowerVal = mb_strtolower($rawOutletCode);
+                $matchedOutlet = $allOutlets->first(fn (Outlet $o) => mb_strtolower(trim($o->name)) === $lowerVal);
+                if (! $matchedOutlet && $outlets->has($upperCode)) {
+                    $candidates = $outlets->get($upperCode);
+                    $matchedOutlet = $candidates->count() === 1
+                        ? $candidates->first()
+                        : ($candidates->first(fn (Outlet $o) => str_contains(mb_strtolower($title), mb_strtolower($o->name))) ?? $candidates->first());
+                }
+                if (! $matchedOutlet) {
+                    $matchedOutlet = $allOutlets->first(fn (Outlet $o) => str_contains(mb_strtolower($o->name), $lowerVal));
+                }
             }
             $matchedOutlet ??= $mainOffice;
             if (! $matchedOutlet) {

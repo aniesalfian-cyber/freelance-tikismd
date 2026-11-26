@@ -17,14 +17,14 @@ class DashboardController extends Controller
 
         return view('hrd.dashboard', [
             'today' => $today,
-            'activeTasks' => TaskAssignment::with(['user:id,name', 'outlet:id,name'])
+            'activeTasks' => TaskAssignment::with(['user:id,name', 'outlet:id,name,code,type,is_main_office'])
                 ->whereDate('assigned_date', today())->where('status', TaskAssignment::STATUS_IN_PROGRESS)->latest('started_at')->get(),
-            'lateTasks' => TaskAssignment::with(['user:id,name', 'outlet:id,name'])
+            'lateTasks' => TaskAssignment::with(['user:id,name', 'outlet:id,name,code,type,is_main_office'])
                 ->whereDate('assigned_date', today())->where('status', TaskAssignment::STATUS_PENDING)
                 ->whereTime('scheduled_start_time', '<', now()->format('H:i:s'))->orderBy('scheduled_start_time')->limit(8)->get(),
             'map' => $dashboard->liveOutletMap(),
             'couriersMap' => $dashboard->liveCouriersMap(),
-            'outlets' => Outlet::active()->orderByDesc('is_main_office')->orderBy('name')->get(['id', 'name', 'code', 'address', 'is_main_office']),
+            'outlets' => Outlet::active()->orderByDesc('is_main_office')->orderBy('name')->get(['id', 'name', 'code', 'type', 'address', 'is_main_office']),
             'templates' => TaskTemplate::where('is_active', true)->orderBy('title')->get(['id', 'title', 'description', 'target_division', 'default_outlet_id', 'estimated_duration_minutes']),
         ]);
     }

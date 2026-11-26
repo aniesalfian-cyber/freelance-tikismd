@@ -221,7 +221,7 @@ class DashboardService
         $nonWorking = $day['non_working'];
         $todayTasks = TaskAssignment::query()
             ->notCancelled()
-            ->with('outlet:id,name,code,latitude,longitude')
+            ->with('outlet:id,name,code,type,is_main_office,latitude,longitude')
             ->whereDate('assigned_date', $today)
             ->get()
             ->groupBy('user_id');

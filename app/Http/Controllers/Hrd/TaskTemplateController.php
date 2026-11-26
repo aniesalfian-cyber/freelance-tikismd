@@ -16,7 +16,7 @@ class TaskTemplateController extends Controller
     public function index()
     {
         return view('hrd.templates.index', [
-            'templates' => TaskTemplate::with(['outlet:id,name', 'user:id,name'])->orderByDesc('is_active')->orderBy('scheduled_start_time')->paginate(15),
+            'templates' => TaskTemplate::with(['outlet:id,name,code,type,is_main_office', 'user:id,name'])->orderByDesc('is_active')->orderBy('scheduled_start_time')->paginate(15),
         ]);
     }
 

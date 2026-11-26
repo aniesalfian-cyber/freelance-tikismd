@@ -188,7 +188,7 @@ class ReportService
 
     protected function tasksReport(array $f): array
     {
-        $tasks = TaskAssignment::query()->with(['user:id,name', 'outlet:id,name'])
+        $tasks = TaskAssignment::query()->with(['user:id,name', 'outlet:id,name,code,type,is_main_office'])
             ->whereBetween('assigned_date', [$f['from'], $f['to']])
             ->when($f['outlet_id'], fn ($q) => $q->where('outlet_id', $f['outlet_id']))
             ->when($f['user_id'], fn ($q) => $q->where('user_id', $f['user_id']))

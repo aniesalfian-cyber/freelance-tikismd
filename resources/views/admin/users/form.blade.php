@@ -24,14 +24,19 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
                 <label class="label">Email Login</label>
                 <input type="email" name="email" value="{{ old('email', $user->email) }}" required class="input">
             </div>
             <div>
-                <label class="label">Nomor WhatsApp</label>
+                <label class="label">Nomor Handphone / WhatsApp</label>
                 <input type="text" name="phone" value="{{ old('phone', $user->phone) }}" placeholder="0812xxxxxxxx" class="input">
+            </div>
+            <div>
+                <label class="label">PIN Login (4 Digit)</label>
+                <input type="text" name="pin" value="{{ old('pin') }}" inputmode="numeric" maxlength="4" pattern="[0-9]{4}"
+                       placeholder="{{ $user->exists ? 'Kosongkan jika tetap' : 'Default: 1234' }}" class="input font-mono">
             </div>
         </div>
 

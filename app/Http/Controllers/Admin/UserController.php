@@ -126,11 +126,20 @@ class UserController extends Controller
             'email' => ['required', 'email', 'max:150', Rule::unique('users', 'email')->ignore($user?->id)],
             'nik' => ['nullable', 'string', 'max:30', Rule::unique('users', 'nik')->ignore($user?->id)],
             'phone' => ['nullable', 'string', 'max:25', 'regex:/^[0-9+\-\s]{6,25}$/'],
+            'pin' => ['nullable', 'digits:4'],
             'role' => ['required', Rule::in(array_keys(User::ROLES))],
             'specialization' => ['nullable', 'string', 'max:150'],
             'hourly_rate' => ['nullable', 'numeric', 'min:0'],
-        ], ['phone.regex' => 'Format nomor telepon tidak valid.', 'email.unique' => 'Email sudah digunakan.', 'nik.unique' => 'NIK sudah digunakan.']);
+        ], [
+            'phone.regex' => 'Format nomor telepon tidak valid.',
+            'pin.digits' => 'PIN login harus berupa tepat 4 digit angka.',
+            'email.unique' => 'Email sudah digunakan.',
+            'nik.unique' => 'NIK sudah digunakan.',
+        ]);
 
+        if (empty($data['pin'])) {
+            unset($data['pin']);
+        }
         $data['is_active'] = $request->boolean('is_active');
         $data['hourly_rate'] = $data['hourly_rate'] ?? 0;
         $data['nik'] = $data['nik'] ?: null;

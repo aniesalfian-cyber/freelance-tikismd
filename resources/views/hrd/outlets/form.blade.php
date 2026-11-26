@@ -13,30 +13,24 @@
             @if($outlet->exists) @method('PUT') @endif
 
             <!-- Pilih Tipe Lokasi -->
-            <div>
+            <div x-data="{ locType: '{{ old('type', $outlet->type ?? \App\Models\Outlet::TYPE_GERAI) }}' }">
                 <label class="label">Kategori / Tipe Lokasi (*)</label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <label class="flex items-start gap-3 p-3 rounded-2xl border cursor-pointer transition"
-                           :class="locType === 'gerai' ? 'bg-cyan-500/10 border-cyan-500/40 text-cyan-200' : 'bg-white/5 border-white/10 text-slate-300 hover:border-white/20'"
-                           x-data="{ locType: '{{ old('type', $outlet->type ?? \App\Models\Outlet::TYPE_GERAI) }}' }">
-                        <input type="radio" name="type" value="gerai" @checked(old('type', $outlet->type ?? \App\Models\Outlet::TYPE_GERAI) === \App\Models\Outlet::TYPE_GERAI) class="mt-0.5">
+                           :class="locType === 'gerai' ? 'bg-cyan-50 border-cyan-400 text-slate-900' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'">
+                        <input type="radio" name="type" value="gerai" x-model="locType" @checked(old('type', $outlet->type ?? \App\Models\Outlet::TYPE_GERAI) === \App\Models\Outlet::TYPE_GERAI) class="mt-0.5">
                         <div class="min-w-0">
-                            <div class="font-bold text-xs text-white flex items-center gap-1.5">
-                                <span>🏪</span> Gerai Cabang
-                            </div>
-                            <div class="text-[11px] text-slate-400 mt-0.5 leading-snug">Titik gerai/cabang TIKISMD operasional pickup & delivery paket.</div>
+                            <div class="font-bold text-xs text-slate-900">Gerai Cabang</div>
+                            <div class="text-[11px] text-slate-600 mt-0.5 leading-snug">Titik gerai atau cabang TIKISMD operasional pickup & delivery paket.</div>
                         </div>
                     </label>
 
                     <label class="flex items-start gap-3 p-3 rounded-2xl border cursor-pointer transition"
-                           :class="locType === 'corporate' ? 'bg-purple-500/10 border-purple-500/40 text-purple-200' : 'bg-white/5 border-white/10 text-slate-300 hover:border-white/20'"
-                           x-data="{ locType: '{{ old('type', $outlet->type ?? \App\Models\Outlet::TYPE_GERAI) }}' }">
-                        <input type="radio" name="type" value="corporate" @checked(old('type', $outlet->type) === \App\Models\Outlet::TYPE_CORPORATE) class="mt-0.5">
+                           :class="locType === 'corporate' ? 'bg-purple-50 border-purple-400 text-slate-900' : 'bg-white border-slate-200 text-slate-700 hover:border-slate-300'">
+                        <input type="radio" name="type" value="corporate" x-model="locType" @checked(old('type', $outlet->type) === \App\Models\Outlet::TYPE_CORPORATE) class="mt-0.5">
                         <div class="min-w-0">
-                            <div class="font-bold text-xs text-white flex items-center gap-1.5">
-                                <span>🏢</span> Perusahaan Rekan (Corporate)
-                            </div>
-                            <div class="text-[11px] text-slate-400 mt-0.5 leading-snug">Perusahaan/kantor mitra kerja sama B2B untuk jadwal penjemputan paket.</div>
+                            <div class="font-bold text-xs text-slate-900">Perusahaan Rekan (Corporate)</div>
+                            <div class="text-[11px] text-slate-600 mt-0.5 leading-snug">Perusahaan atau kantor mitra kerja sama B2B untuk jadwal penjemputan paket.</div>
                         </div>
                     </label>
                 </div>
@@ -45,7 +39,8 @@
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                     <label class="label">Kode Lokasi (*)</label>
-                    <input type="text" name="code" value="{{ old('code', $outlet->code) }}" placeholder="Contoh: CORP-001 / GR-004" required class="input font-mono uppercase">
+                    <input type="text" name="code" value="{{ old('code', $outlet->code) }}" placeholder="Contoh: CORPT-SMD01 / GR-004" required class="input font-mono uppercase">
+                    <p class="text-[10px] text-slate-500 mt-1">Dapat digunakan bersama untuk beberapa lokasi satu kode area.</p>
                 </div>
                 <div class="sm:col-span-2">
                     <label class="label">Nama Gerai / Perusahaan Rekan (*)</label>

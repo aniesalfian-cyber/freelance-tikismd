@@ -22,7 +22,7 @@ class ReportController extends Controller
         return view('reports.index', [
             'report' => $report,
             'types' => ReportService::TYPES,
-            'outlets' => Outlet::orderBy('name')->get(['id', 'name']),
+            'outlets' => Outlet::orderBy('name')->get(['id', 'name', 'code', 'type', 'is_main_office']),
             'freelancers' => User::freelancers()->orderBy('name')->get(['id', 'name']),
             'query' => $request->query(),
         ]);

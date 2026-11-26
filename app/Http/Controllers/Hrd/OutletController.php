@@ -123,7 +123,7 @@ class OutletController extends Controller
     protected function validated(Request $request, ?Outlet $outlet = null): array
     {
         $data = $request->validate([
-            'code' => ['required', 'string', 'max:20', 'alpha_dash', Rule::unique('outlets', 'code')->ignore($outlet?->id)],
+            'code' => ['required', 'string', 'max:40', 'alpha_dash'],
             'name' => ['required', 'string', 'max:150'],
             'type' => ['required', 'string', Rule::in([Outlet::TYPE_GERAI, Outlet::TYPE_CORPORATE])],
             'address' => ['required', 'string', 'max:500'],
@@ -131,7 +131,6 @@ class OutletController extends Controller
             'longitude' => ['required', 'numeric', 'between:-180,180'],
             'radius_meters' => ['required', 'integer', 'min:10', 'max:1000'],
         ], [
-            'code.unique' => 'Kode lokasi sudah digunakan.',
             'code.alpha_dash' => 'Kode hanya boleh huruf, angka, strip, dan underscore.',
             'type.in' => 'Tipe lokasi harus berupa Gerai Cabang atau Corporate.',
         ]);

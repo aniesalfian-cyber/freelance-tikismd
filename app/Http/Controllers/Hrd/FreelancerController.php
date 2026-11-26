@@ -66,7 +66,7 @@ class FreelancerController extends Controller
             'freelancer' => $freelancer,
             'logs' => $logs,
             'avgKpi' => round((float) $logs->avg('final_kpi_score'), 2),
-            'tasks' => TaskAssignment::with('outlet:id,name')->where('user_id', $freelancer->id)->latest('assigned_date')->latest('id')->limit(10)->get(),
+            'tasks' => TaskAssignment::with('outlet:id,name,code,type,is_main_office')->where('user_id', $freelancer->id)->latest('assigned_date')->latest('id')->limit(10)->get(),
             'attendances' => $attendanceBridge->historyForUser($freelancer, 10),
             'taskStats' => [
                 'total' => TaskAssignment::where('user_id', $freelancer->id)->count(),
