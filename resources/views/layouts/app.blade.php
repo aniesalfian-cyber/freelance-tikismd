@@ -275,6 +275,12 @@
                 </div>
             @endif
 
+            @if(session('warning'))
+                <div class="glass px-4 py-3 border-amber-300 bg-amber-50 text-amber-950 text-sm flex items-center justify-between gap-3 shadow-sm">
+                    <span>{{ session('warning') }}</span>
+                </div>
+            @endif
+
             @if(session('error'))
                 <div class="glass px-4 py-3 border-red-300 bg-red-50 text-red-900 text-sm flex items-center justify-between gap-3 shadow-sm">
                     <span>{{ session('error') }}</span>
@@ -302,12 +308,14 @@
     <!-- Credential Copy / WhatsApp Modal -->
     @include('partials.credential-modal')
 
-    @if(session('success') || session('error'))
+    @if(session('success') || session('warning') || session('error'))
         <script>
             window.hsmReady(() => {
                 if (window.HsmSwal) {
                     @if(session('success'))
                         window.HsmSwal.toast(@json(session('success')), 'success');
+                    @elseif(session('warning'))
+                        window.HsmSwal.toast(@json(session('warning')), 'warning');
                     @elseif(session('error'))
                         window.HsmSwal.toast(@json(session('error')), 'error');
                     @endif

@@ -180,22 +180,49 @@ class TaskAssignmentController extends Controller
         ]);
 
         $result = $excelService->importTasks($request->file('excel_file'), $request->user()->id);
+        $skippedDuplicates = (int) ($result['skipped_duplicates'] ?? 0);
+        $duplicates = $result['duplicates'] ?? [];
+        $dates = $result['dates'] ?? [];
 
         if (! $result['success']) {
             return back()->with('error', 'Gagal mengimpor tugas: '.implode(' | ', array_slice($result['errors'], 0, 3)))
-                ->with('import_errors', $result['errors']);
+                ->with('import_errors', $result['errors'])
+                ->with('import_duplicates', $duplicates);
         }
 
-        ActivityLogger::log('task.imported', "Mengimpor {$result['imported']} tugas kurir dari Excel");
+        $redirectParams = [];
+        if (count($dates) === 1) {
+            $redirectParams['date'] = $dates[0];
+        } elseif (count($dates) > 1) {
+            $redirectParams['range'] = 'all';
+        }
+
+        if ($result['imported'] === 0 && $skippedDuplicates > 0) {
+            ActivityLogger::log('task.import_skipped', "Import Excel dilewati: {$skippedDuplicates} baris tugas sudah terdaftar (duplikat)");
+
+            return redirect()->route('hrd.tasks.index', $redirectParams)
+                ->with('warning', "Tidak ada tugas baru yang ditambahkan. Seluruh {$skippedDuplicates} baris pada file Excel sudah terdaftar dan dilewati otomatis.")
+                ->with('import_duplicates', $duplicates);
+        }
+
+        $logDesc = "Mengimpor {$result['imported']} tugas kurir dari Excel";
+        if ($skippedDuplicates > 0) {
+            $logDesc .= " ({$skippedDuplicates} duplikat dilewati)";
+        }
+        ActivityLogger::log('task.imported', $logDesc);
 
         $msg = "{$result['imported']} penugasan kurir berhasil diimpor ke sistem.";
+        if ($skippedDuplicates > 0) {
+            $msg .= " {$skippedDuplicates} baris duplikat dilewati otomatis.";
+        }
         if (! empty($result['errors'])) {
-            $msg .= ' Namun '.count($result['errors']).' baris dilewati karena format tidak sesuai.';
+            $msg .= ' '.count($result['errors']).' baris tidak valid dilewati.';
         }
 
-        return redirect()->route('hrd.tasks.index')
+        return redirect()->route('hrd.tasks.index', $redirectParams)
             ->with('success', $msg)
-            ->with('import_errors', $result['errors']);
+            ->with('import_errors', $result['errors'])
+            ->with('import_duplicates', $duplicates);
     }
 
     public function show(Request $request, TaskAssignment $task)

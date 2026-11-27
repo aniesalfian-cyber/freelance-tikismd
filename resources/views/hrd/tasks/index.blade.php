@@ -1,6 +1,38 @@
 @extends('layouts.app', ['title' => 'Manajemen Penugasan & Monitoring Status', 'subtitle' => 'Distribusi tugas pasti harian dan tugas dinamis pada Gerai & Corporate'])
 
 @section('content')
+@if(session('import_duplicates') && count(session('import_duplicates')) > 0)
+    <details class="glass px-4 py-3 border border-amber-300 bg-amber-50 text-amber-950 text-xs shadow-xs">
+        <summary class="cursor-pointer font-bold text-sm flex items-center justify-between gap-2 select-none">
+            <span class="inline-flex items-center gap-2">
+                <x-icon name="repeat" class="w-4 h-4 text-amber-800 flex-none" />
+                <span>Rincian {{ count(session('import_duplicates')) }} baris duplikat yang dilewati otomatis (klik untuk lihat)</span>
+            </span>
+        </summary>
+        <ul class="list-disc list-inside space-y-1 mt-2.5 pt-2.5 border-t border-amber-200/80 text-amber-950 max-h-44 overflow-y-auto">
+            @foreach(session('import_duplicates') as $dup)
+                <li>{{ $dup }}</li>
+            @endforeach
+        </ul>
+    </details>
+@endif
+
+@if(session('import_errors') && count(session('import_errors')) > 0)
+    <details class="glass px-4 py-3 border border-red-300 bg-red-50 text-red-950 text-xs shadow-xs">
+        <summary class="cursor-pointer font-bold text-sm flex items-center justify-between gap-2 select-none">
+            <span class="inline-flex items-center gap-2">
+                <x-icon name="alert" class="w-4 h-4 text-red-700 flex-none" />
+                <span>Rincian {{ count(session('import_errors')) }} baris tidak valid yang dilewati (klik untuk lihat)</span>
+            </span>
+        </summary>
+        <ul class="list-disc list-inside space-y-1 mt-2.5 pt-2.5 border-t border-red-200/80 text-red-950 max-h-44 overflow-y-auto">
+            @foreach(session('import_errors') as $err)
+                <li>{{ $err }}</li>
+            @endforeach
+        </ul>
+    </details>
+@endif
+
 <!-- Summary Status Pills -->
 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 rise">
     <div class="glass p-4 flex items-center justify-between">

@@ -63,16 +63,12 @@ class TaskExcelService
             ->setTitle('Format Import Penugasan Kurir PT HSM')
             ->setDescription('Template resmi untuk import penugasan kurir operasional TIKISMD');
 
-        // ==========================================
-        // SHEET 1: FORMULIR TUGAS
-        // ==========================================
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Formulir Tugas');
 
-        // Header Perusahaan & Petunjuk
-        $sheet->setCellValue('A1', 'PT. HUBUNGAN SAUDARA MULIA (HSM) — FORMAT IMPORT TUGAS KURIR');
+        $sheet->setCellValue('A1', 'PT. HUBUNGAN SAUDARA MULIA (HSM) - FORMAT IMPORT TUGAS KURIR');
         $sheet->setCellValue('A2', 'Petunjuk: Kolom dengan tanda (*) wajib diisi. Nomor HP Kurir harus terdaftar pada sistem.');
-        $sheet->setCellValue('A3', 'Tipe Tugas: "pasti_harian" atau "tidak_pasti" | Format Tanggal: YYYY-MM-DD | Format Jam: HH:MM');
+        $sheet->setCellValue('A3', 'Tipe Tugas: "pasti_harian" atau "tidak_pasti" | Format Tanggal: YYYY-MM-DD | Format Jam: HH:MM (Baris duplikat dilewati otomatis)');
 
         $headers = [
             'A4' => 'No',
@@ -92,8 +88,8 @@ class TaskExcelService
             $sheet->setCellValue($cell, $val);
         }
 
-        // Contoh Data Realistis Sesuai 4 Divisi
-        $tomorrow = today()->addDay()->toDateString();
+        // Gunakan tanggal hari ini sebagai contoh default agar admin tidak salah mengimpor ke H+1.
+        $sampleDate = today()->toDateString();
         $sampleData = [
             [
                 1,
@@ -104,7 +100,7 @@ class TaskExcelService
                 'Pengantaran Paket Mobil Box Rute Samarinda Ilir',
                 'Antar paket kargo box besar ke alamat penerima & gerai transit',
                 'pasti_harian',
-                $tomorrow,
+                $sampleDate,
                 '09:00',
                 180,
             ],
@@ -117,7 +113,7 @@ class TaskExcelService
                 'Shuttle & Pickup Gerai Cabang TIKISMD',
                 'Pengambilan paket dari gerai cabang dan serah terima gudang',
                 'pasti_harian',
-                $tomorrow,
+                $sampleDate,
                 '10:00',
                 120,
             ],
@@ -130,7 +126,7 @@ class TaskExcelService
                 'Delivery Paket Kurir Motor Sesi Pagi',
                 'Antar paket retail area perumahan Vorvo & Juanda',
                 'pasti_harian',
-                $tomorrow,
+                $sampleDate,
                 '08:30',
                 180,
             ],
@@ -143,7 +139,7 @@ class TaskExcelService
                 'Pickup Dokumen & Paket Rekanan Corporate Mitra',
                 'Ambil paket berkas instansi corporate rekanan TIKISMD',
                 'pasti_harian',
-                $tomorrow,
+                $sampleDate,
                 '13:00',
                 120,
             ],
@@ -189,9 +185,6 @@ class TaskExcelService
             $sheet->getColumnDimension(Coordinate::stringFromColumnIndex($c))->setAutoSize(true);
         }
 
-        // ==========================================
-        // SHEET 2: REFERENSI KURIR & GERAI
-        // ==========================================
         $refSheet = $spreadsheet->createSheet();
         $refSheet->setTitle('Referensi Kurir & Gerai');
 
@@ -276,33 +269,39 @@ class TaskExcelService
     }
 
     /**
-     * Parse file Excel yang diunggah dan simpan penugasan ke database.
-     *
-     * @return array [success: bool, imported: int, errors: array, total_rows: int]
+     * Parse file Excel penugasan dan lewati baris yang duplikat (baik antarbaris di file maupun terhadap tugas aktif di DB).
      */
     public function importTasks(UploadedFile $file, int $creatorId): array
     {
         $spreadsheet = IOFactory::load($file->getRealPath());
-        $sheet = $spreadsheet->getSheet(0); // Ambil sheet pertama (Formulir Tugas)
+        $sheet = $spreadsheet->getSheet(0);
         $highestRow = $sheet->getHighestRow();
 
         if ($highestRow < 5) {
             return [
                 'success' => false,
                 'imported' => 0,
+                'skipped_duplicates' => 0,
+                'duplicates' => [],
                 'total_rows' => 0,
                 'errors' => ['File Excel tidak memuat baris data penugasan (minimal baris ke-5).'],
+                'dates' => [],
             ];
         }
 
         $imported = 0;
+        $skippedDuplicates = 0;
+        $duplicateNotes = [];
         $rowErrors = [];
+        $importedDates = [];
+        $seenInFile = [];
+
         $allOutlets = Outlet::orderByDesc('is_active')->orderBy('id')->get();
+        $outletById = $allOutlets->keyBy('id');
         $outlets = $allOutlets->groupBy(fn (Outlet $o) => strtoupper(trim($o->code)));
         $mainOffice = Outlet::mainOffice() ?? $allOutlets->first();
         $couriers = User::freelancers()->get();
 
-        // Siapkan lookup map untuk kurir (nomor HP berbagai varian, NIK, nama)
         $courierMap = [];
         foreach ($couriers as $u) {
             $cleanPhone = preg_replace('/\D+/', '', (string) $u->phone);
@@ -326,16 +325,13 @@ class TaskExcelService
             $rawPhone = trim((string) $sheet->getCell('B'.$row)->getValue());
             $title = trim((string) $sheet->getCell('F'.$row)->getValue());
 
-            // Baris kosong, abaikan
             if ($rawPhone === '' && $title === '') {
                 continue;
             }
 
-            // Validasi Kurir
             $cleanPhone = preg_replace('/\D+/', '', $rawPhone);
             $matchedUser = $courierMap[$cleanPhone] ?? null;
 
-            // Coba fallback dengan Nama Kurir di kolom C jika no HP tidak match
             if (! $matchedUser) {
                 $rawName = mb_strtolower(trim((string) $sheet->getCell('C'.$row)->getValue()));
                 if ($rawName && isset($courierMap[$rawName])) {
@@ -348,13 +344,11 @@ class TaskExcelService
                 continue;
             }
 
-            // Validasi Judul
             if ($title === '') {
                 $rowErrors[] = "Baris {$row}: Judul Tugas wajib diisi.";
                 continue;
             }
 
-            // Validasi Gerai / Corporate Lokasi (mendukung kode lokasi bersama maupun nama lokasi)
             $rawOutletCode = trim((string) $sheet->getCell('E'.$row)->getValue());
             $matchedOutlet = null;
             if ($rawOutletCode !== '') {
@@ -377,7 +371,6 @@ class TaskExcelService
                 continue;
             }
 
-            // Validasi Tanggal
             $rawDate = $sheet->getCell('I'.$row)->getValue();
             $assignedDate = $this->parseDateValue($rawDate);
             if (! $assignedDate) {
@@ -385,24 +378,42 @@ class TaskExcelService
                 continue;
             }
 
-            // Validasi Jam Mulai
             $rawTime = $sheet->getCell('J'.$row)->getValue();
             $scheduledTime = $this->parseTimeValue($rawTime);
 
-            // Validasi Tipe Tugas
             $rawType = trim((string) $sheet->getCell('H'.$row)->getValue());
             $taskType = in_array($rawType, [TaskAssignment::TYPE_FIXED, TaskAssignment::TYPE_ADHOC], true)
                 ? $rawType
                 : TaskAssignment::TYPE_FIXED;
 
-            // Durasi SLA
             $rawDuration = (int) $sheet->getCell('K'.$row)->getValue();
             $duration = ($rawDuration >= 5 && $rawDuration <= 720) ? $rawDuration : 30;
-
             $description = trim((string) $sheet->getCell('G'.$row)->getValue());
+
+            $importedDates[$assignedDate] = true;
+            $dedupKey = $this->buildDedupKey(
+                $matchedUser->id,
+                $matchedOutlet->id,
+                (bool) $matchedOutlet->is_main_office,
+                $assignedDate,
+                $scheduledTime,
+                $title
+            );
+
+            if (isset($seenInFile[$dedupKey])) {
+                $firstRow = $seenInFile[$dedupKey];
+                $skippedDuplicates++;
+                $duplicateNotes[] = "Baris {$row}: Duplikat di dalam file Excel (sama dengan baris {$firstRow}) untuk {$matchedUser->name} di {$matchedOutlet->name} ({$assignedDate} ".substr($scheduledTime, 0, 5).'), dilewati otomatis.';
+                continue;
+            }
+
+            $seenInFile[$dedupKey] = $row;
 
             $tasksToCreate[] = [
                 'row' => $row,
+                'dedup_key' => $dedupKey,
+                'courier_name' => $matchedUser->name,
+                'outlet_name' => $matchedOutlet->name,
                 'user_id' => $matchedUser->id,
                 'outlet_id' => $matchedOutlet->id,
                 'title' => $title,
@@ -417,33 +428,119 @@ class TaskExcelService
         }
 
         if (empty($tasksToCreate)) {
+            $allDuplicatesOnly = $skippedDuplicates > 0 && empty($rowErrors);
+
             return [
-                'success' => false,
+                'success' => $allDuplicatesOnly,
                 'imported' => 0,
-                'total_rows' => count($tasksToCreate) + count($rowErrors),
-                'errors' => $rowErrors ?: ['Tidak ada baris data tugas yang valid untuk diimpor.'],
+                'skipped_duplicates' => $skippedDuplicates,
+                'duplicates' => $duplicateNotes,
+                'total_rows' => $skippedDuplicates + count($rowErrors),
+                'errors' => $allDuplicatesOnly ? [] : ($rowErrors ?: ['Tidak ada baris data tugas yang valid untuk diimpor.']),
+                'dates' => array_values(array_keys($importedDates)),
             ];
         }
 
-        // Eksekusi insert dalam transaksi database
-        DB::transaction(function () use ($tasksToCreate, &$imported) {
+        $uniqueDates = array_values(array_keys($importedDates));
+        $candidateUserIds = array_values(array_unique(array_column($tasksToCreate, 'user_id')));
+
+        DB::transaction(function () use (
+            $tasksToCreate,
+            $uniqueDates,
+            $candidateUserIds,
+            $outletById,
+            &$imported,
+            &$skippedDuplicates,
+            &$duplicateNotes
+        ) {
+            // Kunci baris tugas aktif yang relevan agar klik ganda paralel pun tidak menghasilkan duplikat.
+            $existingTasks = TaskAssignment::query()
+                ->whereIn('user_id', $candidateUserIds)
+                ->where('status', '!=', TaskAssignment::STATUS_CANCELLED)
+                ->where(function ($q) use ($uniqueDates) {
+                    foreach ($uniqueDates as $d) {
+                        $q->orWhereDate('assigned_date', $d);
+                    }
+                })
+                ->lockForUpdate()
+                ->get(['id', 'task_number', 'user_id', 'outlet_id', 'title', 'assigned_date', 'scheduled_start_time']);
+
+            $existingMap = [];
+            foreach ($existingTasks as $existing) {
+                $outlet = $outletById->get($existing->outlet_id);
+                $dateStr = $existing->assigned_date instanceof \DateTimeInterface
+                    ? $existing->assigned_date->format('Y-m-d')
+                    : substr(trim((string) $existing->assigned_date), 0, 10);
+
+                $eKey = $this->buildDedupKey(
+                    (int) $existing->user_id,
+                    (int) $existing->outlet_id,
+                    (bool) ($outlet?->is_main_office ?? false),
+                    $dateStr,
+                    (string) $existing->scheduled_start_time,
+                    (string) $existing->title
+                );
+                $existingMap[$eKey] = $existing->task_number;
+            }
+
             foreach ($tasksToCreate as $tData) {
+                $rowNo = $tData['row'];
+                $dedupKey = $tData['dedup_key'];
+                $courierName = $tData['courier_name'];
+                $outletName = $tData['outlet_name'];
+
+                if (isset($existingMap[$dedupKey])) {
+                    $existingNo = $existingMap[$dedupKey];
+                    $skippedDuplicates++;
+                    $duplicateNotes[] = "Baris {$rowNo}: Tugas untuk {$courierName} di {$outletName} ({$tData['assigned_date']} ".substr($tData['scheduled_start_time'], 0, 5).") sudah terdaftar ({$existingNo}), dilewati otomatis.";
+                    continue;
+                }
+
                 $dateObj = Carbon::parse($tData['assigned_date']);
-                unset($tData['row']);
+                unset($tData['row'], $tData['dedup_key'], $tData['courier_name'], $tData['outlet_name']);
+
                 $task = TaskAssignment::create($tData + [
                     'task_number' => TaskAssignment::generateNumber($dateObj),
                 ]);
                 \App\Models\AppNotification::notifyTaskAssigned($task);
+                $existingMap[$dedupKey] = $task->task_number;
                 $imported++;
             }
         });
 
         return [
-            'success' => true,
+            'success' => $imported > 0 || ($skippedDuplicates > 0 && empty($rowErrors)),
             'imported' => $imported,
-            'total_rows' => $imported + count($rowErrors),
+            'skipped_duplicates' => $skippedDuplicates,
+            'duplicates' => $duplicateNotes,
+            'total_rows' => $imported + $skippedDuplicates + count($rowErrors),
             'errors' => $rowErrors,
+            'dates' => $uniqueDates,
         ];
+    }
+
+    /**
+     * Pada gerai cabang/corporate, 1 kurir di titik, tanggal, dan jam mulai yang sama adalah 1 penugasan unik
+     * meskipun penulisan huruf judul berbeda ("PICK UP" vs "Pickup"). Pada kantor utama (fallback), judul ikut dinormalisasi.
+     */
+    protected function buildDedupKey(
+        int $userId,
+        int $outletId,
+        bool $isMainOffice,
+        string $assignedDate,
+        string $scheduledTime,
+        string $title
+    ): string {
+        $datePart = substr(trim($assignedDate), 0, 10);
+        $timePart = substr(trim($scheduledTime), 0, 5);
+
+        if (! $isMainOffice) {
+            return "{$userId}|{$outletId}|{$datePart}|{$timePart}";
+        }
+
+        $normTitle = preg_replace('/[^a-z0-9]+/', '', mb_strtolower($title)) ?: mb_strtolower(trim($title));
+
+        return "{$userId}|{$outletId}|{$datePart}|{$timePart}|{$normTitle}";
     }
 
     protected function parseDateValue(mixed $value): ?string
